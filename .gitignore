@@ -184,3 +184,4 @@ src/Web/Images/news/
 src/Web/Images/Temp/
 
 *.orig
+*.pubxml
