@@ -173,14 +173,14 @@ UpgradeLog*.htm
 # Microsoft Fakes
 FakesAssemblies/
 
-Web/Logs/
-Web/PlayerImages/
-Web/App_Data/*.xml
-Web/Images/classifieds/
-Web/Images/Coaches/
-Web/Images/Managers/
-Web/Images/Umpires/
-Web/Images/news/
-Web/Images/Temp/
+src/Web/Logs/
+src/Web/PlayerImages/
+src/Web/App_Data/*.xml
+src/Web/Images/classifieds/
+src/Web/Images/Coaches/
+src/Web/Images/Managers/
+src/Web/Images/Umpires/
+src/Web/Images/news/
+src/Web/Images/Temp/
 
 *.orig
