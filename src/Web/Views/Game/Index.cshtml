@@ -1,0 +1,329 @@
+﻿@model Web.Models.GameListModel
+@using Web.Models;
+@{
+    ViewBag.Title = "Games";
+}
+@section Header{
+    <style type="text/css">
+        table, table td {
+            font-size: .85em;
+        }
+
+        tr.header th {
+            white-space: nowrap;
+        }
+
+        table td {
+            font-size: 1.0em;
+        }
+
+        form {
+            display: inline;
+        }
+
+        .filter-box {
+            margin: 0px;
+            border-top: 2px solid grey;
+        }
+
+        .listing {
+            border-left: 0px;
+            border-right: 0px;
+        }
+
+        table {
+            margin: 0px;
+        }
+
+        select {
+            font-size: .8em;
+            height: auto;
+        }
+
+        button {
+            font-size: .8em;
+            height: auto;
+        }
+
+        .listing td {
+            text-align: center;
+        }
+    </style>
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript">
+        function setArrows() {
+            return;
+            var dir = $('#dir').val();
+            var col = $('#col').val();
+            var header = $('th a[href*="' + col + '"]');
+            if (dir == 'Ascending') {
+                header.text(header.text() + ' ▲');
+            }
+            if (dir == 'Descending') {
+                header.text(header.text() + ' ▼');
+            }
+        };
+    </script>
+}
+<h2 style="float: left">Games</h2>
+@if (TempData.ContainsKey("GamesCreated") && ((bool)(TempData["GamesCreated"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Games successfully created.</span>
+    </div>
+}
+@if (TempData.ContainsKey("GameCreated") && ((bool)(TempData["GameCreated"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Game successfully created.</span>
+    </div>
+}
+@switch (Model.UserRole)
+{
+    case Web.Models.UserRole.Administrator:
+    <p style="float: right">
+        Create New @Html.ActionLink("Game", "Create") | @Html.ActionLink("Pool Play", "MassCreate")
+    </p>
+    <br />
+    <br />
+    @*<div class="filter-box" style="float: right">
+        @using (Ajax.BeginForm(new AjaxOptions { Url = "/Game/GamesInfo", HttpMethod = "GET", InsertionMode = InsertionMode.Replace, UpdateTargetId = "games" }))
+        {
+                
+            @Html.DropDownList("LeagueId", (List<SelectListItem>)ViewBag.Leagues, "Select League", new { })
+
+
+            @Html.DropDownList("FilterOptions", (List<SelectListItem>)ViewBag.FilterOptions, "Options", new { })
+                
+            <button>Filter</button>
+        }
+    </div>*@
+    @Html.Partial("_GamesGrid", Model.GamesInfo)        
+        break;
+    case Web.Models.UserRole.Coach:
+    case Web.Models.UserRole.Manager:
+        foreach (var team in Model.TeamGames)
+        {
+            string tableTitle;
+        
+    <table style="margin-bottom: 40px;">
+        <tr style="background-color: #414141">
+            <td style="text-align: center; vertical-align: middle;" colspan="2">
+                @{
+            tableTitle = "<div style='float: left; margin-left: 30px;margin-top:15px;'><h2>" + Html.ActionLink(Web.Models.Team.PrettyName(team.Team), "Edit", "Team", new { id = team.Team.Id }) + "&nbsp;&nbsp;&nbsp;&nbsp; Wins:" + team.Team.Wins + " Losses:" + team.Team.Losses + "  Ties:" + team.Team.Ties + "</h2></div>";
+                }
+                @if (team.Team.League.Type == Web.Models.LeagueType.League)
+                {
+                    tableTitle = tableTitle + Html.Raw("<div style='float: left;'>" +
+                        "<form action='" + @Url.RouteUrl(new { controller = "Team", action = "Edit", id = team.Team.Id }) + "' method='get' class='edit-link'><button class='command edit' style='margin-left:5em;'>Set Home Availability</button></form>" +
+                        "<form action='" + @Url.RouteUrl(new { controller = "Game", action = "RequestGame", id = team.Team.Id }) + "' method='get' class='edit-link'><button class='command edit' style='margin-left:5em;'>Request Away Game</button></form>" +
+                        "</div>");
+                }
+                @if (team.Team.League.Type == Web.Models.LeagueType.Scrimmage)
+                {
+                    tableTitle = tableTitle + Html.Raw("<div style='float: left;'>" +
+                        "<form action='" + @Url.RouteUrl(new { controller = "Team", action = "EditAvailableDates", id = team.Team.Id }) + "' method='get' class='edit-link'><button class='command edit' style='margin-left:1em;'>Set Game Availability</button></form>" +
+                        "<form action='" + @Url.RouteUrl(new { controller = "Game", action = "RequestSpecificGame", id = team.Team.Id }) + "' method='get' class='edit-link'><button class='command edit' style='margin-left:1em;'>Request Specific Game</button></form>" +
+                        "</div>");
+                }
+            </td>
+
+        </tr>
+        <tr>
+            <td colspan="2" style="padding: 0px; margin: 0px;">
+                <div id="games-@team.Team.Id">
+                    @{
+                string gameContainer = string.Format("games-{0}", team.Team.Id);
+                var coachGrid = new WebGrid(canPage: false);
+                var coachGridColumns = new WebGridColumn[20];
+                coachGridColumns = coachGrid.Columns(
+                    coachGrid.Column("HomeTeamName", header: "Home Team", canSort: false, format: @<text>@Html.Raw(item.HomeTeam == null ? item.HomeTeamName : Web.Models.Team.PrettyNameWithoutLeague(item.HomeTeam, item.Game))</text>),
+                    coachGrid.Column("Game.HomeTeamScore", header: "Score", canSort: false),
+                    coachGrid.Column("AwayTeamName", header: "Away Team", canSort: false, format: @<text>@Html.Raw(item.AwayTeam == null ? item.AwayTeamName : Web.Models.Team.PrettyNameWithoutLeague(item.AwayTeam, item.Game))</text>),
+                    coachGrid.Column("Game.AwayTeamScore", header: "Score", canSort: false),
+                    coachGrid.Column("Game.GameDate", header: "Game Date", canSort: false),
+                    coachGrid.Column("Game.Location.Name", header: "Location", canSort: false, format: @<text>@item.Game.Location.Name<br />@item.Game.Field</text>),
+                    coachGrid.Column("Type", header: "Type", canSort: false),
+                    coachGrid.Column("Game.Status", header: "Status", canSort: false, format: @<text>@item.Game.Status.ToString()</text>),
+                    coachGrid.Column("Admin", style: "width: 40em; min-width: 200px;", header: " ", format: @<text><span style="white-space: nowrap;">
+                        @if (item.Game.Status == Web.Models.GameStatus.Requested && item.Game.TeamToConfirmGame != null && item.Game.TeamToConfirmGame.Coaches.Contains(Web.Models.Coach.GetCoachForUser(Web.Models.User.GetUserByEmail(User.Identity.Name))))
+                        { 
+                            @Html.ActionLink("Approve", "GameApprove", new { id = (int)item.Game.Id }, new { onclick = "return confirm('Are you sure you want to confirm playing this game?')", style = "color:#000" })
+                        }
+                    </span></text>, canSort: false),
+                    coachGrid.Column("Admin", style: "width: 40em; min-width: 200px;", header: " ", format: @<text><span style="white-space: nowrap;">
+                        @if (item.Game.Status == Web.Models.GameStatus.Requested && item.Game.TeamToConfirmGame != null && item.Game.TeamToConfirmGame.Coaches.Contains(Web.Models.Coach.GetCoachForUser(Web.Models.User.GetUserByEmail(User.Identity.Name))))
+                        { 
+                            @Html.ActionLink("Decline", "GameDecline", new { id = (int)item.Game.Id }, new { onclick = "return confirm('Are you sure you want to decline playing this game?')", style = "color:#000" })
+                        }
+                    </span></text>, canSort: false),
+                    coachGrid.Column("Admin", style: "width: 40em; min-width: 200px;", header: " ", format: @<text><span style="white-space: nowrap;">
+                        @if (item.Game.GameDate < DateTime.Now && item.Game.HomeTeam.League.Type == Web.Models.LeagueType.Scrimmage && item.Game.Status == Web.Models.GameStatus.Confirmed)
+                        { 
+                            @Html.ActionLink("Enter Score", "EditScore", new { id = (int)item.Game.Id }, new { style = "color:#000" })
+                        }
+                    </span></text>, canSort: false),
+                    coachGrid.Column("Admin", style: "width: 40em; min-width: 200px;", header: " ", format: @<text><span style="white-space: nowrap;">
+                        @if (item.Game.Status == Web.Models.GameStatus.Requested && item.Game.TeamToRequestGame != null && item.Game.TeamToRequestGame.Coaches.Contains(Web.Models.Coach.GetCoachForUser(Web.Models.User.GetUserByEmail(User.Identity.Name))))
+                        {
+                            @Html.ActionLink("Edit", "Edit", "Game", new { id = (int)item.Game.Id }, new { style = "color:#000" }) 
+                        }
+                    </span></text>, canSort: false),
+                    coachGrid.Column("Admin", style: "width: 40em; min-width: 200px;", header: " ", format: @<text><span style="white-space: nowrap;">
+                        @if (item.Game.Status == Web.Models.GameStatus.Requested && item.Game.TeamToRequestGame != null && item.Game.TeamToRequestGame.Coaches.Contains(Web.Models.Coach.GetCoachForUser(Web.Models.User.GetUserByEmail(User.Identity.Name))))
+                        {
+                            @Html.ActionLink("Delete", "Delete", new { id = (int)item.Game.Id }, new { onclick = "return confirm('Are you sure you want to delete this game?')", style = "color:#000" })
+                        }
+                    </span></text>, canSort: false)
+);
+                coachGrid.Bind(team.GamesInfo, autoSortAndPage: true);
+                
+                        @coachGrid.GetHtml(headerStyle: "header",
+                                tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px", dataTableTitle = tableTitle },
+                                alternatingRowStyle: "even",
+                                rowStyle: "odd",
+                                columns: coachGridColumns
+                            );
+                        @Html.Hidden("dir", coachGrid.SortDirection) 
+                        @Html.Hidden("col", coachGrid.SortColumn)
+                    }
+                </div>
+                @if (team.Team.League.Type != Web.Models.LeagueType.Tournament)
+                {
+                    <br />
+                    <div class="filter-box" style="vertical-align: bottom; background-color: #e1e2dc; width: 100%; text-align: center;">
+                    <span style="margin-left: 10px; font-weight: bold;">Challenge Games Available</span>
+
+                    @using (Ajax.BeginForm(new AjaxOptions { Url = "/Game/GetAvailableDates", HttpMethod = "GET", InsertionMode = InsertionMode.Replace, UpdateTargetId = "available-dates-" + team.Team.Id }))
+                    {                
+                            
+                        <select name="DivisionId">
+                            <option value="">Select Division</option>
+                            @foreach (var item in (List<SelectListItem>)ViewBag.Divisions)
+                            {
+                                var selected = (team.Team.Division.Id == int.Parse(item.Value)) ? " selected=\"selected\"" : "";
+                                <option value="@item.Value"@Html.Raw(selected)>@item.Text</option>
+                            }
+                        </select>
+                        @Html.DropDownList("Distance", (List<SelectListItem>)ViewBag.Distances, "Distance", new { })
+
+                        @:From: 
+                        <select name="LocationId">
+                            <option value="">Select Location</option>
+                            @foreach (var item in (List<SelectListItem>)ViewBag.Locations)
+                            {
+                                var selected = team.Team.Location == null ? "" : (team.Team.Location.Id == int.Parse(item.Value)) ? " selected=\"selected\"" : "";
+                                <option value="@item.Value"@Html.Raw(selected)>@item.Text</option>
+                            }
+                        </select>                            
+                           
+                        @Html.Hidden("TeamId", team.Team.Id)
+                        <button>Find Games</button>
+                    }
+                    
+                </div>
+                @Html.Partial("_AvailableDatesGrid", team.AvailableDates)
+                }
+            </td>
+        </tr>
+    </table>            
+        }
+
+        break;
+    case Web.Models.UserRole.Umpire:
+    <div id="games">
+        @{
+        var umpireGrid = new WebGrid(canPage: false);
+        var umpireGridColumns = new WebGridColumn[20];
+        umpireGridColumns = umpireGrid.Columns(
+            umpireGrid.Column("HomeTeamName", header: "Home Team", canSort: false, format: @<text>@Html.Raw(item.HomeTeam == null ? "" : Web.Models.Team.PrettyNameWithoutLeague(item.HomeTeam, item.Value))</text>),
+            umpireGrid.Column("HomeTeamScore", header: "Score", canSort: false),
+            umpireGrid.Column("AwayTeamName", header: "Away Team", canSort: false, format: @<text>@Html.Raw(item.AwayTeam == null ? "" : Web.Models.Team.PrettyNameWithoutLeague(item.AwayTeam, item.Value))</text>),
+            umpireGrid.Column("AwayTeamScore", header: "Score", canSort: false),
+            umpireGrid.Column("GameDate", header: "Game Date", canSort: false),
+            umpireGrid.Column("Location.Name", header: "Location", canSort: false, format: @<text>@item.Location.Name<br />@item.Field</text>),
+            umpireGrid.Column("Status", header: "Status", canSort: false, format: @<text>@item.Status.ToString()</text>),
+            umpireGrid.Column("Score Game", style: "center", header: " ", format: (item) => Html.ActionLink("Enter Scores", "EditScore", "Game", new { id = (int)item.Id }, new { style = "color:#000" }), canSort: false)
+        );
+        umpireGrid.Bind(Model.Games, autoSortAndPage: true);
+        
+            @umpireGrid.GetHtml(headerStyle: "header",
+                tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px" },
+                alternatingRowStyle: "even",
+                rowStyle: "odd",
+                columns: umpireGridColumns
+            );
+            @Html.Hidden("dir", umpireGrid.SortDirection) 
+            @Html.Hidden("col", umpireGrid.SortColumn)
+        }
+    </div>
+             break;
+    default:
+             // who is this for?
+    <div id="games">
+        @{
+             var defaultGrid = new WebGrid(canPage: false);
+             var defaultGridColumns = new WebGridColumn[20];
+
+             defaultGridColumns = defaultGrid.Columns(
+                 defaultGrid.Column("HomeTeam", header: "Home Team", canSort: false, format: @<text>@(item.HomeTeam != null ? Web.Models.Team.PrettyName(item.HomeTeam) : "TBD")</text>),
+                 defaultGrid.Column("AwayTeam", header: "Away Team", canSort: false, format: @<text>@(item.AwayTeam != null ? Web.Models.Team.PrettyName(item.AwayTeam) : "TBD")</text>),
+                 defaultGrid.Column("GameDate", header: "Game Date", canSort: false, format: @<text>@item.GameDate.ToString()</text>),
+                 defaultGrid.Column("Location", header: "Location", canSort: false, format: @<text>@item.Location.Name</text>),
+                 defaultGrid.Column("Status", header: "Status", canSort: false, format: @<text>@item.Status.ToString()</text>)
+             );
+
+             defaultGrid.Bind(Model.Games, autoSortAndPage: true);
+             
+            @defaultGrid.GetHtml(headerStyle: "header",
+                tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px" },
+                alternatingRowStyle: "even",
+                rowStyle: "odd",
+                columns: defaultGridColumns
+            );
+            @Html.Hidden("dir", defaultGrid.SortDirection) 
+            @Html.Hidden("col", defaultGrid.SortColumn)
+        }
+    </div>
+             break;
+}
+
+
+
+
+
+
+@helper DatesForm(TeamGameModel team)
+{
+                        using (Ajax.BeginForm(new AjaxOptions { Url = "/Game/GetAvailableDates", HttpMethod = "GET", InsertionMode = InsertionMode.Replace, UpdateTargetId = "available-dates-" + team.Team.Id }))
+                        {                
+                            
+                        <select name="DivisionId">
+                            <option value="">Select Division</option>
+                            @foreach (var item in (List<SelectListItem>)ViewBag.Divisions)
+                            {
+                                var selected = (team.Team.Division.Id == int.Parse(item.Value)) ? " selected=\"selected\"" : "";
+                                <option value="@item.Value"@Html.Raw(selected)>@item.Text</option>
+                            }
+                        </select>
+                        @Html.DropDownList("Distance", (List<SelectListItem>)ViewBag.Distances, "Distance", new { })
+
+                        @:From: 
+                        <select name="LocationId">
+                            <option value="">Select Location</option>
+                            @foreach (var item in (List<SelectListItem>)ViewBag.Locations)
+                            {
+                                var selected = team.Team.Location == null ? "" : (team.Team.Location.Id == int.Parse(item.Value)) ? " selected=\"selected\"" : "";
+                                <option value="@item.Value"@Html.Raw(selected)>@item.Text</option>
+                            }
+                        </select>                            
+                           
+                        @Html.Hidden("TeamId", team.Team.Id)
+                        <button>Find Games</button>
+                        }
+
+}

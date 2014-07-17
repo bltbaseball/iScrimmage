@@ -1,0 +1,78 @@
+﻿@model Web.Models.TeamPlayerNewModel
+
+@{
+    ViewBag.Title = "Create Team -> Player";
+}
+@section Header {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#DateOfBirth').datepicker();
+        });
+    </script>
+}
+<h2>Create Team Player for
+    @ViewBag.Team.Name in
+    @ViewBag.Team.League.Name</h2>
+
+@using (Html.BeginForm("Create", "TeamPlayer", method: FormMethod.Post, htmlAttributes: new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Team Player</legend>
+
+        @Html.Hidden("TeamId", (int)ViewBag.Team.Id)
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Status)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(model => model.Status, @Web.Models.Transforms.ToSelectList<Web.Models.PlayerStatus>(Model.Status))
+            @Html.ValidationMessageFor(model => model.Status)
+        </div>
+        
+        <div class="editor-label">
+            @Html.LabelFor(model => model.PlayerId)
+        </div>
+        <div class="editor-field">
+            <input type="text" id="PlayerSearch" data-autocomplete-url="@Url.Action("/SearchPlayers", "TeamPlayer", new { teamId = ViewBag.Team.Id })"  autocomplete="off" />
+            @Html.HiddenFor(model => model.PlayerId)
+        </div>
+
+        <p>
+            <input type="submit" value="Create" />
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index", "TeamPlayer", new { id = ((Web.Models.Team)ViewBag.Team).Id }, new { })
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+<script type="text/javascript">
+    jQuery(function ($) {
+        $('*[data-autocomplete-url]').each(function () {
+            $(this).autocomplete({
+                source: $(this).data("autocomplete-url"),
+                minLength: 2,
+                select: function (event, ui) {
+                    if (ui.item.id == '0')
+                        return false; //Do nothing, leave the search text as is
+                    $('#PlayerId').val(ui.item.id);
+                },
+                change: function (event, ui) {
+                    if (ui.item) {
+                        if (ui.item.id != '0') {
+                            this.value = ui.item.label;
+                        }
+                    }
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,198 @@
+﻿@model Web.Models.TeamUpdateModel
+
+@{
+    ViewBag.Title = "Edit Team";
+}
+
+<h2>Edit Team</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Team</legend>
+
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Name)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Name)
+            @Html.ValidationMessageFor(model => model.Name)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Url)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Url)
+            @Html.ValidationMessageFor(model => model.Url)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LeagueId)
+        </div>
+        <div class="editor-field">
+        @if (User.IsInRole("Administrator"))
+        {
+            @Html.DropDownListFor(m => m.LeagueId, (List<SelectListItem>)ViewBag.Leagues, new { })
+            @Html.ValidationMessageFor(model => model.LeagueId)
+        }
+        else if(Model.Team.Location != null) {
+            @Model.Team.Location.Name
+        }
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.DivisionId)
+        </div>
+        <div class="editor-field">
+        @if (User.IsInRole("Administrator"))
+        {
+            @Html.DropDownListFor(m => m.DivisionId, (List<SelectListItem>)ViewBag.Divisions, new { })
+            @Html.ValidationMessageFor(model => model.DivisionId)
+        }
+        else {
+            @Model.Team.Division.Name
+        }
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.ClassId)
+        </div>
+        <div class="editor-field">
+        @if (User.IsInRole("Administrator"))
+        {
+            @Html.DropDownListFor(m => m.ClassId, (List<SelectListItem>)ViewBag.TeamClasses, new { })
+            @Html.ValidationMessageFor(model => model.ClassId)
+        }
+        else {
+            @Model.Team.Class.Name
+        }
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LocationId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.LocationId, (List<SelectListItem>)ViewBag.Locations) <a href="@Url.RouteUrl(new { controller = "Location", action = "Create" })" class="new-location">( new location )</a>
+            @Html.ValidationMessageFor(model => model.LocationId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.HtmlDescription)
+        </div>
+        <div class="editor-field">
+            @Html.TextAreaFor(model=>model.HtmlDescription, new {@class = "ckeditor"})
+            @Html.ValidationMessageFor(model => model.HtmlDescription)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.IsLookingForPlayers)
+        </div>
+        <div class="editor-field">
+            @Html.RadioButtonFor(model => model.IsLookingForPlayers, true, new { @id ="IsLookingForPlayersTrue" }) <label for="IsLookingForPlayersTrue" style="display: inline;">Yes</label>
+            @Html.RadioButtonFor(model => model.IsLookingForPlayers, false, new { @id = "IsLookingForPlayersFalse" }) <label for="IsLookingForPlayersFalse" style="display: inline;">No</label>
+        </div>
+
+        
+        <p>
+            <button class="command">Save</button>
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+<div id="location-dialog" class="dialog" title="Create Location">
+    @Html.Partial("_CreateLocation", new Web.Models.LocationNewModel())
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript" src="/scripts/ckeditor/ckeditor.js"></script>
+    <style type="text/css">
+        input.available-date, input.available-time
+        {
+            min-width: inherit;
+            width: 6em;
+        }
+        ol#AvailableDatesList li
+        {
+            list-style-type: decimal;
+        }
+    </style>
+    <script type="text/javascript">
+        var tournamentIds = [ @(string.Join(",", ((List<int>)ViewBag.Tournaments).ToArray()))];
+
+        $(document).ready(function () {
+            $('button').button();
+            
+            $('div#location-dialog').dialog({
+                autoOpen: false,
+                resizable: false,
+                modal: true,
+                width: 600,
+                buttons: {
+                    'Cancel': function () {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+
+            $(document).on('click', 'a.new-location', function(e) {
+                e.preventDefault();
+                $('#location-dialog').dialog('open');
+            });
+
+            $('#location-dialog').on('click', '#CreateLocation', function(e) {
+                e.preventDefault();
+                var isValid = $(this).parents('form').valid();
+                if(!isValid)
+                    return;
+                var dialog = $('#location-dialog');
+                var locations = $('select[name$=LocationId],#AvailableDateLocation');
+                var token = $('input[name=__RequestVerificationToken]', dialog).val();
+                var data = {
+                    Name: $('#Name', dialog).val(),
+                    Address:$('#Address', dialog).val(),
+                    City:$('#City', dialog).val(),
+                    State:$('#State', dialog).val(),
+                    Zip:$('#Zip', dialog).val(),
+                    Url:$('#Url', dialog).val(),
+                    Notes:$('#Notes', dialog).val(),
+                    GroundsKeeperPhone:$('#GroundsKeeperPhone', dialog).val()
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/Location/Create',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+                        if (result) {
+                            if (result.Success) {
+                                // close dialog, populate locations, select created location
+                                $('#location-dialog').dialog('close');
+                                locations.empty();
+                                $.each(result.Locations, function(index, val) {
+                                    locations.append($('<option>').text(val.Name).val(val.Id));
+                                });
+                                locations.val(result.LocationId);
+                            } else {                                
+                                $('#location-dialog').html(result);
+                            }
+                        }
+                        
+                    },
+                    error: function (xhr, status, error) {
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -1,0 +1,185 @@
+﻿@model Web.Models.BracketGamesModel
+@using Web.Models;
+@{
+    ViewBag.Title = Model.Info.Bracket.Name + " Games";
+}
+@section Header {
+    <style type="text/css">
+
+    </style>
+}
+@section Scripts {
+    <script type="text/javascript">
+    function initPickers() {
+        $('.game-time').timepicker();
+        $('.game-date').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            yearRange: "-5:+5",
+            onChangeMonthYear: function (year, month, elem) {
+                var currentDate = $(this).datepicker('getDate');
+                if (currentDate == null)
+                    return;
+
+                var day = currentDate.getDate();
+                var newDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+                $(this).datepicker('setDate', newDate);
+            }
+        });
+    }
+        $(document).ready(function () {
+            initPickers();
+        });
+        </script>
+}
+@if (TempData.ContainsKey("Error"))
+{
+    <div class="status-indicator ui-corner-all ui-state-error">
+        <span class="ui-icon ui-icon-alert"></span>
+        <span>@TempData["Error"].ToString()</span>
+    </div>
+}
+
+<h2>@(Model.Info.Bracket.Name) Games</h2>
+
+@{
+    Html.RenderPartial("_BracketInfo", Model.Info);
+    }
+
+@using (Html.BeginForm("Games", "Brackets", FormMethod.Post, new { id="GamesForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    
+    
+    
+    <div id="game-grid">
+        <table class="listing dataTableActivate" dataTableHeight="500px">
+            <thead>
+                <tr>
+                    <th>Game</th>
+                    <th>Round</th>
+                    <th id="HomeTeam">Teams</th>
+                    <th>Date/Time</th>
+                    <th>Location</th>
+                    <th>Field</th>
+                    <th></th>
+                </tr>
+            </thead>
+            @for (var i = 0; i < Model.Games.Count; i++)
+            {
+                var item = Model.Games[i];
+                <tr class="game">
+                    <td>#@(item.GameNumber)</td>
+                    <td>@(item.Bracket+1)/@(item.Position+1)</td>
+                    <td>@Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(item.Game == null ? null : item.Game.HomeTeam, item.Game))
+                        <br />
+                        vs<br />
+                        @Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(item.Game == null ? null : item.Game.AwayTeam, item.Game))
+                        @*@if (item.Team1 != null) {
+                            @item.Team1.Name
+                        } else if(item.Team1Seed != null) {
+                            <text>Seed #@item.Team1Seed.ToString()</text>
+                        } else {
+                            <text>TBD</text> }
+                        <br />
+                        vs<br />
+                        @if (item.Team2 != null) {
+                            @item.Team2.Name
+                        } else if(item.Team2Seed != null) {
+                            <text>Seed #@item.Team2Seed.ToString()</text>
+                        } else {
+                            <text>TBD</text> }*@
+                    </td>
+                    <td>@Html.TextBoxFor(model=>model.Games[i].GameDate, new { @class="game-date", style = "width: 4em; min-width: 100px;" })
+                        @Html.TextBoxFor(model=>model.Games[i].GameTime, new { @class="game-time", style = "width: 4em; min-width: 100px;" })</td>
+                    <td>@Html.DropDownListFor(model=>model.Games[i].LocationId, ((List<SelectListItem>)ViewBag.Locations).Select(x => new SelectListItem
+                        {
+                            Value = x.Value,
+                            Text = x.Text,
+                            Selected = (x.Value == Model.Games[i].LocationId.ToString())
+                        }))</td>
+                    <td>@Html.TextBoxFor(model=>model.Games[i].Field, new { style = "width: 5em; min-width: 5em;" })
+                        @Html.HiddenFor(model=>model.Games[i].Bracket)
+                        @Html.HiddenFor(model=>model.Games[i].Position)
+                    </td>
+                    <td>
+                            <span style="white-space:nowrap;">
+                            @if(Model.Games[i].Game != null) {
+                    @Html.ActionLink("Enter Scores", "EditScore", "Game", new { id = (int)Model.Games[i].Id, returnUrl = "/Brackets/Games/" + Model.Id.ToString() }, new { style = "color:#000" }) <br />
+                    @Html.ActionLink("Umpires (" + ((Model.Games[i].Game.FieldUmpire != null ? 1 : 0) + (Model.Games[i].Game.PlateUmpire != null ? 1 : 0)).ToString() + ")"
+                                , "EditUmpires"
+                                , "Game"
+                                , new { id = (int)Model.Games[i].Game.Id }
+                                , new { style = "color:#000", ptip = 
+                                        Html.Raw(
+                                        "Plate Umpire: <a href=\"" + Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = Model.Games[i].Game.PlateUmpire != null ? Model.Games[i].Game.PlateUmpire.Id : 0 }) + "\">" + Web.Models.Umpire.GetUmpireName(Model.Games[i].Game.PlateUmpire) + "</a><br>" + 
+                                        "Field Umpire: <a href=\"" + Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = Model.Games[i].Game.FieldUmpire != null ? Model.Games[i].Game.FieldUmpire.Id : 0 }) + "\">" + Web.Models.Umpire.GetUmpireName(Model.Games[i].Game.FieldUmpire) + "</a>") })
+                            }
+                    </span>
+
+                    </td>
+                </tr>
+            }
+
+
+
+
+
+            @for (var i = 0; i < Model.PoolGames.Count; i++)
+            {
+                var item = Model.PoolGames[i];
+                <tr class="game">
+                    <td>Pool</td>
+                    <td></td>
+                    <td>@Html.HiddenFor(model=>model.PoolGames[i].Id)
+                        
+                        @Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(item.Game == null ? null : item.Game.HomeTeam, item.Game))
+                        <br />
+                        vs<br />
+                        @Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(item.Game == null ? null : item.Game.AwayTeam, item.Game))
+                    </td>
+                    <td>@Html.TextBoxFor(model=>model.PoolGames[i].GameDate, new { @class="game-date", style = "width: 4em; min-width: 100px;" })
+                        @Html.TextBoxFor(model=>model.PoolGames[i].GameTime, new { @class="game-time", style = "width: 4em; min-width: 100px;" })</td>
+                    <td>@Html.DropDownListFor(model=>model.PoolGames[i].LocationId, ((List<SelectListItem>)ViewBag.Locations).Select(x => new SelectListItem
+                        {
+                            Value = x.Value,
+                            Text = x.Text,
+                            Selected = (x.Value == Model.PoolGames[i].LocationId.ToString())
+                        }))</td>
+                    <td>@Html.TextBoxFor(model=>model.PoolGames[i].Field, new { style = "width: 5em; min-width: 5em;" })
+                    </td>
+                    <td>
+                            <span style="white-space:nowrap;">
+                            @if (Model.PoolGames[i].Game != null)
+                            {
+                    @Html.ActionLink("Enter Scores", "EditScore", "Game", new { id = (int)Model.PoolGames[i].Id, returnUrl = "/Brackets/Games/" + Model.Id.ToString() }, new { style = "color:#000" }) <br />
+                    @Html.ActionLink("Umpires (" + ((Model.PoolGames[i].Game.FieldUmpire != null ? 1 : 0) + (Model.PoolGames[i].Game.PlateUmpire != null ? 1 : 0)).ToString() + ")"
+                                , "EditUmpires"
+                                , "Game"
+                                , new { id = (int)Model.PoolGames[i].Game.Id }
+                                , new { style = "color:#000", ptip = 
+                                        Html.Raw(
+                                        "Plate Umpire: <a href=\"" + Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = Model.PoolGames[i].Game.PlateUmpire != null ? Model.PoolGames[i].Game.PlateUmpire.Id : 0 }) + "\">" + Web.Models.Umpire.GetUmpireName(Model.PoolGames[i].Game.PlateUmpire) + "</a><br>" + 
+                                        "Field Umpire: <a href=\"" + Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = Model.PoolGames[i].Game.FieldUmpire != null ? Model.PoolGames[i].Game.FieldUmpire.Id : 0 }) + "\">" + Web.Models.Umpire.GetUmpireName(Model.PoolGames[i].Game.FieldUmpire) + "</a>") })
+                            }
+                    </span>
+
+                    </td>
+                </tr>
+            }
+            </table>
+
+
+            @Html.HiddenFor(model => model.Id)
+            <button id="SubmitGames" class="command">Submit Games</button>
+
+
+
+
+
+    </div>
+    
+}
+<p>@Html.ActionLink("Back to List", "Index")</p>

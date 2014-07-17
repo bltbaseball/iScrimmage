@@ -1,0 +1,105 @@
+﻿@model Web.Models.PlayerNewUnattachedModel
+
+@{
+    ViewBag.Title = "Create Player";
+}
+@section Header {
+    <script type="text/javascript">
+            $(document).ready(function () {
+                $('#DateOfBirth').datepicker({
+                    @(Model.DateOfBirth.HasValue ? "" : "defaultDate: new Date("+DateTime.Now.AddYears(-20).Year.ToString()+",01,01),")
+                    changeMonth: true,
+                    changeYear: true,
+                    showButtonPanel: true,
+                    yearRange: "-20:+0",
+                    onChangeMonthYear: function (year, month, elem) {
+                        var currentDate = $(this).datepicker('getDate');
+                        if (currentDate == null)
+                            return;
+
+                        var day = currentDate.getDate();
+                        var newDate = new Date(year, month-1, day, 0, 0, 0, 0);
+                        $(this).datepicker('setDate', newDate);
+                    }
+                });
+            });
+    </script>
+}
+
+
+<h2>Create Player</h2>
+
+@using (Html.BeginForm()) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Player</legend>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LastName)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.LastName)
+            @Html.ValidationMessageFor(model => model.LastName)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.FirstName)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.FirstName)
+            @Html.ValidationMessageFor(model => model.FirstName)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.DateOfBirth)
+        </div>
+        <div class="editor-field">
+            <input type="text" name="DateOfBirth" id="DateOfBirth" style="width: 8em"  value="@if(Model.DateOfBirth.HasValue) { if(Model.DateOfBirth.Value.Year > 1900) { @Model.DateOfBirth.Value.ToShortDateString() }}" /> 
+            @Html.ValidationMessageFor(model => model.DateOfBirth)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Email)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Email)
+            @Html.ValidationMessageFor(model => model.Email)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Gender)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(model => model.Gender, @Web.Models.Transforms.ToSelectList<Web.Models.Gender>(Model.Gender))
+            @Html.ValidationMessageFor(model => model.Gender)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.JerseyNumber)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.JerseyNumber)
+            @Html.ValidationMessageFor(model => model.JerseyNumber)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.PhoneNumber)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.PhoneNumber)
+            @Html.ValidationMessageFor(model => model.PhoneNumber)
+        </div>
+
+        <p>
+            <input type="submit" value="Create" />
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+

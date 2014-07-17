@@ -1,0 +1,304 @@
+﻿@model Web.Models.PlayerNewModel
+
+@{
+    ViewBag.Title = "Create Player";
+}
+@section Header {
+    <script type="text/javascript">
+            $(document).ready(function () {
+                $('#DateOfBirth').datepicker({
+                    @(Model.DateOfBirth.HasValue ? "" : "defaultDate: new Date("+DateTime.Now.AddYears(-20).Year.ToString()+",01,01),")
+                    changeMonth: true,
+                    changeYear: true,
+                    showButtonPanel: true,
+                    yearRange: "-20:+0",
+                    onChangeMonthYear: function (year, month, elem) {
+                        var currentDate = $(this).datepicker('getDate');
+                        if (currentDate == null)
+                            return;
+
+                        var day = currentDate.getDate();
+                        var newDate = new Date(year, month-1, day, 0, 0, 0, 0);
+                        $(this).datepicker('setDate', newDate);
+                    }
+                });
+            });
+    </script>
+}
+<h2>New Player for @Web.Models.Team.PrettyName((Web.Models.Team)ViewBag.Team)</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model=>model.TeamId)    
+
+    <fieldset>
+        <legend>Player</legend>
+         <b>First name, last name, and date of birth CANNOT be changed after submission.</b> <br />
+             <br /> 
+            Use the "Save for Later" button to save partial information to build your roster.<br />
+             <br />
+ 
+            @Html.HiddenFor(m => m.PlayerId)
+            @Html.HiddenFor(m => m.UpdatePlayerId)
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LastName) 
+        </div>
+        <div class="editor-field">
+            <input type="text" id="LastName" name="LastName" data-autocomplete-url="@Url.Action("/SearchPlayers", "TeamPlayer", new { teamId = Model.TeamId })" value="@Model.LastName"  autocomplete="off" />
+            <img src="~/Images/ajax-loader.gif" id="LastNameSpinner" height="30" style="vertical-align:middle;"/>
+            @Html.ValidationMessageFor(model => model.LastName)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.FirstName)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.FirstName) 
+            @Html.ValidationMessageFor(model => model.FirstName)
+        </div>
+        
+        <div class="editor-label">
+            @Html.LabelFor(model => model.DateOfBirth)
+        </div>
+        <div class="editor-field">
+            <input type="text" name="DateOfBirth" id="DateOfBirth" style="width: 8em"  value="@if(Model.DateOfBirth.HasValue) { if(Model.DateOfBirth.Value.Year > 1900) { @Model.DateOfBirth.Value.ToShortDateString() }}" /> 
+            @Html.ValidationMessageFor(model => model.DateOfBirth)
+        </div>
+
+    <div id="playerInfo">
+                    
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Email)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Email)
+            @Html.ValidationMessageFor(model => model.Email)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Gender)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(model => model.Gender, @Web.Models.Transforms.ToSelectList<Web.Models.Gender>(Model.Gender))
+            @Html.ValidationMessageFor(model => model.Gender)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.JerseyNumber)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.JerseyNumber)
+            @Html.ValidationMessageFor(model => model.JerseyNumber)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.PhoneNumber)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.PhoneNumber)
+            @Html.ValidationMessageFor(model => model.PhoneNumber)
+        </div>
+
+    </div>
+        </fieldset>
+
+        <br />
+        <fieldset>
+            <legend>Guardian</legend>
+            <div>
+                @Html.HiddenFor(model=>model.GuardianId)
+                @Html.HiddenFor(model=>model.UpdateGuardianId)
+
+                <div class="editor-label">
+                    @Html.LabelFor(model => model.Guardian.Email)
+                </div>
+                <div class="editor-field">
+                    <input type="text" id="Guardian_Email" name="Guardian.Email" data-autocomplete-url="@Url.Action("/SearchGuardians", "TeamPlayer", new { teamId = @Model.TeamId })"  value="@if(Model.Guardian != null){@Model.Guardian.Email}"  autocomplete="off" />
+                    <img src="~/Images/ajax-loader.gif" id="GuardianEmailSpinner" height="30" style="vertical-align:middle;"/>
+                    @Html.ValidationMessageFor(model => model.Guardian.Email)
+                </div>
+    <div id="guardianInfo">
+
+                <div class="editor-label">
+                    @Html.LabelFor(model => model.Guardian.FirstName)
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.Guardian.FirstName)
+                    @Html.ValidationMessageFor(model => model.Guardian.FirstName)
+                </div>
+
+                <div class="editor-label">
+                    @Html.LabelFor(model => model.Guardian.LastName)
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.Guardian.LastName)
+                    @Html.ValidationMessageFor(model => model.Guardian.LastName)
+                </div>
+    </div>
+            </div>
+        </fieldset>
+
+    if(((Web.Models.Team)ViewBag.Team).League.WaiverRequired) {
+        <p>
+            <input type="submit" value="Submit and Send Waiver to Guardian *" name="Commit" />
+        </p>
+        <p>
+            * A document from HelloSign will be emailed to the Guardian for immediate signature. If they do not receive it immediately, please check your spam folders.
+        </p>
+    }
+    else
+    {
+        <p>
+            <input type="submit" value="Submit to Roster" name="Commit" />
+        </p>
+    }
+
+        <p>
+            <input type="submit" value="Save for later" name="Save" />
+        </p>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index", "TeamPlayer", new { id = (int)Model.TeamId }, null)
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+<script type="text/javascript">
+
+    function existingplayerforms() {
+        $("#playerInfo").hide();
+        $("#guardianInfo").hide();
+        $("#FirstName").prop("disabled", true);
+        $("#DateOfBirth").prop("disabled", true);
+    }
+    function existingplayer(row) {
+        existingplayerforms();
+        $("#playerInfo").hide();
+        $('#LastName').val(row.lastName);
+        $('#FirstName').val(row.firstName);
+        $('#DateOfBirth').val(row.dateOfBirth);
+        $('#PlayerId').val(row.id);
+        if (row.guardianEmail) {
+            existingguardian(row.guardianId, row.guardianEmail);
+        } else {
+            newguardian();
+        }
+    }
+    function newplayer() {
+        $("#playerInfo").show();
+        $('#PlayerId').val(null);
+        $('#FirstName').val(null);
+        $('#DateOfBirth').val(null);
+        $("#FirstName").prop("disabled", false);
+        $("#DateOfBirth").prop("disabled", false);
+        $('#FirstName').focus();
+    }
+    function existingguardian(id, email) {
+        $('#Guardian_Email').val(email);
+        $('#GuardianId').val(id);
+        $("#guardianInfo").hide();
+    }
+    function newguardian() {
+        $('#GuardianId').val(0);
+        $("#guardianInfo").show();
+    }
+    $("#LastNameSpinner").hide();
+    $("#GuardianEmailSpinner").hide();
+    @if (Model.PlayerId.HasValue ? (Model.PlayerId > 0 ? true : false) : (string.IsNullOrEmpty(Model.LastName) ? true : false))
+    { 
+        @: existingplayerforms();
+    }
+
+    jQuery(function ($) {
+        $('#LastName[data-autocomplete-url]').each(function () {
+            var myUrl = $(this).data("autocomplete-url");
+            var topResult = null;
+            $(this).autocomplete({
+                source: function (request, response) {
+                    $("#LastNameSpinner").show();
+                    topResult = null;
+                    $.getJSON(myUrl, request, function (data, status, xhr) {
+                        response(data);
+                        if (data.length > 0)
+                            topResult = data[0];
+                    });
+                },
+                delay: 0,
+                response: function (event, ui) {
+                    $('#LastNameSpinner').hide();
+                },
+                minLength: 1,
+                select: function (event, ui) {
+                    if (ui.item.id == '0') {
+                        newplayer();
+                        return false;
+                    } else {
+                        existingplayer(ui.item);
+                        return false;
+                    }
+                },
+                change: function (event, ui) {
+                    newplayer();
+                    newguardian();
+                    if (ui.item) {
+                        if (ui.item.id != '0') {
+                            existingplayer(ui.item);
+                        }
+                    } else if (topResult != null) {
+                        if (topResult.id != 0) {
+                            existingplayer(topResult);
+                        }
+                    }
+                    return false;
+                }
+            });
+        });
+        $('#Guardian_Email[data-autocomplete-url]').each(function () {
+            var myUrl = $(this).data("autocomplete-url");
+            var topResult = null;
+            $(this).autocomplete({
+                source: function (request, response) {
+                    $("#GuardianEmailSpinner").show();
+                    topResult = null;
+                    $.getJSON(myUrl, request, function (data, status, xhr) {
+                        response(data);
+                        if (data.length > 0)
+                            topResult = data[0];
+                    });
+                },
+                delay: 0,
+                response: function (event, ui) {
+                    $('#GuardianEmailSpinner').hide();
+                },
+                minLength: 1,
+                select: function (event, ui) {
+                    if (ui.item.id == '0') {
+                        newguardian();
+                        return false; //Do nothing, leave the search text as is
+                    } else {
+                        existingguardian(ui.item.id, ui.item.email);
+                        return false;
+                    }
+                },
+                change: function (event, ui) {
+                    newguardian();
+                    if (ui.item) {
+                        if (ui.item.id != '0') {
+                            existingguardian(ui.item.id, ui.item.email);
+                        }
+                    } else if (topResult != null) {
+                        if (topResult.id != 0) {
+                            existingguardian(topResult.id, topResult.email);
+                        }
+                    }
+                    return false;
+                }
+            });
+        });
+    });
+</script>

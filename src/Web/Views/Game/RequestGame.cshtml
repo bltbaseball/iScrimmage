@@ -1,0 +1,128 @@
+﻿@model Web.Models.GameRequestModel
+@{
+    ViewBag.Title = "Request A Game";
+}
+@section Header {
+
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+<script type="text/javascript">
+    function showLoading() {
+        $('#loading').show();
+    }
+
+    function hideLoading() {
+        $('#loading').hide();
+    }
+
+    $(document).ready(function () {
+        $('button').button();
+        $('#ScheduleGame').button('disable');
+
+        $(document).on('change', '#AwayTeamId', function (e) {
+            // ajax call for available dates for the new team
+            $('#ScheduleGame').button('disable');
+            var awayTeamId = $(this).val();
+
+            if (awayTeamId == '') {
+                $('#AvailableDates').hide();
+                $('#ChooseAwayTeam').show();
+                return;
+            }
+            $('#AvailableDates').empty();
+
+            $('#AvailableDates').show();
+            $('#ChooseAwayTeam').hide();
+
+            // show loading image
+            showLoading();
+            var data = {
+                teamId: awayTeamId
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/Game/GetAvailableDatesForTeam',
+                data: JSON.stringify(data),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (result) {
+                    if (result) {
+                        if (result.Success == true) {
+                            // populate dates
+                            var dates = result.Dates;
+                            if (dates.length == 0) {
+                                $('#AvailableDates').append($('<option>').text('No dates available for team.'));
+                            } else {
+                                $('#ScheduleGame').button('enable');
+                            }
+                            for (var i = 0; i < dates.length; i++) {
+                                var date = dates[i];
+                                $('#AvailableDates').append($('<option>').val(date.Id).text(date.Date + ' @@ ' + date.Location));
+                            }
+                        } else {
+                        }
+                    }
+                    // stop loading
+                    hideLoading();
+                },
+                error: function (xhr, status, error) {
+                    hideLoading();
+                }
+            });
+            
+        });
+    });
+</script>
+}
+<h2>Request A Game</h2>
+
+@if (TempData.ContainsKey("GameRequested") && ((bool)(TempData["GameRequested"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Game successfully requested.</span>
+    </div>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Game</legend>
+
+        @Html.HiddenFor(model => model.HomeTeamId)
+        @Html.ValidationMessageFor(model => model.HomeTeamId)   
+        <div class="editor-label">
+            @Html.LabelFor(model => model.AwayTeamId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.AwayTeamId, (List<SelectListItem>)ViewBag.AwayTeams, "Please choose", new { })
+            <img id="loading" src="/Images/ajax-loader.gif" alt="Loading..." style="display: none; vertical-align: middle;" />
+            @Html.ValidationMessageFor(model => model.AwayTeamId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.AvailableDateId)
+        </div>
+        <div class="editor-field">
+            @*populated via ajax*@
+            <div id="ChooseAwayTeam">Please choose an away team to see the available dates.</div>
+            <select id="AvailableDates" name="AvailableDateId" style="display: none;">
+
+            </select>    
+            @Html.ValidationMessageFor(model => model.AvailableDateId)       
+        </div>
+
+        <p>
+            <button id="ScheduleGame" class="command">Schedule Game</button>
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to Games", "Index", "Game")
+</div>

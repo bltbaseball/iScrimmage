@@ -1,0 +1,19 @@
+﻿@model Web.Models.LeagueOverviewModel
+
+@{
+    ViewBag.Title = "League Overview";
+    if (Request.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_Dashboard.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+
+@{
+    Html.RenderPartial("_LeagueInfo", Model);
+}
+
+

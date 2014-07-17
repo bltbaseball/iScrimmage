@@ -1,0 +1,37 @@
+﻿@model Web.Models.TeamStatusModel
+
+<fieldset class="team-status" style="border:0px;font-size:larger;font-weight:bold;">
+    <ul class="checklist">
+        @if (Model.Team.League.Type == Web.Models.LeagueType.League || Model.Team.League.Type == Web.Models.LeagueType.Scrimmage) 
+        {
+            <li class="@(Model.HasAvailableDatesEntered ? "complete" :"incomplete")"><span class="ui-icon @(Model.HasAvailableDatesEntered ? "ui-icon-check" :"ui-icon-close")"></span> 
+                @if(Model.HasAvailableDatesEntered) {
+                    @Html.ActionLink("Add/Edit Available Game Dates", "Edit", "Team", new { id = Model.Team.Id }, new { })
+                } else {
+                    @Html.ActionLink("Add Available Game Dates, " + Model.Team.League.MinimumDatesAvailable.ToString() + " Required", "Edit", "Team", new { id = Model.Team.Id }, new { })
+                }
+            </li>
+            if (Model.Team.League.Type == Web.Models.LeagueType.Scrimmage)
+            {
+                <li class="complete"><span class="ui-icon ui-icon-check"></span> 
+                    @Html.ActionLink("Add More Players", "Create", "Player", new {id = Model.Team.Id}, new{})
+                </li>
+            } else {
+                <li class="@(Model.HasMinimumNumberOfPlayers ? "complete" :"incomplete")"><span class="ui-icon @(Model.HasMinimumNumberOfPlayers ? "ui-icon-check" :"ui-icon-close")"></span> 
+                    @Html.ActionLink("Add More Players (9)", "Create", "Player", new {id = Model.Team.Id}, new{})
+                </li>
+            }
+        }
+        @if (Model.Team.League.Type != Web.Models.LeagueType.Scrimmage) 
+        {
+            <li class="@(Model.HasPaidMandatoryFees ? "complete" :"incomplete")"><span class="ui-icon @(Model.HasPaidMandatoryFees ? "ui-icon-check" :"ui-icon-close")"></span>
+                @Html.ActionLink("Paid mandatory fees", "League", "Home", new {id = Model.Team.League.Id, teamId= Model.Team.Id}, new{})
+            </li>
+            <li class="@(Model.HasPhotosSubmitted ? "complete" :"incomplete")"><span class="ui-icon @(Model.HasPhotosSubmitted ? "ui-icon-check" :"ui-icon-close")"></span> Photos</li>
+            <li class="@(Model.HasValidBirthdates ? "complete" :"incomplete")"><span class="ui-icon @(Model.HasValidBirthdates ? "ui-icon-check" :"ui-icon-close")"></span> Valid Birthdates</li>
+            if (Model.Team.League.WaiverRequired) {
+                <li class="@(Model.HasWaiversSigned ? "complete" :"incomplete")"><span class="ui-icon @(Model.HasWaiversSigned ? "ui-icon-check" :"ui-icon-close")"></span> All Waivers Signed</li>
+            }
+        }
+    </ul>
+</fieldset>

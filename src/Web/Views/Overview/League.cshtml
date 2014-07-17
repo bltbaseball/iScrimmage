@@ -1,0 +1,20 @@
+﻿@model Web.Models.LeaguesOverviewModel
+
+@{
+    ViewBag.Title = "League Overview";
+    if (Request.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_Dashboard.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+<a id="leagues"></a>
+<div id="league-list">
+    @Html.Partial("_InfoOverview", Model.Leagues, new ViewDataDictionary(this.ViewData) { { "header", "<h1>Leagues</h1>" } })
+</div>
+
+
+

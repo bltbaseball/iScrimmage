@@ -1,0 +1,98 @@
+﻿@model Web.Models.UmpireUpdateModel
+
+@{
+    ViewBag.Title = "Edit Umpire";
+}
+
+<h2>Edit Umpire</h2>
+
+@using (Html.BeginForm("Edit", "Umpires", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Update Umpire</legend>
+        @Html.HiddenFor(model => model.Id)
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Email)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Email)
+            @Html.ValidationMessageFor(model => model.Email)
+        </div>
+
+        @*<div class="editor-field">
+            @Html.EditorFor(model => model.InviteUser)
+            @Html.LabelFor(model => model.InviteUser)
+            @Html.ValidationMessageFor(model => model.InviteUser)
+        </div>*@
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.FirstName)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.FirstName)
+            @Html.ValidationMessageFor(model => model.FirstName)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LastName)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.LastName)
+            @Html.ValidationMessageFor(model => model.LastName)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.PhoneNumber)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.PhoneNumber)
+            @Html.ValidationMessageFor(model => model.PhoneNumber)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Photo)
+        </div>
+        <div class="editor-field">
+            @if (!string.IsNullOrEmpty(Model.CurrentPhotoPath))
+            {
+                <img src="@Url.Content(Model.CurrentPhotoPath)" style="width: 100px; height: 100px; border: 0;" /><br />
+            }
+            <input type="file" name="imagePhoto" id="imagePhoto" />
+            @Html.ValidationMessageFor(model => model.Photo)
+        </div>
+      
+        @if (User.IsInRole("Administrator"))
+        {
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LeagueId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.LeagueId, (List<SelectListItem>)ViewBag.Leagues, new { })
+            @Html.ValidationMessageFor(model => model.LeagueId)
+        </div>
+        }
+
+        <p>
+            <button id="SubmitItem">Update Umpire</button>
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script type="text/javascript">
+        //<![CDATA[
+        $(document).ready(function () {
+            $('button').button();
+        });
+        //]]>
+    </script>
+}

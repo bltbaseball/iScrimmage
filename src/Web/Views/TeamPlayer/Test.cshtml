@@ -1,0 +1,42 @@
+﻿@{
+    ViewBag.Title = "Test";
+}
+@section Header {
+    <script type="text/javascript" src="/Scripts/jquery.upload-1.0.2.js"></script>
+    <link href="/Content/themes/base/jquery.Jcrop.css" rel="stylesheet"/>
+    <script src="/Scripts/jquery.Jcrop.js"></script>
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="/Scripts/upload-photo.js"></script>
+    <script type="text/javascript">
+        function photoCropped(id, file) {
+            console.log(id + ' ' + file);
+            $('<img />').attr('src', '/Images/Temp/' + file + '.jpeg').appendTo($('#cropped-photos'));
+        }
+
+        PhotoUploadCallbacks.add(photoCropped);
+        $(document).ready(function () {
+            $(document).on('click', '#AddPhoto', function (e) {
+                e.preventDefault();
+                var dialog = $('#upload-photo-dialog');
+                dialog.dialog('open');
+                // set id for file upload
+                $('#CropId', dialog).val(1);
+                $('#CropType', dialog).val('Player');
+                
+            });
+        });
+    </script>
+}
+<h2>Test</h2>
+
+<button id="AddPhoto" class="command">Add Photo</button>
+<div id="cropped-photos">
+
+</div>
+@{
+    Html.RenderPartial("_UploadPhotoPartial");
+}
+
+

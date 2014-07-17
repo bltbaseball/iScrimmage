@@ -1,0 +1,171 @@
+﻿@model Web.Models.TeamOverviewModel
+@using Web.Models;
+
+@{
+    ViewBag.Title = Web.Models.Team.PrettyName(Model.Team);
+    if (Request.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_Dashboard.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+
+<h1>@Web.Models.Team.PrettyNameWithoutLeague(Model.Team) - <a href="@Url.RouteUrl(new { controller = "Overview", action = "Details", id = Model.Team.League.Id })">@Model.Team.League.Name</a></h1>
+Wins:@Model.Team.Wins  Losses:@Model.Team.Losses  Ties:@Model.Team.Ties
+<br />
+<br />
+@if(Model.Team.HtmlDescription != null) {
+    <span id="dynamichtml">
+    @Html.Raw(Model.Team.HtmlDescription)
+    </span>
+    <br />
+}
+
+@if(Model.Team.Location != null) {
+    <h3>Home Field</h3>
+    <span>
+    <a href="@Url.RouteUrl(new { controller = "Overview", action = "Location", id = Model.Team.Location.Id })">@Model.Team.Location.Name</a>
+    </span>
+    <br />
+}
+
+@if(!string.IsNullOrEmpty(Model.Team.Url)) {
+    <p>Website: <a href="http://@Model.Team.Url">@Model.Team.Url</a></p>
+}
+
+@if (Request.IsAuthenticated) {
+
+
+if (Model.Team.Coaches.Count == 0)
+{
+    <p>Coaches: There are no coaches on this team.</p>
+}
+else
+{
+    <div id="team-coaches">
+        @{
+    var grid = new WebGrid(canPage: false);
+        var gridColumns = grid.Columns(
+            grid.Column("FirstName", header: "First Name", canSort: false),
+            grid.Column("LastName", header: "Last Name", canSort: false),
+            grid.Column("PhoneNumber", header: "Phone Number", canSort: false),
+            grid.Column("Email", header: "Email", canSort: false, format:@<text>
+                <a class="messaging" href="#" data-type="Coach" data-for="@item.Id" data-to="@item.FirstName @item.LastName">Send Email</a>
+            </text>)
+        );
+
+        grid.Bind(Model.Team.Coaches, autoSortAndPage: true);
+        
+                @grid.GetHtml(headerStyle: "header",
+                    tableStyle: "listing game dataTableActivate", htmlAttributes: new { dataTableHeight = "500px", dataTableTitle = "<h3>Coaches</h3>" },
+                    alternatingRowStyle: "even",
+                    rowStyle: "odd",
+                    columns: gridColumns
+                );
+        }
+    </div>
+    <br />
+}
+    
+}
+<br />
+@if (Model.Team.Players.Count == 0)
+{
+    <p>Players:There are no players on this team.</p>
+}
+else
+{
+    <div id="team-players">
+        @{
+    var grid = new WebGrid(canPage: false);
+        var gridColumns = grid.Columns(
+            grid.Column("Name", header: "Player", canSort: false, format: @<text>
+                    @item.TeamPlayer.Player.LastName, @item.TeamPlayer.Player.FirstName<br />
+                    @*@if(item.Player.DateOfBirth != null) {
+                        @item.Player.DateOfBirth.ToShortDateString()<br />
+                    }*@
+                    #@item.TeamPlayer.Player.JerseyNumber (@item.TeamPlayer.Player.Id)
+            </text>),
+            grid.Column("Photo", header: "Photo", canSort: false, format: @<text>
+                <div id="photo-cont-@item.TeamPlayer.Id">
+                    @{
+                        string playerPhoto = null;
+                        string hidePhoto = "display: none;";
+                        if (!string.IsNullOrEmpty(item.TeamPlayer.Photo))
+                        {
+                            playerPhoto = "/PlayerImages/" + item.TeamPlayer.Photo + ".jpeg";
+                            hidePhoto = null;
+                        }   
+                    }
+                    <img class="photo" id="photo-@item.TeamPlayer.Id" src="@playerPhoto" height="100" width="100"  style="border: 1px solid #999; @hidePhoto"/> 
+                </div>
+                </text>),
+            grid.Column("Status", header: "Status", canSort: false),
+            grid.Column("Player.GameStats", header: "Pitch Stats", canSort: false, format: @<text>
+                @foreach (Web.Models.PlayerGameStat playerStat in Web.Models.Player.GetPlayerGameStats(item.TeamPlayer.Player))
+                {
+                       <div>@if(playerStat.InningsPitched > 0 && playerStat.InningsOuts > 0) {
+                               @playerStat.InningsPitched @playerStat.InningsOuts@:/3 Innings
+                           } else if(playerStat.InningsPitched > 0) {
+                               @playerStat.InningsPitched @:0/3 Innings
+                           }@if(playerStat.PitchesThrown > 0) {
+                               @playerStat.PitchesThrown
+                               @:Pitches
+                           }@playerStat.Game.GameDate</div>
+               }
+               </text>)
+        );
+
+        grid.Bind(Model.Players, autoSortAndPage: true);
+        
+                @grid.GetHtml(headerStyle: "header",
+                    tableStyle: "listing game dataTableActivate", htmlAttributes: new { dataTableHeight = "500px", dataTableTitle = "<h3>Players</h3>" },
+                    alternatingRowStyle: "even",
+                    rowStyle: "odd",
+                    columns: gridColumns
+                );
+        }
+    </div>
+}
+<br />
+@if (Model.Games.Count == 0)
+{
+    <p>Games:This team has no games scheduled.</p>
+}
+else
+{
+    <div id="team-games">
+        @{
+        var grid = new WebGrid(canPage: false);
+        var gridColumns = grid.Columns(
+            grid.Column("HomeTeam", header: "Home Team", canSort: false, format: @<text>
+                        @Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(item.HomeTeam, item.Game))
+                    </text>),
+    grid.Column("Game.HomeTeamScore", header: "Score", canSort: false),
+    grid.Column("AwayTeam", header: "Away Team", canSort: false, format: @<text>
+                        @Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(item.AwayTeam, item.Game))
+                    </text>),
+    grid.Column("Game.AwayTeamScore", header: "Score", canSort: false),
+    grid.Column("GameTime", header: "Game Date", canSort: false),
+    grid.Column("Location", header: "Location", canSort: false, format: @<text>
+                            <a href="@Url.RouteUrl(new { controller = "Overview", action = "Location", id = item.Game.Location.Id })">@item.Game.Location.Name</a><br />@item.Game.Field</text>),
+    grid.Column("Status", header: "Status", canSort: false, format: @<text>@item.Game.Status.ToString()</text>),
+    grid.Column("Type", header: "Type", canSort: false)
+        );
+
+        grid.Bind(Model.Games, autoSortAndPage: true);
+        
+                @grid.GetHtml(headerStyle: "header",
+                    tableStyle: "listing game dataTableActivate", htmlAttributes: new { dataTableHeight = "500px", dataTableTitle = "<h3>Games</h3>" },
+                    alternatingRowStyle: "even",
+                    rowStyle: "odd",
+                    columns: gridColumns
+                );
+        }
+    </div>
+}
+
+<form class="edit-link"><button class="command edit" onclick="history.back(); return false">Back</button></form>

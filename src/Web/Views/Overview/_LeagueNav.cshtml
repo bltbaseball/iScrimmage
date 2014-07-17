@@ -1,0 +1,18 @@
+﻿@model Web.Models.League
+@using Web.Models
+
+@{
+    var controllerName = ViewContext.RouteData.GetRequiredString("controller");
+    var controllerAction = ViewContext.RouteData.GetRequiredString("action");
+}
+
+<a href="@Url.RouteUrl(new { controller = "Overview", action = "Details", id = Model.Id })" style="@if (controllerAction == "Details")
+                                                                                                   { @Html.Raw("font-weight:bold;") }">Games</a> | 
+<a href="@Url.RouteUrl(new { controller = "Overview", action = "Pitch", id = Model.Id })" style="@if (controllerAction == "Pitch")
+                                                                                                 { @Html.Raw("font-weight:bold;") }">Pitch Stats</a> | 
+<a href="@Url.RouteUrl(new { controller = "Overview", action = "LeagueCoaches", id = Model.Id })" style="@if (controllerAction == "LeagueCoaches")
+                                                                                                         { @Html.Raw("font-weight:bold;") }">Coaches</a> | 
+<a href="@Url.RouteUrl(new { controller = "Overview", action = "LeagueTeams", id = Model.Id })" style="@if (controllerAction == "LeagueTeams")
+                                                                                                       { @Html.Raw("font-weight:bold;") }">Teams</a> | 
+<a href="@Url.RouteUrl(new { controller = "Overview", action = "LeaguePlayers", id = Model.Id })" style="@if (controllerAction == "LeaguePlayers")
+                                                                                                         { @Html.Raw("font-weight:bold;") }">Players</a>

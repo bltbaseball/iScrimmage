@@ -1,0 +1,95 @@
+﻿@model Web.Models.PitchOverviewModel
+@using Web.Models;
+
+@{
+    ViewBag.Title = Model.League.Name;
+    if (Request.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_Dashboard.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+<div style="width: 30em; float: right; text-align: right;">
+@{
+    Html.RenderPartial("_LeagueNav", Model.League);
+}
+</div>
+<h1><a href="@Url.RouteUrl(new { controller = "Overview", action = "Details", id = Model.League.Id })">@Model.League.Name</a></h1>
+<br />
+
+
+<h3>Pitch Stats</h3>
+@if (Model.Players.Count == 0)
+{
+    <p>No pitching stats have been submitted.</p>
+}
+else
+{
+    <div id="team-players">
+        @{
+    var grid = new WebGrid(canPage: false);
+        var gridColumns = grid.Columns(
+            grid.Column("Team", header: "Team", canSort: false, format: @<text>
+                        @Html.Raw( Web.Models.Team.PrettyNameWithoutLeague(item.TeamPlayer.Team, null))
+                </text>),
+            grid.Column("Name", header: "Player", canSort: false, format: @<text>
+                    @item.TeamPlayer.Player.LastName, @item.TeamPlayer.Player.FirstName<br />
+                    @*@if(item.Player.DateOfBirth != null) {
+                        @item.Player.DateOfBirth.ToShortDateString()<br />
+                    }*@
+                    #@item.TeamPlayer.Player.JerseyNumber (@item.TeamPlayer.Player.Id)
+                </text>),
+            grid.Column("Division", header: "Division", canSort: false, format: @<text>@item.TeamPlayer.Team.Division.Name</text>),
+            grid.Column("Class", header: "Class", canSort: false, format: @<text>@item.TeamPlayer.Team.Class.Name</text>),
+            /*grid.Column("Photo", header: "Photo", canSort: false, format: @<text>
+                <div id="photo-cont-@item.TeamPlayer.Id">
+                    @{
+                        string playerPhoto = null;
+                        string hidePhoto = "display: none;";
+                        if (!string.IsNullOrEmpty(item.TeamPlayer.Photo))
+                        {
+                            playerPhoto = "/PlayerImages/" + item.TeamPlayer.Photo + ".jpeg";
+                            hidePhoto = null;
+                        }   
+                    }
+                    <img class="photo" id="photo-@item.TeamPlayer.Id" src="@playerPhoto" height="100" width="100"  style="border: 1px solid #999; @hidePhoto"/> 
+                </div>
+                </text>),*/
+            grid.Column("Player.GameStats", header: "Pitch Stats", canSort: false, format: @<text>
+                @foreach (Web.Models.PlayerGameStat playerStat in Web.Models.Player.GetPlayerGameStats(item.TeamPlayer.Player))
+                {
+                       <div>
+                           
+                           @if(playerStat.InningsPitched > 0 || playerStat.InningsOuts > 0) {
+                               @:@playerStat.InningsPitched @(playerStat.InningsOuts == null ? "0" : playerStat.InningsOuts.ToString() )/3 Innings
+                           }@if(playerStat.PitchesThrown > 0) {
+                               @playerStat.PitchesThrown
+                               @:Pitches
+                           }
+                           
+                           vs @if(item.TeamPlayer.Team != playerStat.Game.HomeTeam) { @Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(playerStat.Game.HomeTeam, playerStat.Game)) }
+                               @if(item.TeamPlayer.Team != playerStat.Game.AwayTeam) { @Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(playerStat.Game.AwayTeam, playerStat.Game)) }
+             
+                           at @playerStat.Game.GameDate
+                           
+                       </div>
+               }
+               </text>)
+        );
+
+        grid.Bind(Model.Players.OrderBy(t => t.TeamPlayer.Team.Name).ThenBy(t => t.TeamPlayer.Player.JerseyNumber).ToList(), autoSortAndPage: true);
+        
+                @grid.GetHtml(headerStyle: "header",
+                    tableStyle: "listing game dataTableActivate", htmlAttributes: new { dataTableHeight = "500px" },
+                    alternatingRowStyle: "even",
+                    rowStyle: "odd",
+                    columns: gridColumns
+                );
+        }
+    </div>
+}
+
+<form class="edit-link"><button class="command edit" onclick="history.back(); return false">Back</button></form>

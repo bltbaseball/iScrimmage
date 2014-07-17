@@ -1,0 +1,66 @@
+﻿@model GameOverviewModel
+@using Web.Models
+                        
+<div id="league-games-@(Model.UniqueAjaxName)">
+                @{
+                    var grid = new WebGrid(canPage: false);
+                    var gridColumns = grid.Columns(
+                        grid.Column("HomeTeam", header: "Team 1", canSort: false, format: @<text>
+                        @Html.Raw(item.HomeTeam == null ? item.HomeTeamName : Web.Models.Team.PrettyNameWithoutLeague(item.HomeTeam, item.Game))
+                    </text>),
+                        grid.Column("Game.HomeTeamScore", header: "Score", canSort: false),
+                        grid.Column("AwayTeam", header: "Team 2", canSort: false, format: @<text>
+                        @Html.Raw(item.AwayTeam == null ? item.AwayTeamName : Web.Models.Team.PrettyNameWithoutLeague(item.AwayTeam, item.Game))
+                    </text>),
+                        grid.Column("Game.AwayTeamScore", header: "Score", canSort: false),
+                        grid.Column("Game.GameDate", header: "Game Date", canSort: false),
+                        grid.Column("Game.Status", header: "Status", canSort: false, format: @<text>@item.Game.Status.ToString()</text>),
+                        grid.Column("Location", header: "Location", canSort: false, format: @<text>
+                            <a href="@Url.RouteUrl(new { controller = "Overview", action = "Location", id = item.Game.Location.Id })">@item.Location/@item.Game.Field</a></text>),
+                        grid.Column("Type", header: "Type", canSort: false),
+                        grid.Column("PlateUmpire", header: "Plate Umpire", canSort: false, format: @<text>
+                        @if (item.Game.PlateUmpire != null)
+                        {
+                            <a href="@Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.Game.PlateUmpire.Id })">@item.PlateUmpire</a>
+                        }
+                    </text>),
+                        grid.Column("FieldUmpire", header: "Field Umpire", canSort: false, format: @<text>
+                        @if (item.Game.FieldUmpire != null)
+                        {
+                            <a href="@Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.Game.FieldUmpire.Id })">@item.FieldUmpire</a>
+                        }
+                    </text>),
+                                    grid.Column("", style: "center", header: "", format: @<text>
+                                    @if (User.IsInRole("Administrator") || Web.Models.User.IsHeadUmpireOfLeague(User, item.Game))
+                                    {
+                                        <span style="white-space:nowrap;">
+                                        @Html.ActionLink("Enter Scores", "EditScore", "Game", new { id = (int)item.Game.Id, returnUrl = Model.ReturnUrl }, new { style = "color:#000" }) <br />
+                                        @Html.ActionLink("Umpires (" + ((item.Game.FieldUmpire != null ? 1 : 0) + (item.Game.PlateUmpire != null ? 1 : 0)).ToString() + ")", "EditUmpires", "Game", new { id = (int)item.Game.Id }
+                                            , new
+                                            {
+                                                style = "color:#000",
+                                                ptip = Html.Raw(
+                                                    "Plate Umpire: <a href=\"" + Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.Game.PlateUmpire != null ? item.Game.PlateUmpire.Id : 0 }) + "\">" + Web.Models.Umpire.GetUmpireName(item.Game.PlateUmpire) + "</a><br>" +
+                                                    "Field Umpire: <a href=\"" + Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.Game.FieldUmpire != null ? item.Game.FieldUmpire.Id : 0 }) + "\">" + Web.Models.Umpire.GetUmpireName(item.Game.FieldUmpire) + "</a>")
+                                            })
+                                        <br />
+                                        @if (User.IsInRole("Administrator") || Web.Models.User.IsHeadUmpireOfLeague(User, item.Game))
+                                        {
+                                            @Html.ActionLink("Edit", "Edit", "Game", new { id = (int)item.Game.Id, returnUrl = Model.ReturnUrl }, new { style = "color:#000" })
+                                            @:  |  
+                                            @Html.ActionLink("Delete", "Delete", "Game", new { id = (int)item.Game.Id, returnUrl = Model.ReturnUrl }, new { onclick = "return confirm('Are you sure you want to delete this game?')", style = "color:#000" })
+                                        }
+                                    </span>}</text>, canSort: false)
+                           
+                    @*grid.Column("Status", header: "Status", canSort: false, format: @<text>@item.Status.ToString()</text>)*@
+);
+
+                    grid.Bind(Model.LeagueGames, autoSortAndPage: true);
+                @grid.GetHtml(headerStyle: "header",
+                    tableStyle: "listing game dataTableActivate",
+                    alternatingRowStyle: "even",
+                    rowStyle: "odd",
+                    columns: gridColumns
+                    );
+                }
+            </div>

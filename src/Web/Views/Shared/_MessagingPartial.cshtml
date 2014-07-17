@@ -1,0 +1,28 @@
+﻿<div id="messaging-dialog" class="dialog" title="Send Message">
+    <form id="messaging-form">
+    <div id="messaging-status"></div>
+
+    <div class="editor-label">
+        <label for="MessagingDialogTo">To</label>
+    </div>
+    <div class="editor-field">
+        <span id="MessagingDialogTo"></span>
+    </div>
+
+    <div class="editor-label">
+        <label for="Subject">Subject</label>
+    </div>
+    <div class="editor-field">
+        <input class="required" id="MessagingSubject" type="text" value="" />
+    </div>
+
+    <div class="editor-label">
+        <label for="Body">Body</label>
+    </div>
+    <div class="editor-field">
+        <textarea cols="20" class="required" id="MessagingBody" rows="2" style="width: 40em; height: 6em;"></textarea>
+    </div>
+    <input type="hidden" id="MessagingId" />
+    <input type="hidden" id="MessagingType" />
+    </form>
+</div>

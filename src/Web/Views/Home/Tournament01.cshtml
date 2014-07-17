@@ -1,0 +1,369 @@
+﻿@model Web.Models.LeagueInfoModel
+
+@{
+    ViewBag.Title = "Tournaments";
+    if (Request.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_Dashboard.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+
+
+<h1>BLT Baseball Pre-Fall Season Majors Invitational</h1>
+
+<h2>Big League Travel Baseball™ presents</h2>
+<h3>BLT Baseball Pre-Fall Season Majors Invitational</h3>
+<br />
+<p><strong>Date:</strong> August 16 - August 18, 2013</p>
+
+<p>
+    <strong>Location:</strong><br />
+    Bamford Park<br />
+    3800 SW 92 Avenue<br />
+    Davie, FL 33328
+</p>
+
+<p>
+    <strong>Age Groups:</strong> 10U, 12U, 14U
+</p>
+
+<p>
+    <strong>Tournament Fees:</strong><br />
+    $475.00
+</p>
+
+<p>
+    3 - Games Guarantee (2 Pool & 1 Elimination) with single Elimination.<br />
+    Umpires – Included in fee.
+</p>
+
+<p>Teams in each division will receive awards for 1st Place & 2nd Place and individual awards. Future events for AA and AAA are coming, so stay tuned!</p>
+<br />
+<br />
+<h1>Registration</h1>
+<h1 style="color:#f00;"><!--Registration Closed!--></h1>
+
+@if (!Request.IsAuthenticated)
+{
+    
+
+    <h1>Register and Create Your Team! Login Now!</h1>
+            
+    <h2>To ensure maximum functionality, a Google account is required</h2>
+    <div>
+        @using (Html.BeginForm("ExternalLogin", "Account", new { ReturnUrl = "/Home/CoachInvite" }))
+        {
+            @Html.AntiForgeryToken()
+            <button type="submit" class="command" name="provider" value="google" title="Log in using your Google account">Log in using your Google account</button>
+        }
+    </div>
+    <h2 class="mt15">Don't have a Google account?</h2>
+    <div>
+        @using (Html.BeginForm("ExternalSignup", "Account", new { ReturnUrl = "/Home/CoachInvite" }, FormMethod.Post, new { target = "_blank" }))
+        {
+            @Html.AntiForgeryToken()
+            <button type="submit" class="command" name="provider" value="google" title="Create a Google Account" style="width: 18em;">Create a Google Account</button>
+        }
+    </div>
+    <br />
+    <br />
+}
+else
+{
+    if (ViewBag.TeamsInTournament.Count == 0)
+    {
+        <h3>Register a Team</h3>
+        <p>You have no teams registered for this tournament. @Html.ActionLink("Register your team now", "Create", "Team") and add players to its roster to get started.</p>
+    }
+    else
+    {
+        <h3>Teams Already Registered</h3>
+        <div id="active-teams">
+        @{
+        var activeTeamGrid = new WebGrid(canPage: false);
+        activeTeamGrid.Bind(ViewBag.TeamsInTournament, autoSortAndPage: true);
+        
+            @activeTeamGrid.GetHtml(headerStyle: "header",
+                tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px" },
+                alternatingRowStyle: "even",
+                rowStyle: "odd",
+                columns: activeTeamGrid.Columns(
+                    activeTeamGrid.Column("Name", header: "Name", format: (item) => Html.ActionLink((string)item.Name + " " + (string)item.Division.Name + " " + (string)item.Class.Name, "Edit", "Team", new { id = (int)item.Id }, new { }), canSort: false),
+                    activeTeamGrid.Column("League", header: "League", canSort: false, format: @<text>@item.League.Name</text>),
+                    activeTeamGrid.Column("Players", style: "center", header: "Roster", canSort: false, format: @<text>
+                        @if (item.Players.Count == 0)
+                        {
+                            <form action="@Url.RouteUrl(new { controller = "Player", action = "Create", id = item.Id })" method="get" class="edit-link">
+                                <button class="command edit">Add Players</button>
+                            </form>  
+                        }
+                        else
+                        {
+                            <a href="@Url.RouteUrl(new { controller = "TeamPlayer", action = "Index", id = item.Id })">@item.Players.Count players</a>
+                        }
+                    </text>),
+                    activeTeamGrid.Column("Pay", style:"center", header: " ", format: @<text>
+            @*
+                        @if (Web.Models.FeePayment.GetFeesPaidStatus(item.Value))
+                        {
+                            <strong>Paid</strong>   
+                        } else {
+                            if (item.Value.League.Type == Web.Models.LeagueType.Tournament)
+                            {
+                                <form action="@Url.RouteUrl(new{ controller="Home", action ="Tournament01", id = item.Id})" method="get" class="edit-link">
+                                <button class="command edit">Pay</button>
+                                </form>
+                            } else {
+                                <form action="@Url.RouteUrl(new{ controller="Team", action ="PayFees", id = item.Id})" method="get" class="edit-link">
+                                <button class="command edit">Pay</button>
+                                </form>
+                            }
+                        }*@
+
+            @{ var Fees = new List<Web.Models.LeagueFeeModel>();
+
+                //string feeId = null;
+                //bool isPaidUp = true;
+
+               var fees = Web.Models.Fee.GetFeesForLeague(item.Value.League);
+               var feesPaid = Web.Models.FeePayment.GetFeePaymentsForTeam(item.Value);
+                foreach (var fee in fees)
+                {
+                    var feeModel = new Web.Models.LeagueFeeModel();
+                    feeModel.Amount = fee.Amount;
+                    feeModel.Name = fee.Name;
+                    feeModel.InvoiceId = string.Format("{0}_{1}", fee.Id, item.Id);
+                    feeModel.IsPaid = false;
+
+                    IList<Web.Models.FeePayment> feePaymentList = feesPaid;
+                    var feePayment = feePaymentList.Where(f => f.Fee == fee && f.Status == Web.Models.FeePaymentStatus.Completed).SingleOrDefault();
+                    if (feePayment != null)
+                    {
+                        feeModel.IsPaid = true;
+                    }
+                    
+                    
+                    <div>@(feeModel.Name): @feeModel.Amount.ToString("C") 
+            @if (feeModel.IsPaid) 
+            {
+                <strong> Paid</strong>    
+            } 
+            else 
+            {
+                string action = "https://www.paypal.com/cgi-bin/webscr";
+                if(System.Configuration.ConfigurationManager.AppSettings["PayPalSandbox"] == "true") 
+                {
+                    action = "https://www.sandbox.paypal.com/cgi-bin/webscr";
+                }
+                <form action="@action" method="post" id="PayPalForm@(feeModel.InvoiceId)">
+                    <input type="hidden" name="cmd" value="_xclick" />
+                    <input type="hidden" name="item_name" value="@(feeModel.Name) - @(item.Name) @(item.Division.Name) - @item.League.Name" />
+                    <input type="hidden" name="business" value="@System.Configuration.ConfigurationManager.AppSettings["PayPalEmail"]" />
+                    <input type="hidden" name="amount" value="@feeModel.Amount.ToString("F2")" />
+                    <input type="hidden" name="invoice" value="@(feeModel.InvoiceId)" />
+                    <input type="hidden" name="currency_code" value="USD" />
+                    <input type="hidden" name="no_shipping" value="1" />
+                    <input type="hidden" name="return" value="http://www.bltbaseball.com/Home/PaymentSuccess" />
+                    <input type="hidden" name="notify_url" value="http://www.bltbaseball.com/PayPal/IPN" />
+                    <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" />
+                </form>               
+            }
+                        </div>
+                    
+                }
+                }
+                    </text>, canSort: false)
+                )
+            );
+        }
+        </div>
+        <h3>Register Another Team</h3>
+        <br />
+        <p>@Html.ActionLink("Create Another Team", "Create", "Team") and add players to its roster.</p>
+    }
+    @*
+    if (ViewBag.Team != null)
+    {
+        foreach(var fee in Model.Fees) 
+        {
+            <h3>@(fee.Name): @fee.Amount.ToString("C")</h3>
+            if(fee.IsPaid) 
+            {
+                <strong>Fee Paid</strong>    
+            } 
+            else 
+            {
+                string action = "https://www.paypal.com/cgi-bin/webscr";
+                if(System.Configuration.ConfigurationManager.AppSettings["PayPalSandbox"] == "true") 
+                {
+                    action = "https://www.sandbox.paypal.com/cgi-bin/webscr";
+                }
+                <form action="@action" method="post" id="PayPalForm@(fee.InvoiceId)">
+                    <input type="hidden" name="cmd" value="_xclick" />
+                    <input type="hidden" name="item_name" value="@(fee.Name) - @(Model.Team.Name) @(Model.Team.Division.Name) - @Model.League.Name" />
+                    <input type="hidden" name="business" value="@System.Configuration.ConfigurationManager.AppSettings["PayPalEmail"]" />
+                    <input type="hidden" name="amount" value="@fee.Amount.ToString("F2")" />
+                    <input type="hidden" name="invoice" value="@(fee.InvoiceId)" />
+                    <input type="hidden" name="currency_code" value="USD" />
+                    <input type="hidden" name="no_shipping" value="1" />
+                    <input type="hidden" name="return" value="http://www.bltbaseball.com/Home/PaymentSuccess" />
+                    <input type="hidden" name="notify_url" value="http://www.bltbaseball.com/PayPal/IPN" />
+                    <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" />
+                </form><br />                
+            }
+        }
+        
+  
+    }
+    else
+    {
+        <h1>You Are Logged In</h1>
+            
+    <h2>To pay the registration fee, follow the link and select "Pay" next to the team.</h2>
+    <div>
+        @using (Html.BeginForm("Index", "Team"))
+        {
+            @Html.AntiForgeryToken()
+            <button type="submit" class="command" name="provider" value="google" title="Select Team">Select Team</button>
+        }
+    </div>
+    }
+    <br />
+    *@
+}
+
+
+
+@{
+    string rowClass;
+}
+@*<table>
+    <thead>
+        <tr>
+            <th>Who's Coming</th>
+        </tr>
+    </thead>
+    <tbody>
+@{
+    rowClass = "odd";
+    List<Web.Models.Team> teams = ViewBag.Teams;
+    foreach(var team in teams)
+    {
+        <tr class="@rowClass">
+            <td>@Web.Models.Team.PrettyName(team)
+            </td>
+        </tr>
+        if (rowClass == "even")
+        {
+            rowClass = "odd";
+        }
+        else
+        {
+            rowClass = "even";
+        }
+    }
+}
+    </tbody>
+</table>*@
+<br />
+<br />
+<table>
+    <thead>
+        <tr>
+            <th>Download</th>
+            <th>Size</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var downloads = Directory.GetFiles(Server.MapPath("~/Content/Downloads")).OrderBy(f => f);
+            rowClass = "odd";
+            foreach (var file in downloads)
+            {
+                var info = new FileInfo(file);
+            <tr class="@rowClass">
+                <td><a href="@Url.Content("~/Content/Downloads/" + info.Name)">@info.Name</a></td>
+                <td>@((info.Length / 1024).ToString("f1")) KB</td>
+            </tr>
+                if (rowClass == "even")
+                {
+                    rowClass = "odd";
+                }
+                else
+                {
+                    rowClass = "even";
+                }
+            }
+        }
+    </tbody>
+</table>
+@*
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript">
+        $.fn.serializeObject = function () {
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function () {
+                if (o[this.name] !== undefined) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
+        };
+
+        $(document).ready(function () {
+            $(document).on('click', '#TournamentPay', function (e) {
+                e.preventDefault();
+
+                $('#TournamentPay').prop('disabled', true);
+
+                var isValid = $('#TournamentForm').valid();
+                if (!isValid)
+                    return;
+
+                var data = $('#TournamentForm').serializeObject();
+
+                // submit the form. if successful, submit paypal form.
+                $.ajax({
+                    type: 'POST',
+                    url: '/Home/Tournament01',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result) {
+                            if (result.Success == true) {
+                                // populate paypal form
+                                $('#os0').val($('#AgeGroup').val());
+                                $('#os1').val($('#Team').val());
+
+                                // submit paypal  form
+                                $('#PayPalForm').submit();
+
+                            } else {
+                                // show error
+                                $('#TournamentError').show();
+                            }
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        // show error
+                        $('#TournamentError').show();
+                    }
+                });
+            });
+
+
+        });
+    </script>
+} *@

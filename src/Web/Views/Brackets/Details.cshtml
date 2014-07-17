@@ -1,0 +1,15 @@
+﻿@model Web.Models.BracketInfoModel
+@{
+    ViewBag.Title = Model.Bracket.Name;
+}
+@section Header {
+    <style type="text/css">
+
+    </style>
+}
+
+
+<h2>@Model.Bracket.Name</h2>
+@{
+    Html.RenderPartial("_BracketInfo", Model);
+}

@@ -1,0 +1,36 @@
+﻿@model IList<Web.Models.Team>
+@using Web.Models
+
+    @{
+                    var activeTeamGrid = new WebGrid(canPage: false);
+                    activeTeamGrid.Bind(Model, autoSortAndPage: true);
+                        @activeTeamGrid.GetHtml(headerStyle: "header",
+                            tableStyle: "listing dataTableActivate",
+                            htmlAttributes: new { dataTableHeight = "300px", dataTableTitle = ViewData["header"] != null ? ViewData["header"] : "<h4>Teams</h4>" },
+                            alternatingRowStyle: "even",
+                            rowStyle: "odd", 
+                            columns: activeTeamGrid.Columns(
+                                activeTeamGrid.Column("Name", header: "Name", format: @<text>
+                                    @Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(item.Value, null))
+                                    </text>, canSort: false),
+                                activeTeamGrid.Column("Division.MaxAge", header: "Division", canSort: false),
+                                activeTeamGrid.Column("Class.Name", header: "Class", canSort: false),
+                                activeTeamGrid.Column("Wins", header: "Wins", canSort: false),
+                                activeTeamGrid.Column("Losses", header: "Losses", canSort: false),
+                                activeTeamGrid.Column("Ties", header: "Ties", canSort: false),
+                                activeTeamGrid.Column("Url", header: "Website", canSort:false, format: @<text>
+                                    @if(!string.IsNullOrEmpty(item.Url)) {
+                                        <a href="http://@item.Url" target="blank">@item.Url</a>
+                                    }
+                                    </text>),
+                                activeTeamGrid.Column("Players", style: "center", header: "Roster", canSort: false, format: @<text>                            
+                                    <a href="@Url.RouteUrl(new { controller = "Overview", action = "Team", id = item.Id })">@item.Players.Count players</a>
+                                    </text>)
+                            )
+                        );
+                    }
+
+
+
+
+

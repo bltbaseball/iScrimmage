@@ -1,0 +1,255 @@
+﻿@model Web.Models.BracketNewModel
+
+@{
+    ViewBag.Title = "Create Bracket";
+}
+
+<h2>Create Bracket</h2>
+
+@if (TempData.ContainsKey("Error"))
+{
+    <div class="status-indicator ui-corner-all ui-state-error">
+        <span class="ui-icon ui-icon-alert"></span>
+        <span>@TempData["Error"].ToString()</span>
+    </div>
+}
+
+<div id="GridError" class="status-indicator ui-corner-all ui-state-error" style="display: none;margin-bottom: 10px;">
+    <span class="ui-icon ui-icon-alert"></span>
+    <span class="error-text"></span>
+</div>
+
+@using (Html.BeginForm("Create", "Brackets", FormMethod.Post, new { id="CreateForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Bracket Information</legend>
+    
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Name)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Name)
+            @Html.ValidationMessageFor(model => model.Name)
+        </div>
+    
+            <div class="editor-label">
+            @Html.LabelFor(model => model.LeagueId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(model => model.LeagueId, (List<SelectListItem>)ViewBag.Leagues)
+            @Html.ValidationMessageFor(model => model.LeagueId)
+        </div>
+    
+        <p>
+            <button id="PopulateGrid" class="command">Populate Bracket</button>
+            <img id="loading" src="/Images/ajax-loader.gif" alt="Loading..." style="display: none; vertical-align: middle;" />
+        </p>
+
+        
+        <div id="item-grid" style="display: none;">
+            <p>Drag and drop teams to set their standing in the bracket.</p>
+            <div id="NoItems" style="text-align: center; font-weight: bold; display: none;">
+                No teams available for league.
+            </div>
+
+            <ul id="items">
+            @if (Model.Teams != null)
+            {
+                for (var i = 0; i < Model.Teams.Count(); i++)
+                {
+                    var item = Model.Teams[i];
+                    <li class="item ui-state-default">
+                        <div class="standing">@(i+1)</div>
+                        <input type="hidden" name="Teams.Index" value="@i" /> 
+                        <input type="hidden" name="Teams[@i].TeamId" value="@item.TeamId" />
+                        <input type="hidden" name="Teams[@i].TeamName" value="@item.TeamName" />
+                        <input type="hidden" name="Teams[@i].Standing" value="@item.Standing" />
+                        @*@Html.HiddenFor(j=>j.Teams[i].Standing)*@
+                        <div class="name">@item.TeamName</div>
+                        <div style="clear:both;"></div>
+                    </li>
+                }
+            }
+            </ul>
+
+            <button id="SubmitItems" class="command">Submit Bracket</button>
+        </div>
+
+    </fieldset>
+}
+    
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>
+
+
+@section Header {
+    <style type="text/css">
+        .ui-state-highlight { height: 1.5em; line-height: 1.2em; }
+        li .standing
+        {
+             width: 3m; height: 3m; text-align: center; vertical-align: middle; font-weight: bold; border: 1px solid #fff;
+             position: absolute; top: 0; left: 0;
+             margin-right: 1em; padding: 5px;
+        }
+        li .name
+        {
+            margin-left: 2em;
+        }
+        #items li
+        {
+            position: relative;
+            clear: both;
+            padding: 4px;
+        }
+    </style>
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+<script type="text/javascript">
+    function showLoading() {
+        $('#loading').show();
+    }
+
+    function hideLoading() {
+        $('#loading').hide();
+    }
+
+    function showError(error) {
+        $('#GridError').show().find('span.error-text').text(error);
+    }
+
+    function hideError() {
+        $('#GridError').hide();
+    }
+
+    function showGrid() {
+        $('#item-grid').show();
+    }
+
+    function hideGrid() {
+        $('#item-grid').hide();
+    }
+
+    function addItemToGrid(i, teamId, teamName) {
+        var items = $('#items');
+        items.append(
+            $('<li class="item ui-state-default">')
+                .append($('<div class="standing" />').text(i+1))
+                .append($('<input type="hidden" name="Teams.Index" />').val(i))
+                .append($('<input type="hidden" name="Teams[' + i + '].TeamId" />').val(teamId))
+                .append($('<input type="hidden" name="Teams[' + i + '].TeamName" />').val(teamName))
+                .append($('<input type="hidden" name="Teams[' + i + '].Standing" class="standing-val"/>').val(i+1))
+                .append($('<div class="name" />').text(teamName))
+                .append($('<div style="clear:both;" />'))
+                
+        );
+        $('#CreateForm').validate();
+    }
+
+    function sortGrid() {
+        $('#items').sortable({
+            update: function (event, ui) {
+                $('li').each(function () {
+                    $(this).find('div.standing').text($(this).index() + 1);
+                    $(this).find('input.standing-val').val($(this).index() + 1);
+                })
+            },
+            placeholder: "ui-state-highlight"
+        }).disableSelection();
+    }
+
+    var teamlist = null;
+    $(document).ready(function () {
+
+        @if(Model.Teams != null) {
+            <text>showGrid();</text>
+        }
+        $('button').button();
+        sortGrid();
+        $('#item-grid').on('click', '#AddGame', function (e) {
+            e.preventDefault();
+            var index = $('tr.game').length+1;
+            addGameToGrid(index, '');
+            initPickers();
+        });
+
+        $('#item-grid').on('click', 'button.remove', function (e) {
+            e.preventDefault();
+            $(this).parent().parent().remove();
+        });
+
+        $(document).on('click', '#SubmitItems', function(e) {
+            if (!$('#CreateForm').valid()) {
+                e.preventDefault();
+            }
+        });
+
+        $(document).on('click', '#PopulateGrid', function (e) {
+            e.preventDefault();
+
+            hideError();
+
+            var leagueId = $('#LeagueId').val();
+
+            showLoading();
+            $(this).button('disable');
+
+            var data = {
+                leagueId: leagueId
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/Brackets/GetTeamsForLeague',
+                data: JSON.stringify(data),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (result) {
+                    if (result) {
+                        if (result.Success == true) {
+                            showGrid();
+
+                            // populate dates
+                            var leagueType = result.LeagueType;
+                            var teams = result.Teams;
+
+                            // clear the grid
+                            $('#item-grid table tr.game').remove();
+
+                            if (teams.length == 0) {
+                                $('#NoItems').show();
+                                $('#SubmitItems').button('disable');
+                            } else {
+                                $('#NoItems').hide();
+                                $('#SubmitItems').button('enable');
+
+                                $('#items').empty();
+                                for (var i = 0; i < teams.length; i++) {
+                                    var team = teams[i];
+                                    // populate row item
+                                    addItemToGrid(i, team.TeamId, team.TeamName);
+                                }
+                            }                            
+                        } else {
+                            showError(result.Error);
+                        }
+                    }
+                    // stop loading
+                    hideLoading();
+                    $('#PopulateGrid').button('enable');
+                },
+                error: function (xhr, status, error) {
+                    showError(error);
+                    hideLoading();
+                    $('#PopulateGrid').button('enable');
+                }
+            });
+        });
+    });
+
+</script>
+}

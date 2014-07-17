@@ -1,0 +1,34 @@
+﻿@model Web.Models.LeagueOverviewModel
+@using Web.Models;
+
+@{
+    ViewBag.Title = Model.League.Name;
+    if (Request.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_Dashboard.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+<div style="width: 30em; float: right; text-align: right;">
+@{
+    Html.RenderPartial("_LeagueNav", Model.League);
+}
+</div>
+<h1><a href="@Url.RouteUrl(new { controller = "Overview", action = "Details", id = Model.League.Id })">@Model.League.Name</a></h1>
+<br />
+
+@if (Model.League.Teams.Count == 0)
+{
+    <p>There are no teams.</p>
+}
+else
+{
+    <div >
+        @Html.Partial("_TeamOverview", Model.League.Teams.OrderBy(g => g.Division.MaxAge).ThenBy(g => g.Class.Name).ThenBy(g => g.Name).ToList(), new ViewDataDictionary(this.ViewData) { { "header", "<h1>Teams</h1>" } })
+    </div>
+}
+    
+<form class="edit-link"><button class="command edit" onclick="history.back(); return false">Back</button></form>

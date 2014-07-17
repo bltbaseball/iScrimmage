@@ -1,0 +1,66 @@
+﻿@model Web.Models.TeamOverviewModel
+@using Web.Models;
+
+@{
+    ViewBag.Title = "Players For League";
+    if (Request.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_Dashboard.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+<div style="width: 30em; float: right; text-align: right;">
+@{
+    Html.RenderPartial("_LeagueNav", Model.League);
+}
+</div>
+<h1><a href="@Url.RouteUrl(new { controller = "Overview", action = "Details", id = Model.League.Id })">@Model.League.Name</a></h1>
+<br />
+
+@if (Model.Players.Count == 0)
+{
+    <p>There are no players yet.</p>
+}
+else
+{
+    <div id="team-players">
+
+        @{
+    var grid = new WebGrid(canPage: false);
+        var gridColumns = grid.Columns(
+            grid.Column("TeamPlayer.Team", header: "Team", canSort: false, format: @<text>
+                        @Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(item.TeamPlayer.Team, null))
+                    </text>),
+            grid.Column("TeamPlayer.Player.Name", header: "Player", canSort: false, format: @<text>
+                    <a class="messaging" href="#" data-type="Player" data-for="@item.TeamPlayer.Player.Id" data-to="@item.TeamPlayer.Player.LastName, @item.TeamPlayer.Player.FirstName">@item.TeamPlayer.Player.LastName, @item.TeamPlayer.Player.FirstName ( send message )</a>
+            </text>),
+            grid.Column("TeamPlayer.Player.Guardian", header: "Guardian", canSort: false, format: @<text>
+                @if (item.TeamPlayer.Player.Guardian != null)
+                {
+                    <a class="messaging" href="#" data-type="Guardian" data-for="@item.TeamPlayer.Player.Guardian.Id" data-to="@item.TeamPlayer.Player.Guardian.LastName, @item.TeamPlayer.Player.Guardian.FirstName">@item.TeamPlayer.Player.Guardian.LastName, @item.TeamPlayer.Player.Guardian.FirstName ( send message )</a>
+                } else {
+                    @:No Guardian
+                }
+                </text>
+            ),
+            grid.Column("TeamPlayer.Player.DateOfBirth", header: "DOB", canSort: false, format: @<text>@if (item.TeamPlayer.Player.DateOfBirth != null)
+                                                                                     {@item.TeamPlayer.Player.DateOfBirth.ToShortDateString()}</text>),
+            grid.Column("TeamPlayer.Player.DateOfBirth", header: "Division", canSort: false, format: @<text>@(Web.Helpers.PlayerHelper.PlayerAge(item.TeamPlayer.Player.DateOfBirth))U</text>)
+            
+            );
+
+        grid.Bind(Model.Players.OrderBy(t => t.TeamPlayer.Team.Name).ThenBy(p => p.TeamPlayer.Player.LastName).ToList(), autoSortAndPage: true);
+                @grid.GetHtml(headerStyle: "header",
+                    tableStyle: "listing game dataTableActivate", htmlAttributes: new { dataTableHeight = "500px", dataTableTitle = "<h1>Players</h1>" },
+                    alternatingRowStyle: "even",
+                    rowStyle: "odd",
+                    columns: gridColumns
+                );
+        }
+    </div>
+}
+
+<form class="edit-link"><button class="command edit" onclick="history.back(); return false">Back</button></form>

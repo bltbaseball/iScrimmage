@@ -1,0 +1,142 @@
+﻿@model Web.Models.InviteRequestModel
+
+@{
+    ViewBag.Title = "Create Account";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#requireGuardian').hide();
+        $('.player-field').hide();
+        $('#signup').hide();
+        $("#RoleNotAllowed").change(function () {
+            $('#signup').hide();
+            $('#requireGuardian').show();
+            $('.player-field').hide();
+        });
+        $("#RoleCoach").change(function () {
+            $('#signup').show();
+            $('#requireGuardian').hide();
+            $('.player-field').hide();
+        });
+        $("#RoleGuardian").change(function () {
+            $('#signup').show();
+            $('#requireGuardian').hide();
+            $('.player-field').hide();
+        });
+        $("#RolePlayer").change(function () {
+            $('#signup').show();
+            $('#requireGuardian').hide();
+            $('.player-field').show();
+        });
+        $('#DateOfBirth').datepicker({
+                    @(Model.DateOfBirth.HasValue ? "" : "defaultDate: new Date("+DateTime.Now.AddYears(-20).Year.ToString()+",01,01),")
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            yearRange: "-20:+0",
+            onChangeMonthYear: function (year, month, elem) {
+                var currentDate = $(this).datepicker('getDate');
+                if (currentDate == null)
+                    return;
+
+                var day = currentDate.getDate();
+                var newDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+                $(this).datepicker('setDate', newDate);
+            }
+        });
+    });
+
+</script>
+}
+
+<h1>Great! Welcome to BLT Baseball!</h1>
+<h2>Now just let us know who <i>you</i> are.</h2>
+
+@if (TempData.ContainsKey("RequestSent") && ((bool)(TempData["RequestSent"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Your request for an invitation has been sent. Thank you for your interest!</span>
+    </div>
+} else {
+    using (Html.BeginForm("RequestInvite", "Home", method: FormMethod.Post, htmlAttributes: new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(false)
+
+        <fieldset id="Invite" style="border: 0">
+            <legend></legend>
+            <div>
+                @Html.HiddenFor(model=>model.UserId)
+                <div class="editor-label">I am a:</div>
+                <div class="editor-field">
+                    <input type="radio" name="Role" id="RoleCoach" value="Coach" /> <label for="RoleCoach">Coach</label><br />
+                    <input type="radio" name="Role" id="RoleGuardian" value="Guardian" /> <label for="RoleGuardian">Parent/Guardian</label><br />
+                    <input type="radio" name="Role" id="RolePlayer" value="Player" /> <label for="RolePlayer">Player - 13 and older</label><br />
+                    <input type="radio" name="Role" id="RoleNotAllowed" value="" /> <label for="RoleNotAllowed">Player - 12 and younger</label><br />
+                    @*<input type="radio" name="Role" id="RoleManager" value="Manager" /> <label for="RoleManager">Manager</label><br />
+                    <input type="radio" name="Role" id="RoleUmpire" value="Umpire" /> <label for="RoleUmpire">Umpire</label><br />*@
+                </div>
+                <div id="signup">
+                <div class="editor-label">@Html.LabelFor(model=>model.LastName):</div>
+                <div class="editor-field">
+                    @Html.EditorFor(model=>model.LastName)
+                    @Html.ValidationMessageFor(model=>model.LastName)
+                </div>
+                <div class="editor-label">@Html.LabelFor(model=>model.FirstName):</div>
+                <div class="editor-field">
+                    @Html.EditorFor(model=>model.FirstName)
+                    @Html.ValidationMessageFor(model=>model.FirstName)
+                </div>
+                @*<div class="editor-label">@Html.LabelFor(model=>model.Email):</div>
+                <div class="editor-field">
+                    @Html.EditorFor(model=>model.Email)
+                    @Html.ValidationMessageFor(model=>model.Email)
+                </div>*@
+                <div class="editor-label">@Html.LabelFor(model=>model.PhoneNumber):</div>
+                <div class="editor-field">
+                    @Html.EditorFor(model=>model.PhoneNumber)
+                    @Html.ValidationMessageFor(model=>model.PhoneNumber)
+                </div>
+                <div class="player-field" style="display: none;">
+                    <div class="editor-label">@Html.LabelFor(model=>model.DateOfBirth):</div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model=>model.DateOfBirth)
+                        @Html.ValidationMessageFor(model=>model.DateOfBirth)
+                    </div>
+                
+                    <div class="editor-label">
+                        @Html.LabelFor(model => model.Gender)
+                    </div>
+                    <div class="editor-field">
+                        @Html.DropDownListFor(model => model.Gender, @Web.Models.Transforms.ToSelectList<Web.Models.Gender>(Model.Gender))
+                        @Html.ValidationMessageFor(model => model.Gender)
+                    </div>
+                </div>
+                @*<div class="editor-label">@Html.LabelFor(model=>model.Comments):</div>
+                <div class="editor-field">
+                    @Html.TextAreaFor(model=>model.Comments)
+                    @Html.ValidationMessageFor(model=>model.Comments)
+                </div>*@
+                <button>Create Account</button>
+                </div>
+                <div id="requireGuardian">
+                    <br />
+                    <h3>Please get your guardian to create an account for you!</h3>
+                </div>
+            </div>
+        </fieldset>
+    }
+}
+@section Header {
+    <style type="text/css">
+        #Invite label
+        {
+            display: inline;
+            padding-top: 0;
+        }
+    </style>
+}

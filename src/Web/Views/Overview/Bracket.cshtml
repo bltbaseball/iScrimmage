@@ -1,0 +1,26 @@
+﻿@model BracketOverviewModel
+@using Web.Models
+@{
+    Layout = null;
+    BracketOverviewModel bracket = Model;
+}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>@ViewBag.Title - Big League Travel Baseball</title>
+        @RenderPage("../Shared/_HeaderScripts.cshtml")
+        @Scripts.Render("~/Scripts/image-ro.js")
+        <style>
+            body {
+                margin:10px;
+            }
+        </style>
+    </head>
+    <body>
+                    
+                    <h2>@Model.Bracket.Name @Model.Bracket.Division.Name @Model.Bracket.League.Name</h2>
+                    @{
+                        Html.RenderPartial("../Brackets/_BracketInfo", Bracket.PopulateBracketInfo(bracket.Bracket));
+                    }
+</body>

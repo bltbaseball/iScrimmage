@@ -1,0 +1,181 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>@ViewBag.Title - Big League Travel Baseball</title>
+        @RenderPage("_HeaderScripts.cshtml")
+        @RenderSection("scripts", required: false)
+        @RenderSection("Header", required: false)
+    </head>
+    <body>
+<div class="page_wrapper">
+    <header>
+        <div class="bg_grain">
+        <div class="bg_lined">
+        <div class="content_wrapper">
+            <div id="header_body">
+                <a href="/"><span id="logo"></span></a>
+                <div id="header_content">
+                    <ul>
+                        <li><img src="/images/s_g.png" height="23" width="27" alt="" /></li>
+                        <li><img src="/images/s_fb.png" height="23" width="23" alt="" /></li>
+                        <li><img src="/images/s_t.png" height="23" width="24" alt="" /></li>
+                        @if (Request.IsAuthenticated) { 
+                        <li class="mr15">@Html.ActionLink("View Dashboard", "Dashboard", "Home")</li>
+                        <li class="mr15">Welcome!</li>}
+                    </ul>
+                </div>
+            </div>
+            <div id="nav_main">
+                <ul>
+                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                    <li>@Html.ActionLink("About Us", "About", "Home")</li>
+                    <li>@Html.ActionLink("Why Us", "WhyUs", "Home")</li>
+                    <li>@Html.ActionLink("Pricing", "Pricing", "Home")</li>
+                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                    <li><a href="http://iscrimmage.blogspot.com" target="_blank">Blog</a></li>
+                    <li>@Html.ActionLink("Classifieds", "Classifieds", "Home")</li>
+                        @Html.Partial("_LoginPartial")
+                </ul>
+            </div>
+        </div>
+        </div>
+        </div>
+    </header>
+        @* this really is not the way to do it, should have a separate layout *@
+    @if ((ViewContext.Controller.ValueProvider.GetValue("Controller").RawValue.ToString() == "Home")
+        && (ViewContext.Controller.ValueProvider.GetValue("Action").RawValue.ToString() == "Index"))
+    {
+    <div id="subheader_front">
+        <div id="sh_edge"></div>
+        <div id="sh_title_edge"></div>
+        <div class="content_wrapper">
+	        <div id="sh_right">
+                <div class="sh_right_con">
+                    <div id="sh_create">
+                        <div class="sh_3title">@Html.ActionLink("Create Your Team", "Coaches_Managers", "Home")</div>
+                    </div>
+                </div>
+                <div class="sh_right_con">
+                    <div id="sh_join">
+                        <div class="sh_3title">@Html.ActionLink("Join A Team Now", "Players_Parents", "Home")</div>
+                    </div>
+                </div>
+                <div class="sh_right_con">
+                    <div id="sh_tourn">
+                        <div class="sh_3title">@Html.ActionLink("Leagues & Tournaments", "Tournaments", "Home")</div>
+                    </div>
+                </div>
+            </div>
+	        <div id="sh_main">
+                <div id="sh_image_con">
+                    <div class="sh_title">Find Teams, Play Games Now!</div>
+                    <div class="sh_subtitle">Schedule Your First Game In 5 Minutes...</div>
+                    <div id="sh_content">
+                        <div id="sh_login_con">
+                        <div id="login_wrapper">
+                            @if (Request.IsAuthenticated){
+                            <div id="sh_login_members" class="sh_login_cons">
+                                <h2>Welcome!</h2>
+                                <span>View your dashboard to get started.</span>
+                                <div>
+                                    @Html.ActionLink("Go To Dashboard", "Dashboard", "Home")
+                                </div>
+                            </div>
+                            } else {
+                            <div id="sh_login_members" class="sh_login_cons">
+                                <h2>Members</h2>
+                                <span>Login with your Google account.</span>
+                            	 using (Html.BeginForm("ExternalLogin", "Account", new { ReturnUrl = "/Home/Dashboard" }))
+                                 {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" name="provider" value="google" title="Login" style="cursor:pointer;">Login</button>
+                                 }
+                            </div>
+                            <div id="sh_login_join" class="sh_login_cons">
+                                <h2>Join!</h2>
+                                <span>Start now by joining for free!</span>                                
+                            	@using (Html.BeginForm("ExternalSignup", "Account", new { ReturnUrl = "/Home/Dashboard" }, FormMethod.Post, new { target = "_blank" })) {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" name="provider" value="google" title="Create An Account" style="cursor:pointer;">Create An Account</button>
+                                }
+                                
+                            </div>
+                            }
+                        </div>
+                        </div>
+                        <div id="sh_text">
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @RenderBody()
+    }
+    else
+    {
+    <div id="subheader">
+    </div>
+    <div class="content">
+	<div class="content_wrapper pt30 pb30">
+            @RenderBody()
+    </div>
+    </div>
+    }    
+    <footer>
+	<div class="content_wrapper">
+    	<div id="footer_nav">
+            <ul>
+                <li>@Html.ActionLink("About Us", "About", "Home")</li>
+                <li>@Html.ActionLink("Pricing", "Pricing", "Home")</li>
+                <li>@Html.ActionLink("Contact Us", "Contact", "Home")</li>
+            </ul>
+            <ul class="mt15">
+                <li>@Html.ActionLink("Downloads", "Downloads", "Home")</li>
+                <li>@Html.ActionLink("Terms of Use", "Terms", "Home")</li>
+                <li>@Html.ActionLink("Policy", "Policy", "Home")</li>
+            </ul>
+            <ul class="mt15">
+                @Html.Partial("_LoginPartial")
+            </ul>
+        </div>
+        <div id="footer_about">
+        	<h1>About Us</h1>
+            <p>Big League Travel Baseball™ (BLT Baseball™) promotes competitive baseball in a safe, educational and fun environment. Participants compete in League and Tournament play having the opportunity to showcase their baseball skills with integrity, camaraderie and good sportsmanship to the highest level. We are family oriented, and make the experience fun for all, including those who support the participants.</p>
+            @Html.ActionLink("Learn More...", "About", "Home")
+        </div>
+        <div id="footer_contact">
+        	<h1>Contact Us</h1>
+            <h2>Big League Travel Baseball</h2>
+            <p>500 SE 17th St.<br />
+               Suite 224<br />
+               Fort Lauderdale, Florida<br />
+               33316</p>
+            
+            <h2>Phone</h2>
+            <p>954-303-0525</p>
+            
+            <h2>Email</h2>
+            <p><a href="mailto:bltbaseball@bltbaseball.com">bltbaseball@bltbaseball.com</a></p>
+        </div>
+	</div>
+	</footer>
+    <div id="copyright">
+        &copy; @DateTime.Now.Year - Big League Travel Baseball - @Html.ActionLink("Policy", "Policy", "Home")
+    </div>
+       
+    </div>   
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-40371815-1', 'bltbaseball.com');
+  ga('send', 'pageview');
+
+</script> 
+    </body>
+</html>

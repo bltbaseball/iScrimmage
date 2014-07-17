@@ -1,0 +1,93 @@
+﻿@model Web.Models.BracketInfoModel
+@{
+    ViewBag.Title = Model.Bracket.Name;
+    var firstMatchCount = Model.Games.Where(p => p.Bracket == 0).ToList().Count;
+}
+@section Header {
+    <style type="text/css">
+        .match
+        {
+            font-size: .8em;
+            padding: 5px;
+            width: 125px;
+            height: 40px;
+            line-height: 20px;
+            position: absolute;
+            border: 1px solid #333;
+            background-color: #ddd;
+            border-width: 1px 1px 1px 0;
+        }
+        .round1
+        {
+            left: 0px;
+        }
+
+        .round2
+        {
+            left: 140px;
+        }
+
+        .round3
+        {
+            left: 280px;
+        }
+
+        .round4
+        {
+            left: 420px;
+        }
+
+        @{
+            var numBrackets = Model.Games.Select(p => p.Bracket).Distinct().ToList().Count;
+            
+            for(var i = 0; i <numBrackets;i++) 
+            {
+                var matches = Model.Games.Where(p => p.Bracket == i).Select(p => p.Id).ToList();
+                int j = 0;
+                var itemHeight = ((firstMatchCount * 60) / matches.Count);
+                foreach(var match in matches) 
+                {
+                    // round 1 = i = 0, j = 1,2,3,4
+                    // round 2 = i = 1
+                    // round 3 = i = 2
+                    
+                    var startingTop = (itemHeight - 60)/2;
+                    var addition = 60;
+                    if(i > 0) {
+                        addition = 60 * i * 2;   
+                    }
+                    var itemTop = startingTop + (addition * j);
+                    <text>#match@(match) { top: @(itemTop)px; }</text>
+                @*<text>#match@(match) { top: @((j*(i+1))*60+(i*30))px; }</text>*@
+                    j++;
+                }
+            }   
+        }
+    </style>
+}
+@helper TeamName(Web.Models.Team team, bool isTeamBye) {
+    if(isTeamBye) 
+    {
+        <span>No opponent</span>   
+    } else if (team == null)
+    {
+     <span>TBD</span>   
+    } else {
+        <span>@team.Name</span>
+    }
+}
+
+<h2>@Model.Bracket.Name</h2>
+<div style="position: relative; height:@(firstMatchCount*60)px">
+@foreach (var bracket in Model.Games)
+{
+    <div id="match@(bracket.Id)" class="match round@(bracket.Bracket+1)">
+        <div>@TeamName(bracket.Team1, bracket.IsTeam1Bye)</div>
+        <div>@TeamName(bracket.Team2, bracket.IsTeam2Bye)</div>
+    </div>@*
+    <text>
+    @bracket.Id | @bracket.Team1 | @bracket.Team2 | @bracket.Bracket | @bracket.Position<br />
+    </text>*@
+}
+
+    </div>

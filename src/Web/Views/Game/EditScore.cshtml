@@ -1,0 +1,163 @@
+﻿@model Web.Models.GameUpdateScoreModel
+@using Web.Models
+
+@{
+    ViewBag.Title = "Update Game";
+}
+@section Header {
+    <link href="/Content/themes/base/jquery.Jcrop.css" rel="stylesheet"/>
+    <script src="/Scripts/jquery.Jcrop.js"></script>
+<style type="text/css">
+
+/* Apply these styles only when #preview-pane has
+   been placed within the Jcrop widget */
+.jcrop-holder #preview-pane {
+  display: block;
+  position: absolute;
+  z-index: 2000;
+  top: 10px;
+  right: -280px;
+  padding: 6px;
+  border: 1px rgba(0,0,0,.4) solid;
+  background-color: white;
+
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+
+  -webkit-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* The Javascript code will set the aspect ratio of the crop
+   area based on the size of the thumbnail preview,
+   specified here */
+#preview-pane .preview-container {
+  width: 250px;
+  height: 250px;
+  overflow: hidden;
+}
+
+</style>
+
+}
+<h2>Score Game</h2>
+
+@using (Html.BeginForm())
+{
+    var gameInfo = Game.MapGameToGameInfo(Model.Game);
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Game</legend>
+
+        @Html.HiddenFor(model => model.Id)
+        @Html.HiddenFor(model => model.ReturnUrl)
+
+
+        <div class="editor-label">
+            Home: @gameInfo.HomeTeamName
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.HomeTeamScore)
+            @Html.ValidationMessageFor(model => model.HomeTeamScore)
+        </div>
+
+        <div class="editor-label">
+            Away: @gameInfo.AwayTeamName
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.AwayTeamScore)
+            @Html.ValidationMessageFor(model => model.AwayTeamScore)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Status)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(model => model.Status, @Web.Models.Transforms.ToSelectList<Web.Models.GameStatusForUmpires>((Web.Models.GameStatusForUmpires)Model.Status), @Model.Status)
+            @Html.ValidationMessageFor(model => model.Status)
+        </div>
+
+        @if(Model.Game.HomeTeam != null && Model.Game.AwayTeam != null) {
+        <div class="editor-label">
+            <label>Player Stats</label>
+        </div>
+        <div class="editor-field">
+        <table>
+            <tr>
+                <td>
+                    @Model.Game.HomeTeam.Name
+                    <table class="listing">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Innings Pitched</th>
+                                <th>Outs</th>
+                                <th>Pitches Thrown</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.HomePlayerStats.Count; i++)
+                            {
+                                <tr>
+                                    <td>@Model.HomePlayerStats[i].Player.Player.FirstName @Model.HomePlayerStats[i].Player.Player.LastName #@Model.HomePlayerStats[i].Player.Player.JerseyNumber (@Model.HomePlayerStats[i].Player.Player.Id)</td>
+                                    <td>@Html.HiddenFor(m=>m.HomePlayerStats[i].PlayerId)
+                                        @Html.TextBoxFor(m=>m.HomePlayerStats[i].InningsPitched, new {style="min-width: 0; width: 5em;" })
+                                    </td>
+                                    <td>
+                                        @Html.TextBoxFor(m=>m.HomePlayerStats[i].InningsOuts, new {style="min-width: 0; width: 5em;" })/3
+                                    </td>
+                                    <td>@Html.TextBoxFor(m=>m.HomePlayerStats[i].PitchesThrown, new {style="min-width: 0; width: 5em;" })</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </td>
+                <td>
+                    @Model.Game.AwayTeam.Name
+                    <table class="listing">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Innings Pitched</th>
+                                <th>Outs</th>
+                                <th>Pitches Thrown</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.AwayPlayerStats.Count; i++)
+                            {
+                                <tr>
+                                    <td>@Model.AwayPlayerStats[i].Player.Player.FirstName @Model.AwayPlayerStats[i].Player.Player.LastName #@Model.AwayPlayerStats[i].Player.Player.JerseyNumber (@Model.AwayPlayerStats[i].Player.Player.Id)</td>
+                                    <td>@Html.HiddenFor(m=>m.AwayPlayerStats[i].PlayerId)
+                                        @Html.TextBoxFor(m=>m.AwayPlayerStats[i].InningsPitched, new {style="min-width: 0; width: 5em;" })
+                                    </td>
+                                    <td>
+                                        @Html.TextBoxFor(m=>m.AwayPlayerStats[i].InningsOuts, new {style="min-width: 0; width: 5em;" })/3
+                                    </td>
+                                    <td>@Html.TextBoxFor(m=>m.AwayPlayerStats[i].PitchesThrown, new {style="min-width: 0; width: 5em;" })</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </table>
+            </div>
+        }
+        <p>
+            <input type="submit" value="Save" />
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index", "Game")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

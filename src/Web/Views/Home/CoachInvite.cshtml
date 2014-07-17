@@ -1,0 +1,64 @@
+﻿@model Web.Models.InviteRequestModel
+
+@{
+    ViewBag.Title = "Invitation Needed";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Welcome</h1>
+<p>Thanks for signing up for BLT Baseball. Please enter your Coach information.</p>
+
+@if (TempData.ContainsKey("RequestSent") && ((bool)(TempData["RequestSent"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Your request for an invitation has been sent. Thank you for your interest!</span>
+    </div>
+} else {
+    using (Html.BeginForm("RequestInvite", "Home", method: FormMethod.Post, htmlAttributes: new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+
+        <fieldset id="Invite">
+            <legend><h3>Coach Creation</h3></legend>
+            <div>
+                @Html.HiddenFor(model=>model.UserId)
+                <input type="hidden" name="RedirectAction" value="~/Team/Create" /> 
+                <input type="hidden" name="Role" value="Coach" /> 
+
+                <div class="editor-label">@Html.LabelFor(model=>model.FirstName):</div>
+                <div class="editor-field">
+                    @Html.EditorFor(model=>model.FirstName)
+                    @Html.ValidationMessageFor(model=>model.FirstName)
+                </div>
+                <div class="editor-label">@Html.LabelFor(model=>model.LastName):</div>
+                <div class="editor-field">
+                    @Html.EditorFor(model=>model.LastName)
+                    @Html.ValidationMessageFor(model=>model.LastName)
+                </div>
+                @Html.HiddenFor(model=>model.Email)
+                <div class="editor-label">@Html.LabelFor(model=>model.PhoneNumber):</div>
+                <div class="editor-field">
+                    @Html.EditorFor(model=>model.PhoneNumber)
+                    @Html.ValidationMessageFor(model=>model.PhoneNumber)
+                </div>
+                <div class="editor-label">@Html.LabelFor(model=>model.Comments):</div>
+                <div class="editor-field">
+                    @Html.TextAreaFor(model=>model.Comments)
+                    @Html.ValidationMessageFor(model=>model.Comments)
+                </div>
+                <button>Signup</button>
+            </div>
+        </fieldset>
+    }
+}
+@section Header {
+    <style type="text/css">
+        #Invite label
+        {
+            display: inline;
+            padding-top: 0;
+        }
+    </style>
+}

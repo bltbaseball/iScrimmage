@@ -1,0 +1,339 @@
+﻿@model Web.Models.MessageCreateModel
+
+@{
+    ViewBag.Title = "Messaging";
+}
+
+<h2>Messaging</h2>
+
+@if (TempData.ContainsKey("MessageSent") && ((bool)(TempData["MessageSent"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Message successfully sent. A copy should appear in your Inbox shortly.</span>
+    </div>
+}
+@if (TempData.ContainsKey("Error"))
+{
+    <div class="status-indicator ui-corner-all ui-state-error">
+        <span class="ui-icon ui-icon-alert"></span>
+        <span>@TempData["Error"].ToString()</span>
+    </div>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Send a Message</legend>
+        <div>
+            <div class="editor-label">
+                To
+            </div>
+            <div class="editor-field" id="To">
+                @if (Model.CanMessageLeagues)
+                {
+                    <input type="radio" name="MessageTo" id="MessageToLeague" value="League" @(Model.MessageTo == "League" ? Html.Raw("checked=\"checked\"") : Html.Raw(""))/> <label for="MessageToLeague">League/Tournament</label><br />
+                }
+                <input type="radio" name="MessageTo" id="MessageToTeam" value="Team"  @(Model.MessageTo == "Team" ? Html.Raw("checked=\"checked\"") : Html.Raw(""))/> <label for="MessageToTeam">Team</label><br />
+                <input type="radio" name="MessageTo" id="MessageToCoach" value="Coach"  @(Model.MessageTo == "Coach" ? Html.Raw("checked=\"checked\"") : Html.Raw(""))/> <label for="MessageToCoach">Coach</label><br />
+                <input type="radio" name="MessageTo" id="MessageToPlayer" value="Player"  @(Model.MessageTo == "Player" ? Html.Raw("checked=\"checked\"") : Html.Raw(""))/> <label for="MessageToPlayer">Player</label><br />
+                <input type="radio" name="MessageTo" id="MessageToGuardian" value="Guardian"  @(Model.MessageTo == "Guardian" ? Html.Raw("checked=\"checked\"") : Html.Raw(""))/> <label for="MessageToGuardian">Guardian</label><br />
+                <input type="radio" name="MessageTo" id="MessageToSite" value="Site"  @(Model.MessageTo == "Site" ? Html.Raw("checked=\"checked\"") : Html.Raw(""))/> <label for="MessageToSite">iScrimmage Administrator</label><br />
+            </div>
+
+            <div id="Leagues">
+                <div class="editor-label">
+                    @Html.LabelFor(model => model.LeagueIds)
+                </div>
+                <div class="editor-field">
+                    <div class="sublist">
+                        <ul class="listing">
+                            @foreach (var item in Model.Leagues)
+                            {
+                                <li><input type="checkbox" name="LeagueIds" id="LeagueIds@(item.Id)" checked="checked" value="@item.Id" /> <label for="LeagueIds@(item.Id)">@item.Name</label></li>
+                            }
+                        </ul>
+
+                        <a class="command add icon" href="#">add league/tournament</a>
+                        <fieldset class="hidden" style="margin-top: 5px;">
+                            <legend>Add League/Tournament</legend>
+                            <div class="editor-label">League</div>
+                            <div class="editor-field">
+                                @Html.DropDownList("AddLeagueId", (List<SelectListItem>)ViewBag.LeagueList, "Please choose")
+                            </div>
+                            <div><button class="add" data-for="League">Add League</button> or <a href="#" class="cancel command">Cancel</a></div>
+                        </fieldset>
+                    </div>
+
+                    @Html.ValidationMessageFor(model => model.LeagueIds)
+                </div>
+            </div>
+
+             <div id="Teams">
+                <div class="editor-label">
+                    @Html.LabelFor(model => model.TeamIds)
+                </div>
+                <div class="editor-field">
+                    <div class="sublist">
+                        <ul class="listing">
+                            @foreach (var item in Model.Teams)
+                            {
+                                <li><input type="checkbox" name="TeamIds" id="TeamIds@(item.Id)" checked="checked" value="@item.Id" /> <label for="TeamIds@(item.Id)">@Web.Models.Team.PrettyName(item)</label></li>
+                            }
+                        </ul>
+
+                        <a class="command add icon" href="#">add team</a>
+                        <fieldset class="hidden" style="margin-top: 5px;">
+                            <legend>Add Team</legend>
+                            <div class="editor-label">Team</div>
+                            <div class="editor-field">
+                                @Html.DropDownList("AddTeamId", (List<SelectListItem>)ViewBag.TeamList, "Please choose")
+                            </div>
+                            <div><button class="add" data-for="Team">Add Team</button> or <a href="#" class="cancel command">Cancel</a></div>
+                        </fieldset>
+                    </div>
+
+                    @Html.ValidationMessageFor(model => model.TeamIds)
+                </div>
+            </div>
+
+            <div id="Coaches">
+                <div class="editor-label">
+                    @Html.LabelFor(model => model.CoachIds)
+                </div>
+                <div class="editor-field">
+                    <div class="sublist">
+                        <ul class="listing">
+                            @foreach (var item in Model.Coaches)
+                            {
+                                <li><input type="checkbox" name="CoachIds" id="CoachIds@(item.Id)" checked="checked" value="@item.Id" /> <label for="CoachIds@(item.Id)">@item.FirstName @item.LastName</label></li>
+                            }
+                        </ul>
+
+                        <a class="command add icon" href="#">add coach</a>
+                        <fieldset class="hidden" style="margin-top: 5px;">
+                            <legend>Add Coach</legend>
+                            <div class="editor-label">Coach</div>
+                            <div class="editor-field">
+                                @Html.DropDownList("AddCoachId", (List<SelectListItem>)ViewBag.CoachList, "Please choose")
+                            </div>
+                            <div><button class="add" data-for="Coach">Add Coach</button> or <a href="#" class="cancel command">Cancel</a></div>
+                        </fieldset>
+                    </div>
+
+                    @Html.ValidationMessageFor(model => model.CoachIds)
+                </div>
+            </div>
+            
+            <div id="Players">
+                <div class="editor-label">
+                    @Html.LabelFor(model => model.PlayerIds)
+                </div>
+                <div class="editor-field">
+                    <div class="sublist">
+                        <ul class="listing">
+                            @foreach (var item in Model.Players)
+                            {
+                                <li><input type="checkbox" name="PlayerIds" id="PlayerIds@(item.Id)" checked="checked" value="@item.Id" /> <label for="PlayerIds@(item.Id)">@item.FirstName @item.LastName</label></li>
+                            }
+                        </ul>
+
+                        <a class="command add icon" href="#">add player</a>
+                        <fieldset class="hidden" style="margin-top: 5px;">
+                            <legend>Add Player</legend>
+                            <div class="editor-label">Player</div>
+                            <div class="editor-field">
+                                @Html.DropDownList("AddPlayerId", (List<SelectListItem>)ViewBag.PlayerList, "Please choose")
+                            </div>
+                            <div><button class="add" data-for="Player">Add Player</button> or <a href="#" class="cancel command">Cancel</a></div>
+                        </fieldset>
+                    </div>
+
+                    @Html.ValidationMessageFor(model => model.PlayerIds)
+                </div>
+            </div>
+
+            <div id="Guardians">
+                <div class="editor-label">
+                    @Html.LabelFor(model => model.GuardianIds)
+                </div>
+                <div class="editor-field">
+                    <div class="sublist">
+                        <ul class="listing">
+                            @foreach (var item in Model.Guardians)
+                            {
+                                <li><input type="checkbox" name="GuardianIds" id="GuardianIds@(item.Id)" checked="checked" value="@item.Id" /> <label for="GuardianIds@(item.Id)">@item.FirstName @item.LastName</label></li>
+                            }
+                        </ul>
+
+                        <a class="command add icon" href="#">add guardian</a>
+                        <fieldset class="hidden" style="margin-top: 5px;">
+                            <legend>Add Guardian</legend>
+                            <div class="editor-label">Guardian</div>
+                            <div class="editor-field">
+                                @Html.DropDownList("AddGuardianId", (List<SelectListItem>)ViewBag.GuardianList, "Please choose")
+                            </div>
+                            <div><button class="add" data-for="Guardian">Add Guardian</button> or <a href="#" class="cancel command">Cancel</a></div>
+                        </fieldset>
+                    </div>
+
+                    @Html.ValidationMessageFor(model => model.GuardianIds)
+                </div>
+            </div>
+
+
+            <div class="editor-label">
+                @Html.LabelFor(model => model.Subject)
+            </div>
+            <div class="editor-field">
+                @Html.TextBoxFor(model => model.Subject)
+                @Html.ValidationMessageFor(model => model.Subject)
+            </div>
+
+            <div class="editor-label">
+                @Html.LabelFor(model => model.Body)
+            </div>
+            <div class="editor-field">
+                @Html.TextAreaFor(model => model.Body, new { style = "width: 40em; height: 6em;" })
+                @Html.ValidationMessageFor(model => model.Body)
+            </div>
+    
+            <button id="SendMessage" class="command">Send Message</button>
+        </div>
+
+    </fieldset>
+}
+<br />
+<h2>Message History</h2>
+@if (Model.SentMessages.Count == 0)
+{
+    <p>You have not sent any messages.</p>
+}
+else
+{
+    <div id="SentMessages">
+@{
+    var grid = new WebGrid(canPage: false);
+    var gridColumns = new WebGridColumn[20];
+    gridColumns = grid.Columns(
+    grid.Column("Subject", header: "Subject", canSort: false),
+    grid.Column("Body", header: "Message", canSort: false, format:@<text><span ptip="@item.Body">@if (item.Body.Length > 150)
+                                                                                                 { @item.Body.Substring(0, 150)<text>...</text>}
+                                                                                                 else
+                                                                                                 { @item.Body} </span></text>),
+    grid.Column("RecipientCount", header: "Recipients", canSort: false, format:@<text><span ptip="@item.Recipients">@item.RecipientCount.ToString()</span></text>),
+    grid.Column("SentOn", header: "Sent On", canSort: false)
+    );
+    grid.Bind(Model.SentMessages, autoSortAndPage: true);
+    
+    @grid.GetHtml(headerStyle: "header",
+        tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px" },
+        alternatingRowStyle: "even",
+        rowStyle: "odd",
+        columns: gridColumns
+    );
+}
+</div>
+}
+
+@section Header {
+    <style type="text/css">
+        fieldset label
+        {
+            display: inline;
+            padding-top: 0;
+        }
+        .editor-field
+        {
+            margin-bottom: 1em;
+        }
+        .hidden
+        {
+            display: none;
+        }
+        #Leagues, #Coaches, #Players, #Guardians, #Teams
+        {
+            display: none;
+        }
+        /*.editor-field
+        {
+            margin-left: .5em;
+        }*/
+    </style>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript">
+        function handleRecipient() {
+            $('#Leagues, #Teams, #Coaches, #Players, #Guardians').hide();
+            switch ($('input[name=MessageTo]:checked').val()) {
+                case 'League':
+                    $('#Leagues').show();
+                    break;
+                case 'Coach':
+                    $('#Coaches').show();
+                    break;
+                case 'Team':
+                    $('#Teams').show();
+                    break;
+                case 'Player':
+                    $('#Players').show();
+                    break;
+                case 'Guardian':
+                    $('#Guardians').show();
+                    break;
+            }
+
+        }
+        $(document).ready(function () {
+            handleRecipient();
+            $('#SendMessage').button();//.button('disable');
+            $(document).on('change', 'input[name=MessageTo]', function (e) {
+                handleRecipient();
+            });
+            $(document).on('click', 'a.add', function (e) {
+                e.preventDefault();
+                $(this).hide();
+                $(this).next('fieldset').show();
+                var select = $('#link-add-league').next().find('select');
+                $('option', select).prop('selected', false);
+                $('option[value = ""]', select).prop('selected', true);
+            });
+            $(document).on('click', 'button.add', function (e) {
+                e.preventDefault();
+                var itemFor = $(this).data('for');
+
+                var select = $(this).parent().prev().children('select');
+                var selected = $('option:selected', select);
+                if (selected.val() == '') {
+                    return;
+                }
+                $(this).closest('fieldset').hide();
+                $(this).parents('fieldset').prev('a.add').show();
+
+                var li = '<li><input type="checkbox" name="' + itemFor + 'Ids" id="' + itemFor + 'Ids' + selected.val() + '" value="' + selected.val() + '" checked="checked" /> <label for="' + itemFor + 'Ids' + selected.val() + '">' + selected.text() + '</label></li>';
+                $(this).parent().parent().prevAll('.listing').append(li);
+
+                // remove asset added from select list?
+                $('option[value="' + selected.val() + '"]', select).remove();
+            });
+
+            $(document).on('click', 'a.cancel', function (e) {
+                e.preventDefault();
+                $(this).closest('fieldset').hide();
+                $(this).parents('fieldset').prev('a.add').show();
+            });
+
+            $(document).on('click', '.listing input:checkbox', function () {
+                var rem = $(this);
+                $(this).parent().parent().parent().find('select').append('<option value="' + rem.val() + '">' + rem.next('label').text() + '</option>');
+                rem.parent().remove();
+            });
+        });
+
+    </script>
+}

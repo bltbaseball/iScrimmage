@@ -1,0 +1,192 @@
+﻿@model Web.Models.ManagerUpdateModel
+
+@{
+    ViewBag.Title = "Edit Manager";
+}
+
+<h2>Edit Manager</h2>
+
+@using (Html.BeginForm("Edit", "Managers", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Update Manager</legend>
+        @Html.HiddenFor(model => model.Id)
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Email)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Email)
+            @Html.ValidationMessageFor(model => model.Email)
+        </div>
+
+        @*<div class="editor-field">
+            @Html.EditorFor(model => model.InviteUser)
+            @Html.LabelFor(model => model.InviteUser)
+            @Html.ValidationMessageFor(model => model.InviteUser)
+        </div>*@
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.FirstName)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.FirstName)
+            @Html.ValidationMessageFor(model => model.FirstName)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LastName)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.LastName)
+            @Html.ValidationMessageFor(model => model.LastName)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.PhoneNumber)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.PhoneNumber)
+            @Html.ValidationMessageFor(model => model.PhoneNumber)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Photo)
+        </div>
+        <div class="editor-field">
+            @if (!string.IsNullOrEmpty(Model.CurrentPhotoPath))
+            {
+                <img src="@Url.Content(Model.CurrentPhotoPath)" style="width: 100px; height: 100px; border: 0;" /><br />
+            }
+            <input type="file" name="imagePhoto" id="imagePhoto" />
+            @Html.ValidationMessageFor(model => model.Photo)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.TeamIds)
+        </div>
+        <div class="editor-field">
+            <table>
+                <tr>
+                    <td style="vertical-align: top;">Assigned to team(s):<br />@Html.ListBoxFor(model => model.TeamIds, (IEnumerable<SelectListItem>)ViewBag.ManagerTeams, new { style = "height: 200px; width: 300px;" })</td>
+                    <td style="vertical-align: middle; text-align: center;">
+                        <button id="AddItem">&lt;</button><br /><br />
+                        <button id="AddAllItems">&lt;&lt;</button><br /><br />
+                        <button id="RemoveAllItems">&gt;&gt;</button><br /><br />
+                        <button id="RemoveItem">&gt;</button>
+                    </td>
+                    <td style="vertical-align: top;">All teams:<br />@Html.ListBox("AllItems", (IEnumerable<SelectListItem>)ViewBag.Teams, new { style = "height: 200px; width: 300px;" })</td>
+                </tr>
+                <tr>
+                    <td><a href="#" id="SelectAllCurrentItems">select all</a></td>
+                    <td></td>
+                    <td><a href="#" id="SelectAllItems">select all</a></td>
+                </tr>
+            </table>
+            @Html.ValidationMessageFor(model => model.TeamIds)
+        </div>
+
+        <p>
+            <button id="SubmitItem">Update Manager</button>
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script type="text/javascript">
+        //<![CDATA[
+        $(document).ready(function () {
+            $('button').button();
+            $('#SubmitItem').click(function (e) {
+                e.preventDefault();
+                // select all of the Item ids in the selected list before submitting
+                var form = $(this).parents('form').eq(0);
+                var selected = $('#TeamIds');
+                selected.children().each(function () {
+                    $(this).prop('selected', true);
+                });
+                form.submit();
+            });
+
+            // hook up selection links
+            $('#SelectAllCurrentItems').click(function (e) {
+                e.preventDefault();
+                var selected = $('#TeamIds');
+                selected.children().each(function () {
+                    $(this).prop('selected', true);
+                });
+            });
+
+            $('#SelectAllItems').click(function (e) {
+                e.preventDefault();
+                var all = $('#AllItems');
+                all.children().each(function () {
+                    $(this).prop('selected', true);
+                });
+            });
+
+            $('#AddItem').click(function (e) {
+                e.preventDefault();
+
+                // move selected items from right to left
+                var selected = $('#TeamIds');
+                var all = $('#AllItems');
+                all.children().each(function () {
+                    if ($(this).prop('selected') == true) {
+                        var clone = $(this).clone(true);
+                        $(this).remove();
+                        selected.append(clone);
+                    }
+                });
+            });
+
+            $('#AddAllItems').click(function (e) {
+                e.preventDefault();
+                // move Items from right to left
+                var selected = $('#TeamIds');
+                var all = $('#AllItems');
+                all.children().each(function () {
+                    var clone = $(this).clone(true);
+                    $(this).remove();
+                    selected.append(clone);
+                });
+            });
+
+            $('#RemoveItem').click(function (e) {
+                e.preventDefault();
+                // move selected items from left to right
+                var selected = $('#TeamIds');
+                var all = $('#AllItems');
+                selected.children().each(function () {
+                    if ($(this).prop('selected') == true) {
+                        var clone = $(this).clone(true);
+                        $(this).remove();
+                        all.append(clone);
+                    }
+                });
+            });
+
+            $('#RemoveAllItems').click(function (e) {
+                e.preventDefault();
+
+                // move Items from left to right
+                var selected = $('#TeamIds');
+                var all = $('#AllItems');
+                selected.children().each(function () {
+                    var clone = $(this).clone(true);
+                    $(this).remove();
+                    all.append(clone);
+                });
+            });
+        });
+        //]]>
+    </script>
+}

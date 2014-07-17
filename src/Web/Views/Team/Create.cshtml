@@ -1,0 +1,406 @@
+﻿@model Web.Models.TeamCreateCopyModel
+
+@{
+    ViewBag.Title = "Team Setup";
+}
+
+@using (Html.BeginForm()) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Team Setup</legend>
+
+        @if (ViewBag.Teams.Count == 0)
+        {
+            @Html.HiddenFor(model => model.Choice, new { value = "Create" })
+        }
+        else {
+        <div class="editor-field">
+            <input type="radio" id="ChoiceCreate" name="Choice" value="Create" @(Model.Choice == "Create" ? Html.Raw("checked=\"checked\""): Html.Raw("")) /> <label for="ChoiceCreate" style="display:inline-block;padding:5px;">Create new team</label><br />
+            <input type="radio" id="ChoiceCopy" name="Choice" value="Copy" @(Model.Choice == "Copy" ? Html.Raw("checked=\"checked\""): Html.Raw(""))/> <label for="ChoiceCopy" style="display:inline-block;padding:5px;">Copy existing team</label><br />
+        </div>
+        }
+        
+        <div id="CreateTeam">
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Create.LeagueId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.Create.LeagueId, (List<SelectListItem>)ViewBag.Leagues, new { })
+            @Html.ValidationMessageFor(model => model.Create.LeagueId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Create.Name)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Create.Name)
+            @Html.ValidationMessageFor(model => model.Create.Name)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Create.Url)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Create.Url)
+            @Html.ValidationMessageFor(model => model.Create.Url)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Create.DivisionId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.Create.DivisionId, (List<SelectListItem>)ViewBag.Divisions, new { })
+            @Html.ValidationMessageFor(model => model.Create.DivisionId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Create.ClassId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.Create.ClassId, (List<SelectListItem>)ViewBag.TeamClasses, new { })
+            @Html.ValidationMessageFor(model => model.Create.ClassId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Create.LocationId) 
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.Create.LocationId, (List<SelectListItem>)ViewBag.Locations, new {  }) <a href="@Url.RouteUrl(new{ controller="Location", action ="Create"})" class="new-location">( new location )</a>
+            @Html.ValidationMessageFor(model => model.Create.LocationId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Create.HtmlDescription)
+        </div>
+        <div class="editor-field">
+            @Html.TextAreaFor(model=>model.Create.HtmlDescription, new {@class = "ckeditor"})
+            @Html.ValidationMessageFor(model => model.Create.HtmlDescription)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Create.IsLookingForPlayers)
+        </div>
+        <div class="editor-field">
+            @Html.RadioButtonFor(model => model.Create.IsLookingForPlayers, true, new { @id ="IsLookingForPlayersTrue" }) <label for="IsLookingForPlayersTrue" style="display: inline;">Yes</label>
+            @Html.RadioButtonFor(model => model.Create.IsLookingForPlayers, false, new { @id = "IsLookingForPlayersFalse" }) <label for="IsLookingForPlayersFalse" style="display: inline;">No</label>
+        </div>
+
+
+        <div id="available-dates">
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Create.AvailableDates)
+        </div>
+        <div class="editor-field">
+            <table id="AvailableDatesList" class="listing">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Location</th>
+                        <th>Type</th>
+                        <th>Within Distance</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Create.AvailableDates != null)
+                    {
+                        for (var i = 0; i < Model.Create.AvailableDates.Count; i++)
+                        {
+                            var date = Model.Create.AvailableDates[i];
+                            <tr>
+                                <td>
+                                    <input type="hidden" name="Create.AvailableDates.Index" value="@i" /><input type="hidden" name="Create.AvailableDates[@i].Id" value=""/> 
+                                    <input type="text" name="Create.AvailableDates[@i].Date" class="available-date" value="@date.Date"/> 
+                                </td>
+                                <td><input type="text" name="Create.AvailableDates[@i].Time" class="available-time" value="@date.Time" /> </td>
+                                <td>
+                                    <select name="Create.AvailableDates[@i].LocationId">
+                                        @foreach(var item in (List<SelectListItem>)ViewBag.Locations) 
+                                        {
+                                            var selected = (date.LocationId == int.Parse(item.Value)) ? " selected=\"selected\"" : "";
+                                            <option value="@item.Value"@Html.Raw(selected)>@item.Text</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <select name="Create.AvailableDates[@i].Type">
+                                        @foreach(var item in (List<SelectListItem>)ViewBag.AvailableDateTypes) 
+                                        {
+                                            var selected = (date.Type == item.Value) ? " selected=\"selected\"" : "";
+                                            <option value="@item.Value"@Html.Raw(selected)>@item.Text</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td><input type="text" name="Create.AvailableDates[@i].Distance" value="@date.Distance" style="width: 2em;min-width: 2em;" /> miles</td>
+                                <td><button class="command remove">Remove</button></td>
+                            </tr>
+                        }
+                    }                    
+                </tbody>
+            </table>
+            
+            <fieldset id="AvailableDatesAdd">
+                <legend>Add Available Date</legend>
+                <div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Location</th>
+                                <th>Type</th>
+                                <th>Within Distance</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="vertical-align: middle;"><input type="text" id="AvailableDateDate" class="available-date" value="@DateTime.Now.ToShortDateString()" /></td>
+                                <td style="vertical-align: middle;"><input type="text" id="AvailableDateTime" class="available-time" value="5:00am" /></td>
+                                <td style="vertical-align: middle;">@Html.DropDownList("AvailableDateLocation", (List<SelectListItem>)ViewBag.Locations, new {})</td>
+                                <td style="vertical-align: middle;">
+                                    <select id="AvailableDateType">
+                                        <option value="Home">Home Game</option>
+                                        <option value="Away">Away Game</option>
+                                        <option value="HomeOrAway">Home or Away Game</option>
+                                    </select>
+                                </td>
+                                <td style="vertical-align: middle;"><input type="text" id="AvailableDateDistance" style="width: 2em;min-width: 2em;" /> miles</td>
+                                <td style="vertical-align: middle;"><button id="AvailableDateAdd" class="command add">Add Date</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </fieldset>
+            @Html.ValidationMessageFor(model => model.Create.AvailableDates)
+        </div>
+            </div>
+        <p>
+           <button class="command">Create</button>
+        </p>
+            </div>
+
+        @if (ViewBag.Teams.Count != 0)
+        {
+        <div id="CopyTeam">
+    
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Copy.TeamId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.Copy.TeamId, (List<SelectListItem>)ViewBag.Teams, new { })
+            @Html.ValidationMessageFor(model => model.Copy.TeamId)
+        </div>
+    
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Copy.LeagueId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.Copy.LeagueId, (List<SelectListItem>)ViewBag.Leagues, new { })
+            @Html.ValidationMessageFor(model => model.Copy.LeagueId)
+        </div>
+    
+        <p>
+            <button class="command">Copy Team</button>
+        </p>
+
+        </div>
+        }
+    </fieldset>
+
+}
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+<div id="location-dialog" class="dialog" title="Create Location">
+    @Html.Partial("_CreateLocation", new Web.Models.LocationNewModel())
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <style type="text/css">
+        input.available-date, input.available-time
+        {
+            min-width: inherit;
+            width: 6em;
+        }
+        ol#AvailableDatesList li
+        {
+            list-style-type: decimal;
+        }
+    </style>
+    <script type="text/javascript">
+        var tournamentIds = [ @(string.Join(",", ((List<int>)ViewBag.Tournaments).ToArray()))];
+        function hideDatesForTournament() {
+            $('#available-dates').show();
+            if ($.inArray(parseInt($('#Create_LeagueId').val()), tournamentIds) != -1) {
+                $('#available-dates').hide();
+            }
+        }
+        function showSelectedSection() {
+            switch($('input[name=Choice]:checked').val()) {
+                case 'Copy':
+                    $('#CopyTeam').show();
+                    $('#CreateTeam').hide();
+                    break;
+                case 'Create':
+                    $('#CopyTeam').hide();
+                    $('#CreateTeam').show();
+                    break;
+
+            }
+        }
+        function availableDateTypeChange() {
+            var type = $('#AvailableDateType').val();
+            if(type == 'Home') {
+                $('#AvailableDateDistance').prop('disabled', true);
+            } else {
+                $('#AvailableDateDistance').prop('disabled', false);
+            }
+        }
+        $(document).ready(function () {
+            var maxIndex = @(Model.Create.AvailableDates == null ? 0 : Model.Create.AvailableDates.Count);
+            showSelectedSection();
+            availableDateTypeChange();
+
+            $('button').button();
+            $(document).on('change', '#Create_LeagueId', function(e) {
+                hideDatesForTournament();
+            });
+            $(document).on('change', 'input[name=Choice]', function(e) {
+                showSelectedSection();
+            });
+            hideDatesForTournament();
+
+            $('div#location-dialog').dialog({
+                autoOpen: false,
+                resizable: false,
+                modal: true,
+                width: 600,
+                buttons: {
+                    'Cancel': function () {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+
+            $(document).on('click', 'a.new-location', function(e) {
+                e.preventDefault();
+                $('#location-dialog').dialog('open');
+            });
+
+            $('#location-dialog').on('click', '#CreateLocation', function(e) {
+                e.preventDefault();
+                var isValid = $(this).parents('form').valid();
+                if(!isValid)
+                    return;
+                var dialog = $('#location-dialog');
+                //var locations = $('a.new-location').prev('select');
+                var locations = $('select[name$=LocationId],#AvailableDateLocation');
+                var token = $('input[name=__RequestVerificationToken]', dialog).val();
+                var data = {
+                        Name: $('#Name', dialog).val(),
+                        Address:$('#Address', dialog).val(),
+                        City:$('#City', dialog).val(),
+                        State:$('#State', dialog).val(),
+                        Zip:$('#Zip', dialog).val(),
+                        Url:$('#Url', dialog).val(),
+                        Notes:$('#Notes', dialog).val(),
+                        GroundsKeeperPhone:$('#GroundsKeeperPhone', dialog).val()
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/Location/Create',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+                        if (result) {
+                            if (result.Success) {
+                                // close dialog, populate locations, select created location
+                                $('#location-dialog').dialog('close');
+                                locations.empty();
+                                $.each(result.Locations, function(index, val) {
+                                    locations.append($('<option>').text(val.Name).val(val.Id));
+                                });
+                                locations.val(result.LocationId);
+                            } else {                                
+                                $('#location-dialog').html(result);
+                            }
+                        }
+                        
+                    },
+                    error: function (xhr, status, error) {
+                    }
+                });
+            });
+
+            $('#AvailableDatesAdd').on('change', '#AvailableDateType', function(e) {
+                availableDateTypeChange();
+            });
+            $('#AvailableDatesAdd').on('click', '#AvailableDateAdd', function (e) {
+                e.preventDefault();
+
+                var date = $('#AvailableDateDate').val();
+                var time = $('#AvailableDateTime').val();
+                var locationId = $('#AvailableDateLocation').val();
+                var type = $('#AvailableDateType').val();
+                var distance = $('#AvailableDateDistance').val();
+
+                if(date == '' || time == '' || locationId == '')
+                    return;
+                
+                maxIndex++;
+                $('#AvailableDatesList').append(
+                    $('<tr>')
+                        .append($('<td>')
+                            .append($('<input type="hidden" name="Create.AvailableDates.Index" value="' + maxIndex + '" />'))
+                            .append($('<input type="hidden" name="Create.AvailableDates[' + maxIndex + '].Id" />'))
+                            .append($('<input type="text" name="Create.AvailableDates[' + maxIndex + '].Date" class="available-date"/>').val(date))
+                        )
+                        .append($('<td>')
+                            .append($('<input type="text" name="Create.AvailableDates[' + maxIndex + '].Time" class="available-time" /> ').val(time))
+                        )
+                        .append($('<td>')
+                            .append($('#AvailableDateLocation').clone().attr('id', 'AvailableDateLocation' + maxIndex).attr('name', 'Create.AvailableDates[' + maxIndex + '].LocationId').val(locationId))
+                        )
+                        .append($('<td>')
+                            .append($('#AvailableDateType').clone().attr('id', 'AvailableDateType' + maxIndex).attr('name', 'Create.AvailableDates[' + maxIndex + '].Type').val(type))
+                        )
+                        .append($('<td>')
+                            .append($('<input type="text" name="Create.AvailableDates[' + maxIndex + '].Distance" style="width: 2em; min-width: 2em;" /> ').val(distance))
+                            .append('&nbsp;miles')
+                        )
+                        .append($('<td>')
+                            .append($('<button class="command remove">Remove</button>'))
+                        )
+                );
+            });
+            $('#AvailableDatesList').on('click', 'button.remove', function (e) {
+                $(this).parent().parent().remove();
+                e.preventDefault();
+            });
+            $('input.available-time').timepicker();
+            $('input.available-date').datepicker({
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                yearRange: "-5:+5",
+                minDate: new Date(@DateTime.Now.Year, @(DateTime.Now.Month-1), @DateTime.Now.Day),
+                onChangeMonthYear: function (year, month, elem) {
+                    var currentDate = $(this).datepicker('getDate');
+                    if (currentDate == null)
+                        return;
+
+                    var day = currentDate.getDate();
+                    var newDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+                    $(this).datepicker('setDate', newDate);
+                }
+            });
+        });
+    </script>
+}

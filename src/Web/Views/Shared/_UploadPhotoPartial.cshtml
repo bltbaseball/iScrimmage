@@ -1,0 +1,27 @@
+﻿<div id="upload-photo-dialog" class="dialog" title="Upload Photo">
+    <div id="photo-upload">
+        <input type="file" id="Photo" name="Photo" />
+        <button id="UploadPhoto" class="command">Upload Photo</button>
+    </div>
+
+    <div id="photo-preview" style="display: none;">
+        <input type="hidden" id="CropId" />
+        <input type="hidden" id="CropLeft" />
+        <input type="hidden" id="CropRight" />
+        <input type="hidden" id="CropTop" />
+        <input type="hidden" id="CropBottom" />
+        <input type="hidden" id="CropFile" />
+        <input type="hidden" id="CropType" />
+        <fieldset>
+            <legend>Crop Photo</legend>
+            <img id="jcrop-target" src="" alt="Uncropped Photo"/>
+            <div id="preview-pane">
+                <div class="preview-container">
+                    <img src="" class="jcrop-preview" alt="Preview" />
+                </div>
+            </div>
+
+            <button id="SubmitCrop" class="command">Submit Cropped Photo</button>
+        </fieldset>
+    </div>
+</div>

@@ -1,0 +1,218 @@
+﻿@model Web.Models.LeagueNewModel
+
+@{
+    ViewBag.Title = "Create League";
+}
+@section Header {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#StartDate,#EndDate,#RegistrationStartDate,#RegistrationEndDate,#RosterLockedOn').datepicker({
+                changeMonth: true,
+                changeYear: true,
+                onChangeMonthYear: function (year, month, elem) {
+                    var currentDate = $(this).datepicker('getDate');
+                    if (currentDate == null)
+                        return;
+
+                    var day = currentDate.getDate();
+                    var newDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+                    $(this).datepicker('setDate', newDate);
+                }
+            });
+        });
+    </script>
+}
+<h2>Create League</h2>
+
+@using (Html.BeginForm()) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>League</legend>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Name)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Name)
+            @Html.ValidationMessageFor(model => model.Name)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.HtmlDescription)
+        </div>
+        <div class="editor-field">
+            @Html.TextAreaFor(model=>model.HtmlDescription, new {@class = "ckeditor"})
+            @Html.ValidationMessageFor(model => model.HtmlDescription)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Url)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Url)
+            @Html.ValidationMessageFor(model => model.Url)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.StartDate)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(model => model.StartDate, new { style = "width: 8em" })
+            @Html.ValidationMessageFor(model => model.StartDate)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.EndDate)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(model => model.EndDate, new { style = "width: 8em" })
+            @Html.ValidationMessageFor(model => model.EndDate)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.RegistrationStartDate)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(model => model.RegistrationStartDate, new { style = "width: 8em" })
+            @Html.ValidationMessageFor(model => model.RegistrationStartDate)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.RegistrationEndDate)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(model => model.RegistrationEndDate, new { style = "width: 8em" })
+            @Html.ValidationMessageFor(model => model.RegistrationEndDate)
+        </div>
+        
+        <div class="editor-label">
+            @Html.LabelFor(model => model.IsActive)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.IsActive)
+            @Html.ValidationMessageFor(model => model.IsActive)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.WaiverRequired)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.WaiverRequired)
+            @Html.ValidationMessageFor(model => model.WaiverRequired)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Type)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(model=>model.Type, (IList<SelectListItem>)ViewBag.LeagueTypes)
+            @Html.ValidationMessageFor(model => model.Type)
+        </div>
+
+        <div id="minimum-dates">
+        <div class="editor-label">
+            @Html.LabelFor(model => model.MinimumDatesAvailable)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.MinimumDatesAvailable)
+            @Html.ValidationMessageFor(model => model.MinimumDatesAvailable)
+        </div>
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.RosterLockedOn)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(model => model.RosterLockedOn, new { style = "width: 8em" })
+            @Html.ValidationMessageFor(model => model.RosterLockedOn)
+        </div>
+        <br />
+        <fieldset id="FieldsFees">
+            <legend>Fees</legend>
+            <div>
+            <table class="listing" id="FeeListing">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Amount</th>
+                        <th>Mandatory</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Fees != null)
+                    {
+                        for (int i = 0; i < Model.Fees.Count(); i++)
+                        {
+                            <tr>
+                                <td><input type="hidden" name="Fees.Index" value="@i" />@Html.TextBoxFor(m => Model.Fees[i].Name) @Html.ValidationMessageFor(m=>Model.Fees[i].Name)</td>
+                                <td>@Html.TextBoxFor(m => Model.Fees[i].Amount, "{0:F2}", new { @class="nominwidth", style="width: 5em;"}) @Html.ValidationMessageFor(m=>Model.Fees[i].Amount)</td>
+                                <td>@Html.CheckBoxFor(m => Model.Fees[i].IsRequired)</td>
+                                <td><button class="RemoveFee">Remove</button></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+            <button id="AddFee">Add Fee</button>
+            </div>
+        </fieldset>
+
+        <p>
+            <input type="submit" value="Create" />
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+<script type="text/javascript" src="/scripts/ckeditor/ckeditor.js"></script>
+<script type="text/javascript">
+    @{
+        var feeIndex = 0;
+    }
+    @if (Model.Fees != null)
+    {
+        feeIndex = Model.Fees.Count;
+    }
+    var feeIndex = @(feeIndex);
+
+    function hideMinimumDates() {
+        if($('#Type').val() == 'Tournament') {
+            $('#minimum-dates').hide();
+        } else {
+            $('#minimum-dates').show();
+        }
+    }
+
+    $(document).ready(function () {
+        $('button').button();
+        $(document).on('change', '#Type', function(e) {
+            hideMinimumDates();
+        });
+        hideMinimumDates();
+        $('#FieldsFees').on('click', '#AddFee', function (e) {
+            e.preventDefault();
+            $('#FeeListing tbody').append($('<tr>')
+                .append($('<td><input type="hidden" name="Fees.Index" value="' + feeIndex + '" /><input type="text" name="Fees[' + feeIndex +'].Name"/></td>'))
+                .append($('<td><input type="text" name="Fees[' + feeIndex +'].Amount" class="nominwidth" style="width: 5em;"/></td>'))
+                .append($('<td><input type="checkbox" name="Fees[' + feeIndex +'].IsRequired" value="true" /> <input type="hidden" name="Fees[' + feeIndex +'].IsRequired" value="false"/></td>'))
+                .append($('<td><button class="RemoveFee">Remove</button></td>'))
+            );
+            feeIndex++;
+            $('button').button();
+        });
+
+        $('#FieldsFees').on('click', 'button.RemoveFee', function(e) {
+            e.preventDefault();
+            $(this).parent().parent().remove();
+        });
+    });
+</script>
+}

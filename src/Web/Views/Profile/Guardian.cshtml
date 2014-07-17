@@ -1,0 +1,273 @@
+﻿@model Web.Models.GuardianProfileModel
+@using Web.Helpers
+@{
+    ViewBag.Title = "Guardian Profile";
+    var guardianName = string.Format("{0} {1}", Model.Guardian.FirstName, Model.Guardian.LastName).Trim();
+    if (string.IsNullOrEmpty(guardianName))
+    {
+        guardianName = Model.Guardian.Email;
+    }
+}
+
+@if (TempData.ContainsKey("WaiverRequested") && ((bool)(TempData["WaiverRequested"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>The waiver has been sent to your e-mail address.</span>
+    </div>
+}
+
+<h2>My Profile</h2>
+<p>Welcome @guardianName!</p>
+
+@foreach (var player in Model.Players)
+{
+    <fieldset>
+        <legend>
+            <h1>@player.Player.FirstName @player.Player.LastName</h1>
+        </legend>
+        @if (player.Player.DateOfBirth.HasValue)
+        {
+            <p>Date of Birth:  @player.Player.DateOfBirth.Value.ToShortDateString()</p>
+            <p>Minimum Division: @PlayerHelper.PlayerAge(player.Player.DateOfBirth.Value)U</p>
+        }
+        <div>
+            <h3>Active Teams</h3>
+            @if ((player.TeamsActive.Count + player.TeamsInactive.Count) == 0)
+            {
+                <form action="@Url.RouteUrl(new { controller = "Player", action = "Delete", id = player.Player.Id })" method="post" class="delete-link">
+                        <button class="command delete">Delete</button>
+                        <input type="hidden" value="@player.Player.FirstName @player.Player.LastName" />
+                        @Html.AntiForgeryToken()
+                    </form>
+            }
+            @if (player.TeamsActive.Count == 0)
+            {
+                <p>@player.Player.FirstName is not on any teams that are currently active. </p>
+            }
+            else
+            {
+                <div id="active-teams-@player.Player.Id" class="active-teams">
+                    @{
+                var activeTeamGrid = new WebGrid(canPage: false);
+                activeTeamGrid.Bind(player.TeamsActive, autoSortAndPage: true);
+                
+                        @activeTeamGrid.GetHtml(headerStyle: "header",
+                            tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px" },
+                            alternatingRowStyle: "even",
+                            rowStyle: "odd",
+                            columns: activeTeamGrid.Columns(
+                                activeTeamGrid.Column("Name", header: "Name", format: @<text>@Html.ActionLink(Web.Models.Team.PrettyName((Web.Models.Team)item.Team).ToString(), "Team", "Overview", new { id = item.Team.Id }, null)</text>, canSort: false),
+                                activeTeamGrid.Column("League", header: "League", canSort: false, format: @<text>@item.Team.League.Name</text>),
+                                activeTeamGrid.Column("Team.Players", style: "center", header: "Roster", canSort: false, format: @<text>@item.Team.Players.Count players</text>),
+                                activeTeamGrid.Column("Photo", header: "Photo", canSort: false, format: @<text>
+                        @*@if(!String.IsNullOrEmpty(item.Photo)) 
+                                    {
+                                        <img src="~/PlayerImages/@item.Photo-thumb.jpeg" alt="@player.Player.FirstName @player.Player.LastName" />    
+                                    }*@
+                        <div id="photo-cont-@item.Id">
+                            @{
+                                string playerPhoto = null;
+                                string hidePhoto = "display: none;";
+                                if (!string.IsNullOrEmpty(item.Photo))
+                                {
+                                    playerPhoto = "/PlayerImages/" + item.Photo + ".jpeg";
+                                    hidePhoto = null;
+                                }   
+                            }
+                            <img class="photo" id="photo-@item.Id" src="@playerPhoto" height="100" width="100"  style="border: 1px solid #999; @hidePhoto"/>
+                            @if (string.IsNullOrEmpty(item.Photo))
+                            {
+                                <button class="command AddPhoto" data-id="@item.Id">Add Photo</button>
+                            }
+                            else
+                            {
+                                <button class="command AddPhoto" data-id="@item.Id">Change Photo</button>
+                            }
+                        </div>
+                        </text>),
+                        activeTeamGrid.Column("Waiver", header: "Waiver", style: "center", canSort: false, format: @<text>@item.WaiverStatus<br />
+                        @if (item.WaiverStatus == Web.Models.SignStatus.RequestSent || item.WaiverStatus == Web.Models.SignStatus.Viewed)
+                        {
+<form action="https://www.hellosign.com/editor/sign" method="get" class="edit-link" target="_blank">
+                            <input type="hidden" name="guid" value ="@item.SignWaiverId" />
+                            <button class="command waiver">View and Sign Waiver</button>
+                        </form>
+                        }
+                        @if (item.WaiverStatus != Web.Models.SignStatus.Signed)
+                        {
+<form action="@Url.RouteUrl(new { controller = "Profile", action = "RequestWaiver", playerId = item.Player.Id, teamId = item.Team.Id })" method="get" class="edit-link">
+                            @Html.AntiForgeryToken()
+                        <button class="command waiver">Send Waiver To Email</button>
+                        </form>
+                        }
+                        else
+                        {
+
+                        }
+                        </text>)
+
+                                 )
+                             );
+                    }
+                </div>
+            }
+
+
+            <h3>Upcoming Games</h3>
+
+            @if (player.Games.Count == 0)
+            {
+                <p>@player.Player.FirstName has no upcoming games scheduled.</p>
+            }
+            else
+            {
+                <div id="upcoming-games-@player.Player.Id">
+                    @{
+                var grid = new WebGrid(canPage: false);
+                var gridColumns = grid.Columns(
+                    grid.Column("HomeTeam", header: "Home Team", canSort: false, format: @<text><a href="@Url.RouteUrl(new { controller = "Overview", action = "Team", id = item.HomeTeam.Id })">@Web.Models.Team.PrettyName(item.HomeTeam)</a></text>),
+                    grid.Column("AwayTeam", header: "Away Team", canSort: false, format: @<text><a href="@Url.RouteUrl(new { controller = "Overview", action = "Team", id = item.AwayTeam.Id })">@Web.Models.Team.PrettyName(item.AwayTeam)</a></text>),
+                    grid.Column("GameDate", header: "Game Date", canSort: false, format: @<text>@item.GameDate.ToString()</text>),
+                    grid.Column("Location", header: "Location", canSort: false, format: @<text><a href="@Url.RouteUrl(new { controller = "Overview", action = "Location", id = item.Location.Id })">@item.Location.Name</a></text>)
+                );
+
+                grid.Bind(player.Games, autoSortAndPage: true);
+                
+                        @grid.GetHtml(headerStyle: "header",
+                            tableStyle: "listing game",
+                            alternatingRowStyle: "even",
+                            rowStyle: "odd",
+                            columns: gridColumns
+                        );
+                    }
+                </div>
+            }
+            <h3>Teams Looking For Players</h3>
+            <div id="teams-needing-players-@player.Player.Id">
+                @{
+            var lookingGrid = new WebGrid(canPage: false);
+            var lookingGridColumns = lookingGrid.Columns(
+                lookingGrid.Column("Name", header: "Name", canSort: false, format: @<text><a href="@Url.RouteUrl(new { controller = "Overview", action = "Team", id = item.Team.Id })">@item.Name</a></text>),
+                lookingGrid.Column("League", header: "League", canSort: false),
+                lookingGrid.Column("Team.Division.MaxAge", header: "Division", canSort: false, format: @<text>@item.Team.Division.Name</text>),
+                lookingGrid.Column("Class", header: "Class", canSort: false),
+                lookingGrid.Column("Coaches", header: "Coaches", canSort: false, format: @<text>
+                    <ul>
+                        @foreach (var coach in item.Team.Coaches)
+                        {
+                            <li>@coach.FirstName @coach.LastName - <a class="messaging" href="#" data-type="Coach" data-for="@coach.Id" data-to="@coach.FirstName @coach.LastName">@coach.Email</a> - @coach.PhoneNumber</li>
+                        }
+                    </ul>
+                    </text>)
+            );
+
+            lookingGrid.Bind(player.TeamsLookingForPlayers, autoSortAndPage: true);
+            
+                    @lookingGrid.GetHtml(headerStyle: "header",
+                            tableStyle: "listing game",
+                            alternatingRowStyle: "even",
+                            rowStyle: "odd",
+                            columns: lookingGridColumns
+                        );
+                }
+            </div>
+        </div>
+    </fieldset>
+    <br />
+@*<h2>@player.Player.FirstName @player.Player.LastName</h2>
+    <div>Teams:</div>
+    <ul>
+        @foreach (var teamStatus in player.TeamsActive)
+        {
+            <li>@teamStatus.Team.Name
+                <br />
+                Waiver: @teamStatus.WaiverStatus @if(teamStatus.WaiverStatus == Web.Models.SignStatus.NotSigned) {
+                    using (Html.BeginForm("RequestWaiver", "Profile", new { playerId = player.Player.Id, teamId = teamStatus.Team.Id }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button class="command waiver">Send Waiver To Email</button>
+                    }                                     
+                }<br />
+                Photo: <img src="~/PlayerImages/@(System.String.IsNullOrEmpty(teamStatus.Photo) ? "" : teamStatus.Photo).jpeg" id="jcrop-target" />
+            </li>
+        }
+    </ul>    *@
+}
+
+@{
+    Html.RenderPartial("_UploadPhotoPartial");
+}
+@section Header {
+    <script type="text/javascript" src="/Scripts/jquery.upload-1.0.2.js"></script>
+    <link href="/Content/themes/base/jquery.Jcrop.css" rel="stylesheet" />
+    <script src="/Scripts/jquery.Jcrop.js"></script>
+}
+@section scripts {
+    @Styles.Render("~/Content/themes/base/css")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="/Scripts/upload-photo.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            initGrid();
+        });
+        function initGrid() {
+            $('button').button();
+            $('table.listing').on('click', 'button.command.delete', function (e) {
+                // confirm deletion
+                var itemName = $(this).next('input[type=hidden]').val();
+                var dialog = $('div#delete-item-dialog');
+                $('div', dialog).text('Are you sure you want to delete the player "{0}"?'.replace('{0}', itemName));
+                dialog.dialog('open');
+                dialog.data('form', $(this).parent());
+                e.preventDefault();
+                $(this).blur(); // reset button focus
+            });
+        }
+
+        function photoCropped(id, file) {
+            $('#photo-' + id).attr('src', '/PlayerImages/' + file + '.jpeg').show();
+            $('#photo-cont-' + id + ' button').text('Change Photo');
+        }
+
+        PhotoUploadCallbacks.add(photoCropped);
+        $(document).ready(function () {
+            initGrid();
+
+            $('.active-teams').on('click', 'button.AddPhoto', function (e) {
+                e.preventDefault();
+                var dialog = $('#upload-photo-dialog');
+                dialog.dialog('open');
+                // set id for file upload
+                $('#CropId', dialog).val($(this).data('id'));
+                $('#CropType', dialog).val('Player');
+
+            });
+
+            // delete alert dialog
+            $('div#delete-item-dialog').dialog({
+                autoOpen: false,
+                resizable: false,
+
+                modal: true,
+                buttons: {
+                    'Delete': function () {
+                        // replace text with contact name
+
+                        // simply submit associated form
+                        var form = $(this).data('form');
+                        form.submit();
+                    },
+                    'Cancel': function () {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+
+        });
+
+
+    </script>
+}
+

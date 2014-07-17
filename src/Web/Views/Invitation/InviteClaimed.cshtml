@@ -1,0 +1,12 @@
+﻿@{
+    ViewBag.Title = "InviteClaimed";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Invite Claimed</h2>
+
+@if(Request.IsAuthenticated) {
+<p>The invitation you have clicked has already been claimed by another user.</p>
+} else {
+ <p>The invitation you click has already been claimed. If it was claimed by you, please @Html.ActionLink("login", "Login", "Account").</p>   
+}

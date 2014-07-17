@@ -1,0 +1,17 @@
+﻿@model Web.Models.InviteManagerModel
+
+@{
+    ViewBag.Title = "Manager Invitation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Manager Invitation</h1>
+<p>Hello @Model.FirstName @Model.LastName!</p>
+<p>You have been invited to manage your account on BLTBaseball.com.</p>
+<p>In order to do so, please login with your Google Account or create a Google Account using the button below:</p>
+
+@using (Html.BeginForm("ExternalLogin", "Account", new { ReturnUrl = ViewBag.ReturnUrl }))
+{
+    @Html.AntiForgeryToken()
+    <button type="submit" name="provider" value="google" title="Log in using your Google account">Login/Sign Up</button>
+}

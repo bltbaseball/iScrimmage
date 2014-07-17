@@ -1,0 +1,64 @@
+﻿@model Web.Models.UmpireOverviewModel
+
+@{
+    ViewBag.Title = Model.Umpire.LastName + ", " + Model.Umpire.FirstName;
+    if (Request.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_Dashboard.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+
+<h1>Umpire: @Model.Umpire.LastName, @Model.Umpire.FirstName</h1>
+
+        <h4>Games With Umpire</h4>
+        @if (Model.Games.Count == 0)
+        {
+            <p>No games have been scheduled with this umpire yet.</p>
+        } 
+        else 
+        {
+
+<div id="games">            
+@{
+    var grid = new WebGrid(canPage: false);
+    var gridColumns = new WebGridColumn[20];
+    gridColumns = grid.Columns(
+    grid.Column("HomeTeam.Name", header: "Home Team", canSort: false, format: @<text>
+                        @if(item.HomeTeam != null) {
+                            <a href="@Url.RouteUrl(new { controller = "Overview", action = "Team", id = @item.HomeTeam.Id })">@item.HomeTeam.Name </a>
+                        }
+                     </text>),
+    grid.Column("AwayTeam.Name", header: "Away Team", canSort: false, format: @<text>
+                        @if(item.AwayTeam != null) {
+                            <a href="@Url.RouteUrl(new { controller = "Overview", action = "Team", id = @item.AwayTeam.Id })">@item.AwayTeam.Name </a>
+                        }
+                     </text>),
+    grid.Column("GameDate", header: "Game Date", canSort: false),
+    grid.Column("Location.Name", header: "Location", canSort: false, format: @<text>
+                            <a href="@Url.RouteUrl(new { controller = "Overview", action = "Location", id = item.Location.Id })">@item.Location.Name</a><br />@item.Field</text>),
+    grid.Column("Status", header: "Status", canSort: false, format: @<text>@item.Status.ToString()</text>),
+    grid.Column("PlateUmpire", header: "Plate Umpire", canSort: false, format: @<text><a href="@Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.PlateUmpire != null ? item.PlateUmpire.Id : 0 })">@Web.Models.Umpire.GetUmpireName(item.PlateUmpire)</a></text>),
+    grid.Column("FieldUmpire", header: "Field Umpire", canSort: false, format: @<text><a href="@Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.FieldUmpire != null ? item.FieldUmpire.Id : 0 })">@Web.Models.Umpire.GetUmpireName(item.FieldUmpire)</a></text>)
+    );
+    grid.Bind(Model.Games, new[] { "HomeTeamName", "AwayTeamName", "Game.GameDate", "Game.Location.Name", "Type", "Game.Status" }, autoSortAndPage: true);
+    
+    @grid.GetHtml(headerStyle: "header",
+        tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px" },
+        alternatingRowStyle: "even",
+        rowStyle: "odd",
+        columns: gridColumns
+    );
+    @Html.Hidden("dir", grid.SortDirection) 
+    @Html.Hidden("col", grid.SortColumn)
+}
+</div>
+        }
+<script type="text/javascript">
+    $('[title!=""]').qtip();
+</script>
+
+<form class="edit-link"><button class="command edit" onclick="history.back(); return false">Back</button></form>

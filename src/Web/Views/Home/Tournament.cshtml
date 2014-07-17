@@ -1,0 +1,198 @@
+﻿@model Web.Models.LeagueInfoModel
+
+@{
+    ViewBag.Title = Model.League.Name;
+    if (Request.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_Dashboard.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+
+<style>
+    #dynamichtml li {
+        list-style: circle;
+        margin: 5px 0px 5px 30px;
+    }
+    #dynamichtml ul {
+        margin-bottom: 10px;
+    }
+</style>
+<hgroup class="title">
+<h1>@Model.League.Name @if(Model.League.RegistrationEndDate > DateTime.Now) { <span> : <a href="#Register">Register</a> </span> } </h1>
+</hgroup>
+
+<span id="dynamichtml">
+@Html.Raw(Model.League.HtmlDescription)
+</span>
+<br />
+
+<h1><a href="@Url.RouteUrl(new { controller = "Overview", action = "Details", id = Model.League.Id })">Games, Teams, and Scores</a></h1>
+<br />
+
+@if(Model.League.RegistrationEndDate > DateTime.Now)
+{
+<div style="padding-top: 1em;" id="Register">
+
+@if (!Request.IsAuthenticated )
+{ 
+
+    <h1>Register and Create Your Team! Login Now!</h1>
+            
+    <h2>To ensure maximum functionality, a Google account is required</h2>
+    <div>
+        @using (Html.BeginForm("ExternalLogin", "Account", new { ReturnUrl = "/Home/CoachInvite?leagueId=" + Model.League.Id.ToString() }))
+        {
+            @Html.AntiForgeryToken()
+            <button type="submit" class="command" name="provider" value="google" title="Log in using your Google account">Log in using your Google account</button>
+        }
+    </div>
+    <h2 class="mt15">Don't have a Google account?</h2>
+    <div>
+        @using (Html.BeginForm("ExternalSignup", "Account", new { ReturnUrl = "/Home/CoachInvite?leagueId=" + Model.League.Id.ToString() }, FormMethod.Post, new { target = "_blank" }))
+        {
+            @Html.AntiForgeryToken()
+            <button type="submit" class="command" name="provider" value="google" title="Create a Google Account" style="width: 18em;">Create a Google Account</button>
+        }
+    </div>
+
+}
+else
+{
+    if (Model.Teams.Count == 0)
+    {
+        <h2>Register a Team</h2>
+        <p>You have no teams registered for this @(Model.League.Type == Web.Models.LeagueType.League ? "league" : "tournament"). @Html.ActionLink("Register your team now", "Create", "Team") and add players to its roster to get started.</p>
+    }
+    else
+    {
+        
+        <div id="active-teams">
+        @{
+        var activeTeamGrid = new WebGrid(canPage: true, canSort: true, rowsPerPage: 5, ajaxUpdateContainerId: "active-teams", ajaxUpdateCallback: "initGrid");
+        activeTeamGrid.Bind(Model.Teams, autoSortAndPage: true);
+        activeTeamGrid.Pager(WebGridPagerModes.All);
+            @activeTeamGrid.GetHtml(headerStyle: "header",
+                tableStyle: "listing dataTableActivate",
+                htmlAttributes: new { dataTableHeight = "300px", dataTableTitle = "<h2>Your Teams Already Registered</h2>"},
+                alternatingRowStyle: "even",
+                rowStyle: "odd",
+                columns: activeTeamGrid.Columns(
+                    activeTeamGrid.Column("Name", header: "Name", format: (item) => Html.ActionLink((string)item.Name + " " + (string)item.Division.Name + " " + (string)item.Class.Name, "Edit", "Team", new { id = (int)item.Id }, new { }), canSort: true),
+                    activeTeamGrid.Column("League", header: "League", canSort: true, format: @<text>@item.League.Name</text>),
+                    activeTeamGrid.Column("Players", style: "center", header: "Roster", canSort: false, format: @<text>
+                        @if (item.Players.Count == 0)
+                        {
+                            <form action="@Url.RouteUrl(new { controller = "Player", action = "Create", id = item.Id })" method="get" class="edit-link">
+                                <button class="command edit">Add Players</button>
+                            </form>  
+                        }
+                        else 
+                        {
+                            <a href="@Url.RouteUrl(new { controller = "TeamPlayer", action = "Index", id = item.Id })">@item.Players.Count players</a>
+                        }
+                    </text>),
+                    activeTeamGrid.Column("Pay", style:"center", header: " ", format: @<text>
+
+            @{ var Fees = new List<Web.Models.LeagueFeeModel>();
+
+               var fees = Web.Models.Fee.GetFeesForLeague(item.Value.League);
+               var feesPaid = Web.Models.FeePayment.GetFeePaymentsForTeam(item.Value);
+                foreach (var fee in fees)
+                {
+                    var feeModel = new Web.Models.LeagueFeeModel();
+                    feeModel.Amount = fee.Amount;
+                    feeModel.Name = fee.Name;
+                    feeModel.InvoiceId = string.Format("{0}_{1}", fee.Id, item.Id);
+                    feeModel.IsPaid = false;
+
+                    IList<Web.Models.FeePayment> feePaymentList = feesPaid;
+                    var feePayment = feePaymentList.Where(f => f.Fee == fee && f.Status == Web.Models.FeePaymentStatus.Completed).SingleOrDefault();
+                    if (feePayment != null)
+                    {
+                        feeModel.IsPaid = true;
+                    }
+                    
+                    
+                    <div>@(feeModel.Name): @feeModel.Amount.ToString("C") 
+            @if (feeModel.IsPaid) 
+            {
+                <strong> Paid</strong>    
+            } 
+            else 
+            {
+                string action = "https://www.paypal.com/cgi-bin/webscr";
+                if(System.Configuration.ConfigurationManager.AppSettings["PayPalSandbox"] == "true") 
+                {
+                    action = "https://www.sandbox.paypal.com/cgi-bin/webscr";
+                }
+                <form action="@action" method="post" id="PayPalForm@(feeModel.InvoiceId)">
+                    <input type="hidden" name="cmd" value="_xclick" />
+                    <input type="hidden" name="item_name" value="@(feeModel.Name) - @(item.Name) @(item.Division.Name) - @item.League.Name" />
+                    <input type="hidden" name="business" value="@System.Configuration.ConfigurationManager.AppSettings["PayPalEmail"]" />
+                    <input type="hidden" name="amount" value="@feeModel.Amount.ToString("F2")" />
+                    <input type="hidden" name="invoice" value="@(feeModel.InvoiceId)" />
+                    <input type="hidden" name="currency_code" value="USD" />
+                    <input type="hidden" name="no_shipping" value="1" />
+                    <input type="hidden" name="return" value="http://www.bltbaseball.com/Home/PaymentSuccess" />
+                    <input type="hidden" name="notify_url" value="http://www.bltbaseball.com/PayPal/IPN" />
+                    <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" />
+                </form>               
+            }
+                        </div>
+                    
+                }
+                }
+                    </text>, canSort: false)
+                )
+            );
+        }
+        </div>
+        <br />
+        <h2>Register Another Team</h2>
+        <p>@Html.ActionLink("Create Another Team", "Create", "Team") and add players to its roster.</p>
+    }
+}
+    </div>
+}
+
+@{
+    string rowClass;
+}
+
+<br />
+<br />
+<table>
+    <thead>
+        <tr>
+            <th>Download</th>
+            <th>Size</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var downloads = Directory.GetFiles(Server.MapPath("~/Content/Downloads")).OrderBy(f => f);
+            rowClass = "odd";
+            foreach (var file in downloads)
+            {
+                var info = new FileInfo(file);
+            <tr class="@rowClass">
+                <td><a href="@Url.Content("~/Content/Downloads/" + info.Name)">@info.Name</a></td>
+                <td>@((info.Length / 1024).ToString("f1")) KB</td>
+            </tr>
+                if (rowClass == "even")
+                {
+                    rowClass = "odd";
+                }
+                else
+                {
+                    rowClass = "even";
+                }
+            }
+        }
+    </tbody>
+</table>
+<p>@Html.ActionLink("Back to List", "Index", "Overview")</p>

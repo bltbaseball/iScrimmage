@@ -1,0 +1,70 @@
+﻿@model Web.Models.CoachOverviewModel
+@using Web.Models;
+
+@{
+    ViewBag.Title = Model.League.Name;
+    if (Request.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_Dashboard.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+<div style="width: 30em; float: right; text-align: right;">
+@{
+    Html.RenderPartial("_LeagueNav", Model.League);
+}
+</div>
+<h1><a href="@Url.RouteUrl(new { controller = "Overview", action = "Details", id = Model.League.Id })">@Model.League.Name</a></h1>
+<br />
+
+@if (Model.Coaches.Count == 0)
+{
+    <p>There are no coaches on this team.</p>
+}
+else
+{
+    <div id="team-coaches">
+        @{
+    var grid = new WebGrid(canPage: false);
+        var gridColumns = grid.Columns(
+            grid.Column("Team", header: "Team", canSort: false, format: @<text>
+                        @Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(item.Team, null))
+                    </text>),
+            grid.Column("Team.Division.MaxAge", header: "Division", canSort: false),
+            grid.Column("Team.Class.Name", header: "Class", canSort: false),
+            grid.Column("Coach.FirstName", header: "First Name", canSort: false),
+            grid.Column("Coach.LastName", header: "Last Name", canSort: false),
+            grid.Column("Coach.PhoneNumber", header: "Phone Number", canSort: false, format:@<text>
+                @if (Request.IsAuthenticated) 
+                {
+                    @item.Coach.PhoneNumber
+                } else {
+                    @:Please login
+                }
+            </text>),
+            grid.Column("Coach.Email", header: "Email", canSort: false, format:@<text>
+                @if (Request.IsAuthenticated) 
+                {
+                    <a class="messaging" href="#" data-type="Coach" data-for="@item.Coach.Id" data-to="@item.Coach.FirstName @item.Coach.LastName">Send Email</a>
+                } else {
+                    <a href="#" ptip="You must login to send email">Send Email</a>
+                }
+            </text>)
+        );
+
+            grid.Bind(Model.Coaches, autoSortAndPage: true);
+        
+                @grid.GetHtml(headerStyle: "header",
+                    tableStyle: "listing game dataTableActivate", htmlAttributes: new { dataTableHeight = "500px", dataTableTitle = "<h1>Coaches</h1>" },
+                    alternatingRowStyle: "even",
+                    rowStyle: "odd",
+                    columns: gridColumns
+                );
+        }
+    </div>
+}
+    
+<form class="edit-link"><button class="command edit" onclick="history.back(); return false">Back</button></form>

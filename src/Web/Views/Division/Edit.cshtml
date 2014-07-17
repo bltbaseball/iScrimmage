@@ -1,0 +1,54 @@
+﻿@model Web.Models.DivisionUpdateModel
+
+@{
+    ViewBag.Title = "Edit Division";
+}
+
+<h2>Edit Division</h2>
+
+@using (Html.BeginForm()) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Division</legend>
+
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Name)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Name)
+            @Html.ValidationMessageFor(model => model.Name)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.MaxAge)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.MaxAge)
+            @Html.ValidationMessageFor(model => model.MaxAge)
+        </div>
+
+        @*<div class="editor-label">
+            @Html.LabelFor(model => model.LeagueId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.LeagueId, (List<SelectListItem>)ViewBag.Leagues, new { })
+            @Html.ValidationMessageFor(model => model.LeagueId)
+        </div>*@
+
+        <p>
+            <input type="submit" value="Save" />
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

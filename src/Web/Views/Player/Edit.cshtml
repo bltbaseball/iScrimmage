@@ -1,0 +1,141 @@
+﻿@model Web.Models.PlayerUpdateModel
+
+@{
+    ViewBag.Title = "Update Player";
+}
+@section Header {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#DateOfBirth').datepicker({
+                @(Model.DateOfBirth.HasValue ? Model.DateOfBirth.Value.Year.ToString()+","+Model.DateOfBirth.Value.Month.ToString()+","+Model.DateOfBirth.Value.Day.ToString() : "defaultDate: new Date("+DateTime.Now.AddYears(-20).ToString()+".Year,01,01),")
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                yearRange: "-20:+0",
+                onChangeMonthYear: function (year, month, elem) {
+                    var currentDate = $(this).datepicker('getDate');
+                    if (currentDate == null)
+                        return;
+
+                    var day = currentDate.getDate();
+                    var newDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+                    $(this).datepicker('setDate', newDate);
+                }
+                });
+            });
+    </script>
+}
+<h2>Update Player</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Player</legend>
+
+        @Html.HiddenFor(model => model.Id)
+        
+        <div class="editor-label">
+            @Html.LabelFor(model => model.FirstName)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.FirstName)
+            @Html.ValidationMessageFor(model => model.FirstName)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LastName)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.LastName)
+            @Html.ValidationMessageFor(model => model.LastName)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Email)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Email)
+            @Html.ValidationMessageFor(model => model.Email)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Gender)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(model => model.Gender, @Web.Models.Transforms.ToSelectList<Web.Models.Gender>(Model.Gender))
+            @Html.ValidationMessageFor(model => model.Gender)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.JerseyNumber)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.JerseyNumber)
+            @Html.ValidationMessageFor(model => model.JerseyNumber)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.PhoneNumber)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.PhoneNumber)
+            @Html.ValidationMessageFor(model => model.PhoneNumber)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.DateOfBirth)
+        </div>
+        <div class="editor-field">
+            <input type="text" name="DateOfBirth" id="DateOfBirth" value="@(Model.DateOfBirth.HasValue ? Model.DateOfBirth.Value.ToShortDateString() : "")" style="width: 8em" />
+            @Html.ValidationMessageFor(model => model.DateOfBirth)
+        </div>
+
+        <br />
+        <fieldset>
+            <legend>Guardian</legend>
+            <div>
+                @*choose existing option*@
+                @Html.HiddenFor(model=>model.GuardianId)
+                @Html.HiddenFor(model=>model.Guardian.Id)
+                <div class="editor-label">
+                    @Html.LabelFor(model => model.Guardian.FirstName)
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.Guardian.FirstName)
+                    @Html.ValidationMessageFor(model => model.Guardian.FirstName)
+                </div>
+
+                <div class="editor-label">
+                    @Html.LabelFor(model => model.Guardian.LastName)
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.Guardian.LastName)
+                    @Html.ValidationMessageFor(model => model.Guardian.LastName)
+                </div>
+
+                <div class="editor-label">
+                    @Html.LabelFor(model => model.Guardian.Email)
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.Guardian.Email)
+                    @Html.ValidationMessageFor(model => model.Guardian.Email)
+                </div>
+            </div>
+        </fieldset>
+
+        <p>
+            <input type="submit" value="Save" />
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

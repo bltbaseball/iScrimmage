@@ -1,0 +1,142 @@
+﻿@model Web.Models.GameNewModel
+
+@{
+    ViewBag.Title = "Create Game";
+}
+@section Header {
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#GameTime').timepicker();
+        $('#GameDate').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            yearRange: "-5:+5",
+            onChangeMonthYear: function (year, month, elem) {
+                var currentDate = $(this).datepicker('getDate');
+                if (currentDate == null)
+                    return;
+
+                var day = currentDate.getDate();
+                var newDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+                $(this).datepicker('setDate', newDate);
+            }
+        });
+    });
+</script>
+}
+<h2>Create New Game</h2>
+
+@using (Html.BeginForm("Create"))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Game</legend>
+
+        <div class="editor-label">
+            League/Tournament
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.LeagueId, (List<SelectListItem>)ViewBag.Leagues, "Select League/Tournament", new { id = "Leagues" })
+        </div>
+<span id="hiddenblock">
+        <div class="editor-label">
+            @Html.LabelFor(model => model.HomeTeamId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(
+                m => m.HomeTeamId, 
+                Enumerable.Empty<SelectListItem>(), 
+                "-- Select League/Tournament --",
+                new { id = "HomeTeam" }) 
+
+            @Html.ValidationMessageFor(model => model.HomeTeamId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.AwayTeamId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(
+                m => m.AwayTeamId, 
+                Enumerable.Empty<SelectListItem>(), 
+                "-- Select League/Tournament --",
+                new { id = "AwayTeam" }) 
+            @Html.ValidationMessageFor(model => model.AwayTeamId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.GameDate)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(model => model.GameDate, new { style = "width: 4em; min-width: 100px;" }) @Html.TextBoxFor(model => model.GameTime, new { style = "width: 4em; min-width: 100px;" })
+            @Html.ValidationMessageFor(model => model.GameDate)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LocationId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.LocationId, (List<SelectListItem>)ViewBag.Locations, new { })
+            @Html.ValidationMessageFor(model => model.LocationId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Innings)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.Innings, (List<SelectListItem>)ViewBag.Innings, new { })
+            @Html.ValidationMessageFor(model => model.Innings)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Field)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(model => model.Field, new { style = "width: 8em" })
+            @Html.ValidationMessageFor(model => model.Field)
+        </div>
+
+        <p>
+            <input type="submit" value="Create and Add Players" />
+        </p>
+</span>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index", "Game")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+<script type="text/javascript">
+    $("#hiddenblock").hide();
+    $("#Leagues").change(function () {
+        $("#hiddenblock").show();
+        $.getJSON('/Game/GetMyTeams?LeagueId=' + $(this).val(), function (result) {
+            var ddl = $('#HomeTeam');
+            ddl.empty();
+            $(result).each(function () {
+                $(document.createElement('option'))
+                    .attr('value', this.Value)
+                    .text(this.Text)
+                    .appendTo(ddl);
+            });
+        });
+        $.getJSON('/Game/GetAllTeams?LeagueId=' + $(this).val(), function (result) {
+            var ddl = $('#AwayTeam');
+            ddl.empty();
+            $(result).each(function () {
+                $(document.createElement('option'))
+                    .attr('value', this.Value)
+                    .text(this.Text)
+                    .appendTo(ddl);
+            });
+        });
+    });
+</script>

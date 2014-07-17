@@ -1,0 +1,170 @@
+﻿@model Web.Models.BracketsListModel
+@using Web.Models
+
+@{
+    ViewBag.Title = "Brackets";
+}
+@section Header{
+    <style type="text/css">
+
+        form
+        {
+            display: inline;
+        }
+    </style>
+}
+@section scripts {
+    @Styles.Render("~/Content/themes/base/css")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript">
+        function initGrid() {
+            $('button').button();
+            $('table.listing').on('click', 'button.command.delete', function (e) {
+                // confirm deletion
+                var itemName = $(this).next('input[type=hidden]').val();
+                var dialog = $('div#delete-item-dialog');
+                $('div', dialog).text('Are you sure you want to delete the "{0}" bracket?'.replace('{0}', itemName));
+                dialog.dialog('open');
+                dialog.data('form', $(this).parent());
+                e.preventDefault();
+                $(this).blur(); // reset button focus
+            });
+        }
+
+        $(document).ready(function () {
+            initGrid();
+
+        // delete alert dialog
+        $('div#delete-item-dialog').dialog({
+            autoOpen: false,
+            resizable: false,
+            
+            modal: true,
+            buttons: {
+                'Delete': function () {
+                    // replace text with contact name
+
+                    // simply submit associated form
+                    var form = $(this).data('form');
+                    form.submit();
+                },
+                'Cancel': function () {
+                    $(this).dialog('close');
+                }
+            }
+        });
+    });
+
+</script>
+}
+<h2 style="float:left">Brackets</h2>
+<p style="float:right">
+    @*@Html.ActionLink("Create New", "Create")*@
+    @Html.ActionLink("Create Bracket With Pool Play", "CreatePool")
+</p>
+
+@if (TempData.ContainsKey("BracketCreated") && ((bool)(TempData["BracketCreated"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Bracket successfully created.</span>
+    </div>
+}
+@if (TempData.ContainsKey("BracketDeleted") && ((bool)(TempData["BracketDeleted"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Bracket successfully deleted.</span>
+    </div>
+}
+@if (TempData.ContainsKey("GamesCreated") && ((bool)(TempData["GamesCreated"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>The bracket's games have been successfully created/updated.</span>
+    </div>
+}
+@if (TempData.ContainsKey("Error"))
+{
+    <div class="status-indicator ui-corner-all ui-state-error">
+        <span class="ui-icon ui-icon-alert"></span>
+        <span>@TempData["Error"].ToString()</span>
+    </div>
+}
+@if (TempData.ContainsKey("Notice"))
+ {
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>@TempData["Notice"].ToString()</span>
+    </div>
+ }
+
+<div id="brackets">
+@{
+    var grid = new WebGrid(canPage: false);
+    var gridColumns = new WebGridColumn[20];
+    gridColumns = grid.Columns(
+    grid.Column("Edit", style: "center", header: " ", format: @<text>
+                    <form action="@Url.RouteUrl(new { controller = "Brackets", action = "Edit", id = item.Id })" method="get" class="edit-link">
+                        <button class="command edit">Edit</button>
+                    </form>                    
+                    </text>,
+                canSort: false),
+    grid.Column("Name", header: "Name", canSort: false),
+    grid.Column("League.Name", header: "League", canSort: false, format:@<text>@item.League.Name</text>),
+    grid.Column("Division.Name", header: "Division", canSort: false, format:@<text>@item.Division.Name</text>),
+    grid.Column("Standings", header: "Teams", canSort: false, format:@<text>
+        @Game.GetPoolGamesForBracket(item.Value).Count Pool Games/@Game.GetCompletedPoolGamesForBracket(item.Value).Count Played<br />
+        @Game.GetBracketGamesForBracket(item.Value).Count Bracket Games/@Game.GetCompletedBracketGamesForBracket(item.Value).Count Played
+    </text>),
+    grid.Column("Standings", style: "center", header: "Games",
+        format: @<text>
+            <form action="@Url.RouteUrl(new { controller = "Brackets", action = "Games", id = item.Id })" method="get" class="edit-link">
+                <button class="command edit">Brackets</button>
+            </form>
+            @if (!Game.HavePoolGamesBeenSubmittedToBracket(item.Value))
+            {
+            <form action="@Url.RouteUrl(new { controller = "Brackets", action = "SubmitPool", id = item.Id })" method="get" class="edit-link">
+                <button class="command edit">Submit Pool</button>
+            </form>
+            <form action="@Url.RouteUrl(new { controller = "Brackets", action = "NotifyTeamsOfPoolGames", id = item.Id })" method="get" class="edit-link">
+                <button class="command edit">Email Pool Games</button>
+            </form>
+            }
+            else
+            {
+            <form action="@Url.RouteUrl(new { controller = "Brackets", action = "UnsubmitPool", id = item.Id })" method="get" class="edit-link">
+                <button class="command edit">Unsubmit Pool</button>
+            </form>
+            <form action="@Url.RouteUrl(new { controller = "Brackets", action = "NotifyTeamsOfBracketGames", id = item.Id })" method="get" class="edit-link">
+                <button class="command edit">Email Bracket Games</button>
+            </form>
+            }
+            </text>,
+        canSort: false),
+         grid.Column("Delete", style: "center", header: " ",
+                format: @<text>
+                    <form action="@Url.RouteUrl(new { controller = "Brackets", action = "Delete", id = item.Id })" method="post" class="delete-link">
+                        <button class="command delete">Delete</button>
+                        <input type="hidden" value="@item.Name" />
+                        @Html.AntiForgeryToken()
+                    </form>
+                    </text>,
+                canSort: false)
+    );
+    grid.Bind(Model.Brackets, autoSortAndPage: true);
+    
+    @grid.GetHtml(headerStyle: "header",
+        tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px" },
+        alternatingRowStyle: "even",
+        rowStyle: "odd",
+        columns: gridColumns
+    );
+}
+</div>
+
+<div id="delete-item-dialog" class="dialog" title="Delete Team">
+    <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span><div> </div>
+    <input type="hidden" id="hfDeleteItemId" />
+</div>

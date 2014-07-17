@@ -1,0 +1,106 @@
+﻿@model Web.Models.GenerateInviteCreateModel
+
+@{
+    ViewBag.Title = "Invite";
+}
+
+@{
+/*    var team = Web.Models.Team.GetTeamsForUser(Web.Models.User.GetUserByEmail("coach@bltbaseball.com")).FirstOrDefault();
+    var coach = Web.Models.Coach.GetCoachForEmail("coach@bltbaseball.com");
+    var dates = Web.Models.AvailableDates.GetAvailableDatesForTeam(team);
+    Web.Helpers.EmailNotification.GamesNewAvailableDates(dates,coach,team);
+  */  
+}
+
+
+@if (TempData.ContainsKey("MessageSent") && ((bool)(TempData["MessageSent"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Invite successfully sent!</span>
+    </div>
+}
+@if (TempData.ContainsKey("Error"))
+{
+    <div class="status-indicator ui-corner-all ui-state-error">
+        <span class="ui-icon ui-icon-alert"></span>
+        <span>@TempData["Error"].ToString()</span>
+    </div>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend><h2>Send Invitations</h2></legend>
+        <div>
+            <div class="editor-label">
+                
+            </div>
+            <div class="editor-field" id="To">
+                <input type="radio" name="MessageTo" id="MessageToCoachChallenge" value="CoachChallenge"  @(Model.MessageTo == "CoachChallenge" ? Html.Raw("checked=\"checked\"") : Html.Raw(""))/>
+                <label for="MessageToCoachChallenge">Invite <b><i>and Challenge</i></b> a Team Coach/Manager</label><br />
+                <input type="radio" name="MessageTo" id="MessageToCoach" value="Coach"  @(Model.MessageTo == "Coach" ? Html.Raw("checked=\"checked\"") : Html.Raw(""))/>
+                <label for="MessageToCoach">Invite a Team Coach/Manager</label><br />
+                <input type="radio" name="MessageTo" id="MessageToPlayer" value="Player"  @(Model.MessageTo == "Player" ? Html.Raw("checked=\"checked\"") : Html.Raw(""))/>
+                <label for="MessageToPlayer">Invite a Player</label><br />
+                <input type="radio" name="MessageTo" id="MessageToGuardian" value="Guardian"  @(Model.MessageTo == "Guardian" ? Html.Raw("checked=\"checked\"") : Html.Raw(""))/>
+                <label for="MessageToGuardian">Invite a Guardian</label><br />
+            </div>
+
+            <div class="editor-label">
+                @Html.LabelFor(model => model.Email)
+            </div>
+            <div class="editor-field">
+                @Html.TextBoxFor(model => model.Email)
+                @Html.ValidationMessageFor(model => model.Email)
+            </div>
+
+            <div class="editor-label">
+                @Html.LabelFor(model => model.LastName)
+            </div>
+            <div class="editor-field">
+                @Html.TextBoxFor(model => model.LastName)
+                @Html.ValidationMessageFor(model => model.LastName)
+            </div>
+
+            <div class="editor-label">
+                @Html.LabelFor(model => model.FirstName)
+            </div>
+            <div class="editor-field">
+                @Html.TextBoxFor(model => model.FirstName)
+                @Html.ValidationMessageFor(model => model.FirstName)
+            </div>
+
+            <button id="SendMessage" class="command">Send Invite</button>
+        </div>
+
+    </fieldset>
+}
+
+@section Header {
+    <style type="text/css">
+        fieldset label {
+            display: inline;
+            padding-top: 0;
+        }
+
+        .editor-field {
+            margin-bottom: 1em;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #Leagues, #Coaches, #Players, #Guardians, #Teams {
+            display: none;
+        }
+        /*.editor-field
+        {
+            margin-left: .5em;
+        }*/
+    </style>
+}

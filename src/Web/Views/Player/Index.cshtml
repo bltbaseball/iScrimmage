@@ -1,0 +1,188 @@
+﻿@model IEnumerable<Web.Models.Player>
+
+@{
+    ViewBag.Title = "Players";
+}
+@section scripts {
+    @Styles.Render("~/Content/themes/base/css")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript">
+        function initGrid() {
+            $('button').button();
+            $('table.listing').on('click', 'button.command.delete', function (e) {
+                // confirm deletion
+                var itemName = $(this).next('input[type=hidden]').val();
+                var dialog = $('div#delete-item-dialog');
+                $('div', dialog).text('Are you sure you want to delete the player "{0}"?'.replace('{0}', itemName));
+                dialog.dialog('open');
+                dialog.data('form', $(this).parent());
+                e.preventDefault();
+                $(this).blur(); // reset button focus
+            });
+        }
+
+        $(document).ready(function () {
+            initGrid();
+
+            // delete alert dialog
+            $('div#delete-item-dialog').dialog({
+                autoOpen: false,
+                resizable: false,
+            
+                modal: true,
+                buttons: {
+                    'Delete': function () {
+                        // replace text with contact name
+
+                        // simply submit associated form
+                        var form = $(this).data('form');
+                        form.submit();
+                    },
+                    'Cancel': function () {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+        });
+</script>
+}
+<h2>Players</h2>
+@if (TempData.ContainsKey("PlayerCreated") && ((bool)(TempData["PlayerCreated"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Player added successfully.</span>
+    </div>
+}
+@if (TempData.ContainsKey("PlayerInvited") && ((bool)(TempData["PlayerInvited"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Invitation sent to Player successfully.</span>
+    </div>
+}
+@if (TempData.ContainsKey("GuardianInvited") && ((bool)(TempData["GuardianInvited"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Invitation sent to Guardian successfully.</span>
+    </div>
+}
+@if (TempData.ContainsKey("PlayerDeleted") && ((bool)(TempData["PlayerDeleted"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Player deleted successfully.</span>
+    </div>
+}
+@if (TempData.ContainsKey("PlayerUpdated") && ((bool)(TempData["PlayerUpdated"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Player updated successfully.</span>
+    </div>
+}
+@if (TempData.ContainsKey("Error"))
+{
+    <div class="status-indicator ui-corner-all ui-state-error">
+        <span class="ui-icon ui-icon-alert"></span>
+        <span>@TempData["Error"].ToString()</span>
+    </div>
+}
+@*<p>
+    @Html.ActionLink("Create New Player", "Create")
+</p>*@
+<div id="players">
+@{
+    var grid = new WebGrid(canPage: false);
+    grid.Bind(Model.OrderByDescending(p => p.CreatedOn).ToList(), autoSortAndPage: true);
+    @grid.GetHtml(headerStyle: "header",
+        tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px" },
+        alternatingRowStyle: "even",
+        rowStyle: "odd",
+        columns: grid.Columns(
+            grid.Column("Edit", style: "center", header: " ", format: @<text>
+                    <form action="@Url.RouteUrl(new { controller = "Player", action = "Edit", id = item.Id })" method="get" class="edit-link">
+                        <button class="command edit">Edit</button>
+                    </form>                    
+                    </text>,
+                canSort: false),
+            grid.Column("LastName", header: "Last Name", canSort: false),
+            grid.Column("FirstName", header: "First Name", canSort: false),
+            grid.Column("JerseyNumber", header: "Jersey Number", canSort: false),
+            grid.Column("DateOfBirth", header: "DOB", canSort: false, format: @<text>@if(item.Value.DateOfBirth != null) {@item.Value.DateOfBirth.ToShortDateString()}</text>),
+            grid.Column("DateOfBirth", header: "Division", canSort: false, format: @<text>@(Web.Helpers.PlayerHelper.PlayerAge(item.Value.DateOfBirth))U</text>),
+            grid.Column("CreatedOn", header: "Created", canSort: false, format: @<text>@if(item.Value.CreatedOn != null) {@item.Value.CreatedOn.ToShortDateString()}</text>),
+            grid.Column("Guardian", header: "Guardian", canSort: false, format: @<text>
+                @if (item.Guardian != null)
+                {
+                    if (item.Guardian.User != null)
+                    {
+                        <a class="messaging" href="#" data-type="Guardian" data-for="@item.Guardian.Id" data-to="@item.Guardian.FirstName @item.Guardian.LastName">@item.Guardian.FirstName 
+                        @item.Guardian.LastName</a>                        
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(item.Guardian.Email))
+                        {
+                            <a class="messaging" href="#" data-type="Guardian" data-for="@item.Guardian.Id" data-to="@item.Guardian.Email">@item.Guardian.Email</a>                        
+                            <br />
+                        <form action="@Url.RouteUrl(new { controller = "Player", action = "InviteGuardian", id = item.Guardian.Id, playerId = item.Id })" method="post" class="invite-link">
+                            <button>Send Invite</button>
+                            @Html.AntiForgeryToken()
+                        </form>
+                            if (item.Guardian.InvitationSentOn != null)
+                            {
+                            <p style="font-size:smaller;">Invited @item.Guardian.InvitationSentOn</p>
+                            }
+                        }
+                    }
+                }
+                </text>
+            ),
+            grid.Column("User", "Player", canSort: false, format: @<text>
+                @if (item.User != null)
+                {
+                    <a href="@Url.RouteUrl(new { controller = "Users", action = "Edit", id = item.User.Id })">@item.User.Email</a>
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(item.Email))
+                    {
+                        <a class="messaging" href="#" data-type="Player" data-for="@item.Id" data-to="@item.FirstName @item.LastName">@item.Email</a>
+                        <br />
+                        <form action="@Url.RouteUrl(new { controller = "Player", action = "Invite", id = item.Id })" method="post" class="invite-link">
+                            <button>Send Invite</button>
+                            @Html.AntiForgeryToken()
+                        </form>
+                        if (item.InvitationSentOn != null)
+                        {
+                            <p style="font-size:smaller;">Invited @item.InvitationSentOn</p>
+                        }
+                    }
+                    else
+                    {
+                        <p style="font-size:smaller;">No email address for player</p>
+                    }
+                }
+            </text>),
+            grid.Column("Delete", style: "center", header: " ",
+                format: @<text>
+                    <form action="@Url.RouteUrl(new { controller = "Player", action = "Delete", id = item.Id })" method="post" class="delete-link">
+                        <button class="command delete">Delete</button>
+                        <input type="hidden" value="@item.FirstName @item.LastName" />
+                        @Html.AntiForgeryToken()
+                    </form>
+                    </text>,
+                canSort: false
+            )
+        )
+    );
+}
+</div>
+
+<div id="delete-item-dialog" class="dialog" title="Delete User">
+    <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span><div> </div>
+    <input type="hidden" id="hfDeleteItemId" />
+</div>

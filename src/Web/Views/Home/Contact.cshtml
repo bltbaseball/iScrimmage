@@ -1,0 +1,54 @@
+﻿@model Web.Models.ContactFormModel
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+@{
+    ViewBag.Title = "Contact";
+}
+<div id="map"></div>
+<div class="contact_form tableCell w50">
+    @if (TempData.ContainsKey("ContactSuccess") && (bool)TempData["ContactSuccess"] == true)
+    {
+        <div class="success">Thank you for your submission. We will respond as soon as possible.</div>
+    } else {
+        using (Html.BeginForm()) {
+            @Html.ValidationSummary(false)
+            @Html.AntiForgeryToken()
+            <div class="tableCell w20">
+                <label>Your Name <span class="required">*</span></label>
+                @Html.TextBoxFor(model=>model.Name, new {@class="mr30"})
+                @*<input class="mr30" type="text" />*@
+            </div>
+            <div class="tableCell w20">
+                <label>Your Email Adddress <span class="required">*</span></label>
+                @Html.TextBoxFor(model=>model.Email, new {@class=""})
+                @*<input class="" type="text" />*@
+            </div>
+                <label>Message <span class="required">*</span></label>
+                @Html.TextAreaFor(model=>model.Message, new {@class=""})
+                @*<textarea></textarea>*@
+                <button type="submit">Submit</button>
+        }
+    }
+</div>
+<div class="contact_info tableCell">
+    <div class="contact_info_row">
+        <span>Have questions? Please feel free to contact us any time during business hours or send us an email!</span>
+    </div>
+    <div class="contact_info_row">
+        <h2>The Office</h2>
+        <ul>
+            <li><i class="icon-map-marker"></i> <strong>Address:</strong> 500 SE 17th St. Suite 220, Fort Lauderdale, Florida 33316 <a href="https://goo.gl/maps/YEXDZ" target="_blank">MAP</a><br /></li>
+            <li><i class="icon-phone"></i> <strong>Phone:</strong> (954) 303-0525 <a href="tel:954-303-0525">Call</a><br /></li>
+            <li><i class="icon-envelope"></i> <strong>Email:</strong> <a href="mailto:info@iscrimmage.com">info@iscrimmage.com</a></li>
+        </ul>
+    </div>
+    <div class="contact_info_row">
+        <h2>Business Hours</h2>
+        <ul>
+            <li><i class="icon-time"></i> Weekdays - 9am to 5pm</li>
+            <li><i class="icon-time"></i> Saturday - 9am to 2pm</li>
+            <li><i class="icon-time"></i> Sunday - Closed</li>
+        </ul>
+    </div>
+</div>

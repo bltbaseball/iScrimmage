@@ -1,0 +1,41 @@
+﻿@model Web.Models.TeamCopyModel
+
+@{
+    ViewBag.Title = "Copy Team";
+}
+
+<h2>Copy Team</h2>
+
+@using (Html.BeginForm()) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    
+    <fieldset>
+        <legend>Team</legend>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.TeamId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.TeamId, (List<SelectListItem>)ViewBag.Teams, new { })
+            @Html.ValidationMessageFor(model => model.TeamId)
+        </div>
+    
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LeagueId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.LeagueId, (List<SelectListItem>)ViewBag.Leagues, new { })
+            @Html.ValidationMessageFor(model => model.LeagueId)
+        </div>
+    
+        <p>
+            <button class="command">Copy Team</button>
+        </p>
+    </fieldset>
+}
+    
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+

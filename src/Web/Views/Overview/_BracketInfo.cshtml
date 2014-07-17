@@ -1,0 +1,164 @@
+﻿@model BracketOverviewModel
+@using Web.Models
+@{
+BracketOverviewModel bracket = Model;
+}
+                    
+                    <div id="bracket-@bracket.Bracket.Id-pool-games">
+                    @{
+                        var poolGrid = new WebGrid(canPage: false);
+                        var poolGridColumns = poolGrid.Columns(
+                                poolGrid.Column("HomeTeam", header: "Team 1", canSort: false, format: @<text>
+                                    @Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(item.HomeTeam, item.Game))
+                                </text>),
+                                poolGrid.Column("HomeTeamScore", header: "Score", canSort: false),
+                                poolGrid.Column("AwayTeam", header: "Team 2", canSort: false, format: @<text>
+                                    @Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(item.AwayTeam, item.Game))
+                                </text>),
+                                poolGrid.Column("AwayTeamScore", header: "Score", canSort: false),
+                                poolGrid.Column("Game.GameDate", header: "Game Date", canSort: false),
+                                poolGrid.Column("Game.Status", header: "Status", canSort: false, format: @<text>@item.Game.Status.ToString()</text>),
+                                poolGrid.Column("Location", header: "Location", canSort: false, format: @<text>
+                                        <a href="@Url.RouteUrl(new { controller = "Overview", action = "Location", id = item.Game.Location.Id })">@item.Game.Location.Name/@item.Game.Field</a></text>),
+                                poolGrid.Column("Game.PlateUmpire", header: "Plate Umpire", canSort: false, format: @<text>
+                                    @if (item.Game.PlateUmpire != null)
+                                    {
+                                        <a href="@Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.Game.PlateUmpire.Id})">@Umpire.GetUmpireName(item.Game.PlateUmpire)</a>
+                                    }
+                                </text>),
+                                poolGrid.Column("Game.FieldUmpire", header: "Field Umpire", canSort: false, format: @<text>
+                                    @if (item.Game.FieldUmpire != null)
+                                    {
+                                        <a href="@Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.Game.FieldUmpire.Id})">@Umpire.GetUmpireName(item.Game.FieldUmpire)</a>
+                                    }
+                                </text>),
+                                poolGrid.Column("", style: "center", header: "", format: @<text>
+                                    @if (User.IsInRole("Administrator")) {
+                                        <span style="white-space:nowrap;">
+                                        @Html.ActionLink("Enter Scores", "EditScore", "Game", new { id = (int)item.Game.Id, returnUrl = Model.ReturnUrl  }, new { style = "color:#000" }) <br />
+                                        @Html.ActionLink("Umpires (" + ((item.Game.FieldUmpire != null ? 1 : 0) + (item.Game.PlateUmpire != null ? 1 : 0)).ToString() + ")", "EditUmpires", "Game", new { id = (int)item.Game.Id }
+                                            , new { style = "color:#000", 
+                                            ptip = Html.Raw(
+                                                "Plate Umpire: <a href=\"" + Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.Game.PlateUmpire != null ? item.Game.PlateUmpire.Id : 0 }) + "\">" + Web.Models.Umpire.GetUmpireName(item.Game.PlateUmpire) + "</a><br>" + 
+                                                "Field Umpire: <a href=\"" + Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.Game.FieldUmpire != null ? item.Game.FieldUmpire.Id : 0 }) + "\">" + Web.Models.Umpire.GetUmpireName(item.Game.FieldUmpire) + "</a>") })
+                                        <br />
+                                        @Html.ActionLink("Edit", "Edit", "Game", new { id = (int)item.Game.Id, returnUrl = Model.ReturnUrl }, new { style = "color:#000" })  |  
+                                        @Html.ActionLink("Delete", "Delete", "Game", new { id = (int)item.Game.Id, returnUrl = Model.ReturnUrl }, new { onclick = "return confirm('Are you sure you want to delete this game?')", style = "color:#000" })
+                                    </span>}</text>, canSort: false)
+                            );
+                        poolGrid.Bind(bracket.PoolGamesModel.OrderBy(g => g.Game.GameDate).ToList(), autoSortAndPage: true);
+                        @poolGrid.GetHtml(headerStyle: "header",
+                            tableStyle: "listing game dataTableActivate",
+                            htmlAttributes: new { dataTableTitle = "<h4>Pool Games</h4>" },
+                            alternatingRowStyle: "even",
+                            rowStyle: "odd",
+                            columns: poolGridColumns
+                        );
+                    }
+                    </div>
+<br />
+<br />
+                    @if(bracket.PoolRankings != null) {
+                           
+                        <div id="bracket-@bracket.Bracket.Id-pool-rankings">
+                        @{
+                        var activeTeamGrid = new WebGrid(canPage: false);
+                            activeTeamGrid.Bind(bracket.PoolRankings, autoSortAndPage: true);
+                                @activeTeamGrid.GetHtml(headerStyle: "header",
+                                    tableStyle: "listing dataTableActivate",
+                                    htmlAttributes: new { dataTableTitle = "<h4>Pool Rankings</h4>" },
+                                    alternatingRowStyle: "even",
+                                    rowStyle: "odd",
+                                    columns: activeTeamGrid.Columns(
+                                    activeTeamGrid.Column("Ranking", header: "Ranking", canSort: false),
+                                        activeTeamGrid.Column("TeamName", header: "Name", format: (item) => Html.ActionLink((string)item.TeamName, "Team", "Overview", new { id = (int)item.Team.Id }, new { }), canSort: false),
+                                        activeTeamGrid.Column("Wins", header: "Wins",  canSort: false),
+                                        activeTeamGrid.Column("Losses", header: "Losses",  canSort: false),
+                                        activeTeamGrid.Column("Ties", header: "Ties",  canSort: false),
+                                        activeTeamGrid.Column("MatchingRankLosses", header: "Rank Losses",  canSort: false),
+                                        activeTeamGrid.Column("MatchingRankWins", header: "Rank Wins",  canSort: false),
+                                        activeTeamGrid.Column("RunsAllowed", header: "Runs Allow",  canSort: false),
+                                        activeTeamGrid.Column("RunsScored", header: "Runs Scored",  canSort: false)
+                                    )
+                                );
+                            }
+                            <br />
+                            <p style="font-size:.8em;">
+                                Ranking Formula:
+                                1) Win Percentage Descending
+                                2) Wins Descending
+                                3) Losses Ascending
+                                4) Matching Rank Losses Descending
+                                5) Matching Rank Wins Descending
+                                6) Runs Allowed Ascending
+                                7) Run Differential Max 8 Descending
+                            </p>
+                    </div>
+                    }
+<br />
+<br />
+
+                    
+                    <h2>Bracket View <a href="@Url.RouteUrl(new { controller = "Overview", action = "Bracket", id = bracket.Bracket.Id})" target="_blank" style="font-size:.7em;">( print )</a></h2>
+                    @{
+                        Html.RenderPartial("../Brackets/_BracketInfo", Bracket.PopulateBracketInfo(bracket.Bracket));
+                    }
+
+                    
+                    <div id="bracket-@bracket.Bracket.Id-bracket-games">
+                    @{
+                        var bracketGrid = new WebGrid(canPage: false);
+                    var bracketGridColumns = bracketGrid.Columns(
+                                poolGrid.Column("GameNumber", header: "Game Number", canSort: false),
+                                poolGrid.Column("HomeTeam", header: "Team 1", canSort: false, format: @<text>
+                                    @{ item.Game.HomeTeam = item.HomeTeam; }
+                                    @Html.Raw(item.HomeTeam == null ? item.HomeTeamName : (Web.Models.Team.PrettyNameWithoutLeague(item.HomeTeam, item.Game) + " #" + BracketTeam.GetRankForTeam(item.Game.Bracket.Id, item.HomeTeam).Standing))
+                                </text>),
+                                poolGrid.Column("HomeTeamScore", header: "Score", canSort: false),
+                                poolGrid.Column("AwayTeam", header: "Team 2", canSort: false, format: @<text>
+                                    @{ item.Game.AwayTeam = item.AwayTeam; }
+                                    @Html.Raw(item.AwayTeam == null ? item.AwayTeamName : Web.Models.Team.PrettyNameWithoutLeague(item.AwayTeam, item.Game) + " #" + BracketTeam.GetRankForTeam(item.Game.Bracket.Id, item.AwayTeam).Standing)
+                                </text>),
+                                poolGrid.Column("AwayTeamScore", header: "Score", canSort: false),
+                                bracketGrid.Column("Game.GameDate", header: "Game Date", canSort: false),
+                                bracketGrid.Column("Game.Status", header: "Status", canSort: false, format: @<text>@item.Game.Status.ToString()</text>),
+                                bracketGrid.Column("Location", header: "Location", canSort: false, format: @<text>
+                                        <a href="@Url.RouteUrl(new { controller = "Overview", action = "Location", id = item.Game.Location.Id })">@item.Game.Location.Name/@item.Game.Field</a></text>),
+                                bracketGrid.Column("Game.PlateUmpire", header: "Plate Umpire", canSort: false, format: @<text>
+                                    @if (item.Game.PlateUmpire != null)
+                                    {
+                                        <a href="@Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.Game.PlateUmpire.Id})">@Umpire.GetUmpireName(item.Game.PlateUmpire)</a>
+                                    }
+                                </text>),
+                                bracketGrid.Column("Game.FieldUmpire", header: "Field Umpire", canSort: false, format: @<text>
+                                    @if (item.Game.FieldUmpire != null)
+                                    {
+                                        <a href="@Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.Game.FieldUmpire.Id})">@Umpire.GetUmpireName(item.Game.FieldUmpire)</a>
+                                    }
+                                </text>),
+                                bracketGrid.Column("", style: "center", header: "", format: @<text>
+                                    @if (User.IsInRole("Administrator")) {
+                                        <span style="white-space:nowrap;">
+                                        @Html.ActionLink("Enter Scores", "EditScore", "Game", new { id = (int)item.Game.Id, returnUrl = Model.ReturnUrl }, new { style = "color:#000" }) <br />
+                                        @Html.ActionLink("Umpires (" + ((item.Game.FieldUmpire != null ? 1 : 0) + (item.Game.PlateUmpire != null ? 1 : 0)).ToString() + ")", "EditUmpires", "Game", new { id = (int)item.Game.Id }
+                                            , new { style = "color:#000", 
+                                            ptip = Html.Raw(
+                                                "Plate Umpire: <a href=\"" + Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.Game.PlateUmpire != null ? item.Game.PlateUmpire.Id : 0 }) + "\">" + Web.Models.Umpire.GetUmpireName(item.Game.PlateUmpire) + "</a><br>" + 
+                                                "Field Umpire: <a href=\"" + Url.RouteUrl(new { controller = "Overview", action = "Umpire", id = item.Game.FieldUmpire != null ? item.Game.FieldUmpire.Id : 0 }) + "\">" + Web.Models.Umpire.GetUmpireName(item.Game.FieldUmpire) + "</a>") })
+                                        <br />
+                                        @Html.ActionLink("Edit", "Edit", "Game", new { id = (int)item.Game.Id, returnUrl = Model.ReturnUrl }, new { style = "color:#000" })  |  
+                                        @Html.ActionLink("Delete", "Delete", "Game", new { id = (int)item.Game.Id, returnUrl = Model.ReturnUrl }, new { onclick = "return confirm('Are you sure you want to delete this game?')", style = "color:#000" })
+                                    </span>}</text>, canSort: false)
+                            );
+                    bracketGrid.Bind(bracket.BracketGamesModel.OrderBy(g => g.GameNumber).ToList(), autoSortAndPage: true);
+                        @bracketGrid.GetHtml(headerStyle: "header",
+                            tableStyle: "listing game dataTableActivate",
+                            htmlAttributes: new { dataTableHeight = "300px", dataTableTitle = "<h2>Bracket Games</h2>" },
+                            alternatingRowStyle: "even",
+                            rowStyle: "odd",
+                            columns: bracketGridColumns
+                        );
+                    }
+                    </div>
+<br />
+<br />

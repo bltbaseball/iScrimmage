@@ -1,0 +1,163 @@
+﻿@{
+    ViewBag.Title = "Users";
+}
+@section scripts {
+    @Styles.Render("~/Content/themes/base/css")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript">
+        function initGrid() {
+            $('button').button();
+            $('table.listing').on('click', 'button.command.delete', function (e) {
+                // confirm deletion
+                var itemName = $(this).next('input[type=hidden]').val();
+                var dialog = $('div#delete-item-dialog');
+                $('div', dialog).text('Are you sure you want to delete the "{0}" user?'.replace('{0}', itemName));
+                dialog.dialog('open');
+                dialog.data('form', $(this).parent());
+                e.preventDefault();
+                $(this).blur(); // reset button focus
+            });
+        }
+
+        $(document).ready(function () {
+            initGrid();
+
+            // delete alert dialog
+            $('div#delete-item-dialog').dialog({
+                autoOpen: false,
+                resizable: false,
+            
+                modal: true,
+                buttons: {
+                    'Delete': function () {
+                        // replace text with contact name
+
+                        // simply submit associated form
+                        var form = $(this).data('form');
+                        form.submit();
+                    },
+                    'Cancel': function () {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+        });
+</script>
+}
+<h2 style="float:left">Users</h2>
+<p style="float:right">
+    @Html.ActionLink("Create New User", "Create")
+</p>
+
+@if (TempData.ContainsKey("UserCreated") && ((bool)(TempData["UserCreated"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>User added successfully.</span>
+    </div>
+}
+@if (TempData.ContainsKey("UserDeleted") && ((bool)(TempData["UserDeleted"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>User deleted successfully.</span>
+    </div>
+}
+@if (TempData.ContainsKey("UserUpdated") && ((bool)(TempData["UserUpdated"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>User updated successfully.</span>
+    </div>
+}
+@if (TempData.ContainsKey("Error"))
+{
+    <div class="status-indicator ui-corner-all ui-state-error">
+        <span class="ui-icon ui-icon-alert"></span>
+        <span>@TempData["Error"].ToString()</span>
+    </div>
+}
+@{
+    
+    var users = (IList<Web.Models.User>)ViewBag.Users;
+}
+
+<div id="users">
+@{
+    var grid = new WebGrid(canPage: false);
+    grid.Bind(users, autoSortAndPage: true);
+    
+    @grid.GetHtml(headerStyle: "header", 
+        tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px" }, 
+        alternatingRowStyle: "even", 
+        rowStyle: "odd",
+        columns: grid.Columns(
+            grid.Column("Edit", style: "center", header: " ", format: @<text>
+                    <form action="@Url.RouteUrl(new{ controller="Users", action ="Edit", id = item.Id})" method="get" class="edit-link">
+                        <button class="command edit">Edit</button>
+                    </form>                    
+                    </text>, 
+                canSort: false),
+            //grid.Column("Id", header: "Id", canSort: false),
+            grid.Column("Email", header: "Email", canSort: false),
+            grid.Column("FirstName", header: "First Name", canSort: false),
+            grid.Column("LastName", header: "Last Name", canSort: false),
+            grid.Column("Role", header: "Role", canSort: false),
+            grid.Column("CreateDate", header: "Created On", canSort: false),            
+            grid.Column("OAuthMemberships", header: "Google Account", canSort: false, format: @<text>
+                    @((item.OAuthMemberships.Count == 0) ? "" : "Linked")
+                </text>),
+            grid.Column("Delete", style: "center", header: " ",
+                format: @<text>
+                    <form action="@Url.RouteUrl(new{ controller="Users", action ="Delete", id = item.Id})" method="post" class="delete-link">
+                        <button class="command delete">Delete</button>
+                        <input type="hidden" value="@item.Email" />
+                        @Html.AntiForgeryToken()
+                    </form>
+                    </text>,
+                canSort: false
+            )
+        )
+    );
+}
+</div>
+
+@*<table class="listing">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Email</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Created On</th>
+            <th>Role</th>
+            <th>OAuth Providers</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in users)
+    {
+        <tr>
+            <td>@user.Id</td>
+            <td>@user.Email</td>
+            <td>@user.FirstName</td>
+            <td>@user.LastName</td>
+            <td>@user.CreateDate</td>
+            <td>@user.Role</td>
+            <td><ul>@foreach (var membership in user.OAuthMemberships)
+                {
+                    <li>@membership.Provider - @membership.ProviderUserId</li>
+                }
+                </ul>
+
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>*@
+
+<div id="delete-item-dialog" class="dialog" title="Delete User">
+    <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span><div> </div>
+    <input type="hidden" id="hfDeleteItemId" />
+</div>

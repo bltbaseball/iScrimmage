@@ -1,0 +1,98 @@
+﻿@model Web.Models.BracketInfoModel
+@using Web.Models
+@{
+    var firstMatchCount = Model.Games.Where(p => p.Bracket == 0).ToList().Count;
+}
+
+@helper TeamName(Web.Models.Team team, bool isTeamBye, int? seed, Game game) {
+    if(isTeamBye) 
+    {
+        <span>No opponent</span>   
+    } else if (team == null && seed != null)
+    {
+     <span>Seed #@seed.ToString()</span>   
+    } else if (team == null)
+    {
+     <span>TBD</span>   
+    } else {
+        <span>@Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(team, game))</span>
+    }
+}
+
+<style type="text/css">
+    @{
+        int startingBracketHeight = 80;
+            var numBrackets = Model.Games.Select(p => p.Bracket).Distinct().ToList().Count;
+            
+            for(var i = 0; i <numBrackets;i++) 
+            {
+                var matches = Model.Games.Where(p => p.Bracket == i).Select(p => p.Id).ToList();
+                int j = 0;
+                //Expand brackets after first and second rounds to be taller
+                int bracketHeight = (i >= 2) ? startingBracketHeight * (i) : startingBracketHeight;
+                var itemHeight = ((firstMatchCount * startingBracketHeight) / matches.Count);
+                foreach(var match in matches) 
+                {
+                    // round 1 = i = 0, j = 1,2,3,4
+                    // round 2 = i = 1
+                    // round 3 = i = 2
+
+                    var startingTop = (itemHeight - bracketHeight) / 2;
+                    var addition = bracketHeight;
+                    if(i > 0) {
+                        addition = startingBracketHeight * i * 2;   
+                    }
+                    var itemTop = startingTop + (addition * j);
+                    <text>#match@(match)X@(Model.Bracket.Id) { top: @(itemTop)px; }</text>
+                @*<text>#match@(match) { top: @((j*(i+1))*60+(i*30))px; }</text>*@
+                    j++;
+                }
+            } 
+        }
+</style>
+
+<div style="position: relative; height:@(firstMatchCount*startingBracketHeight)px">
+@{
+    BracketGameModel lastBracket = null;
+}
+@foreach (var bracket in Model.Games)
+{
+    var team1Standing = bracket.Game == null ? null : BracketTeam.GetRankForTeam(bracket.Game.Bracket.Id, bracket.Team1);
+    var team2Standing = bracket.Game == null ? null : BracketTeam.GetRankForTeam(bracket.Game.Bracket.Id, bracket.Team2);
+    string team1Rank = team1Standing == null ? "" : "Rank #" + team1Standing.Standing.ToString();
+    string team2Rank = team2Standing == null ? "" : "Rank #" + team2Standing.Standing.ToString();
+    lastBracket = bracket;
+                       
+        if(bracket.IsTeam1Bye || bracket.IsTeam2Bye) {
+    <div id="match@(bracket.Id)X@(Model.Bracket.Id)" class="emptymatch round@(bracket.Bracket+1)">
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+    </div>
+        } else {
+    <div id="match@(bracket.Id)X@(Model.Bracket.Id)" class="match round@(bracket.Bracket+1)">
+            <div class="roundtop" ptip="@team1Rank">@TeamName(bracket.Team1, bracket.IsTeam1Bye, bracket.Team1Seed, bracket.Game)</div>
+            <div class="roundmiddle"><i>#@bracket.GameNumber</i></div>
+            <div class="roundbottom" ptip="@team2Rank">@TeamName(bracket.Team2, bracket.IsTeam2Bye, bracket.Team2Seed, bracket.Game)</div>
+            <div class="roundtopright">@if(bracket.Game != null) { if(bracket.Game.HomeTeamScore.HasValue) { @Html.Raw("(" + bracket.Game.HomeTeamScore + ")") }}</div>
+            <div class="roundmiddleright"><i>@if(bracket.Game != null) { @Html.Raw(bracket.Game.GameDate.ToString("M/d h:mm tt")) } @if(bracket.Game != null) { if(bracket.Game.Field != null) { @Html.Raw(" - " +   bracket.Game.Field) } }</i></div>
+            <div class="roundbottomright">@if(bracket.Game != null) { if(bracket.Game.AwayTeamScore.HasValue) { @Html.Raw("(" + bracket.Game.AwayTeamScore + ")") } }</div>
+    </div>
+        }
+}
+@{
+    if(lastBracket != null)
+    {
+        if (lastBracket.Winner != null)
+        {
+            <div id="finals@(lastBracket.Id)" class="finals finals@(lastBracket.Bracket+1)">
+                <div>@lastBracket.WinnerSeed) @Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(lastBracket.Winner, null))</div>
+            </div>   
+        } else {
+            <div id="finals@(lastBracket.Id)" class="finals finals@(lastBracket.Bracket+1)">
+                <div>TBD</div>
+            </div>   
+        }
+    }         
+}
+</div>

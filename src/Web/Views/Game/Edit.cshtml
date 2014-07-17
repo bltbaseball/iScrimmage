@@ -1,0 +1,120 @@
+﻿@model Web.Models.GameUpdateModel
+
+@{
+    ViewBag.Title = "Update Game";
+}
+@section Header {
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#GameTime').timepicker();
+        $('#GameDate').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            yearRange: "-5:+5",
+            onChangeMonthYear: function (year, month, elem) {
+                var currentDate = $(this).datepicker('getDate');
+                if (currentDate == null)
+                    return;
+
+                var day = currentDate.getDate();
+                var newDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+                $(this).datepicker('setDate', newDate);
+            }
+        });
+    });
+</script>
+}
+<h2>Update Game </h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Game</legend>
+
+        @Html.HiddenFor(model => model.Id)
+        @Html.HiddenFor(model => model.ReturnUrl)
+
+        @if(ViewBag.IsBrackets == false)
+        {
+        <div class="editor-label">
+            @Html.LabelFor(model => model.HomeTeamId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.HomeTeamId, (List<SelectListItem>)ViewBag.MyTeams, new { })
+            @Html.ValidationMessageFor(model => model.HomeTeamId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.AwayTeamId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.AwayTeamId, (List<SelectListItem>)ViewBag.AllTeams, new { })
+            @Html.ValidationMessageFor(model => model.AwayTeamId)
+        </div>
+        }
+        <div class="editor-label">
+            @Html.LabelFor(model => model.GameDate)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(model => model.GameDate, new { style = "width: 4em; min-width: 100px;" }) @Html.TextBoxFor(model => model.GameTime, new { style = "width: 4em; min-width: 100px;" })
+            @Html.ValidationMessageFor(model => model.GameDate)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LocationId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.LocationId, (List<SelectListItem>)ViewBag.Locations, new { })
+            @Html.ValidationMessageFor(model => model.LocationId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Innings)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.Innings, (List<SelectListItem>)ViewBag.Innings, new { })
+            @Html.ValidationMessageFor(model => model.Innings)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Field)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(model => model.Field, new { style = "width: 8em" })
+            @Html.ValidationMessageFor(model => model.Field)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Status)
+        </div>
+        <div class="editor-field">
+        @if(User.IsInRole("Administrator")) {
+            @Html.DropDownListFor(model => model.Status, @Web.Models.Transforms.ToSelectList<Web.Models.GameStatus>(Model.Status), @Model.Status)
+            @Html.ValidationMessageFor(model => model.Status)
+        } else {
+            <b>@Model.Status</b>
+        }
+        </div>
+
+
+
+        <p>
+            <input type="submit" value="Save" />
+        @if(User.IsInRole("Administrator")) {
+            <input type="submit" name="NotifyTeams" id="NotifyTeams" value="Save and Notify Teams of Changes" />
+        }
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index", "Game")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

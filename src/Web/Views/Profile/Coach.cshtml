@@ -1,0 +1,340 @@
+﻿@model Web.Models.CoachProfileModel
+@using Web.Helpers
+@using Web.Models
+@{
+    ViewBag.Title = "Coach Profile";
+
+    var coachName = string.Format("{0}, {1}", Model.Coach.FirstName, Model.Coach.LastName).Trim();
+    if (string.IsNullOrEmpty(coachName))
+    {
+        coachName = Model.Coach.Email;
+    }
+}
+<h1>Welcome @coachName!</h1>
+
+@if (Model.TeamsActive.Count == 0)
+{
+    <p>You have no teams that are currently active. @Html.ActionLink("Create a team", "Create", "Team") and add players to its roster to get started.</p>
+}
+else
+{
+    <div id="active-teams">
+        @{
+    var activeTeamGrid = new WebGrid(canPage: false);
+    activeTeamGrid.Bind(Model.TeamsActive, autoSortAndPage: true);
+    
+            @activeTeamGrid.GetHtml(headerStyle: "header",
+            tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px", dataTableTitle = "<h3>Active Teams</h3>" },
+            alternatingRowStyle: "even",
+            rowStyle: "odd",
+            columns: activeTeamGrid.Columns(
+                activeTeamGrid.Column("Name", header: "Name", format: (item) => Html.ActionLink((string)item.Name, "Team", "Overview", new { id = (int)item.Team.Id }, new { }), canSort: false),
+                activeTeamGrid.Column("Team.League.Name", header: "League", format: @<text>
+        <a href="@Url.RouteUrl(new { controller = "Overview", action = "Details", id = item.Team.League.Id })">@item.Team.League.Name</a>
+        </text>, canSort: false),
+                activeTeamGrid.Column("Division", header: "Division", canSort: false),
+                activeTeamGrid.Column("Class", header: "Team Class", canSort: false),
+                activeTeamGrid.Column("Team.Wins", header: "Wins", canSort: false),
+                activeTeamGrid.Column("Team.Losses", header: "Losses", canSort: false),
+                activeTeamGrid.Column("Team.Ties", header: "Ties", canSort: false),
+                activeTeamGrid.Column("Players", style: "center", header: "Roster", canSort: false, format: @<text>
+            @if (item.Team.Players.Count == 0)
+            {
+<form action="@Url.RouteUrl(new { controller = "Player", action = "Create", id = item.Team.Id })" method="get" class="edit-link">
+                        <button class="command edit">Add Players</button>
+                    </form>  
+            }
+            else
+            {
+<a href="@Url.RouteUrl(new { controller = "TeamPlayer", action = "Index", id = item.Team.Id })">@item.Team.Players.Count players</a>
+            }
+            </text>),
+            activeTeamGrid.Column("", style: "center", header: "", canSort: false, format: @<text>
+            @if (item.Team.League.Type == Web.Models.LeagueType.League)
+                {
+                    <div style="float: right;">
+                        <form action="@Url.RouteUrl(new { controller = "Team", action = "Edit", id = item.Team.Id })" method="get" class="edit-link">
+                            <button class="command edit">Set Home Availability</button>
+                        </form>
+                        <form action="@Url.RouteUrl(new { controller = "Game", action = "RequestGame", id = item.Team.Id })" method="get" class="edit-link">
+                            <button class="command edit">Request Away Game</button>
+                        </form>
+                    </div>
+                }
+                @if (item.Team.League.Type == Web.Models.LeagueType.Scrimmage)
+                {
+                    List<AvailableDates> myAvailableDates = AvailableDates.GetAvailableDatesForTeam(item.Team);
+                    myAvailableDates = myAvailableDates.Where(a => a.Date >= DateTime.Now).OrderBy(a => a.Date).ToList();
+                    var toolTip = EmailNotification.ToTableData<AvailableDates>(myAvailableDates, new string[] { "Date", "Location" });
+                    toolTip = "<table style='font-size:1.2em'><tr><th>Date</th><th>Location</th></tr>" + toolTip + "</table>";
+            
+                        <form action="@Url.RouteUrl(new { controller = "Team", action = "EditAvailableDates", id = item.Team.Id })" method="get" class="edit-link">
+                            <button class="command edit" ptip="@Html.Raw(toolTip)">Set Game Availability (@myAvailableDates.Count)</button>
+                        </form>
+                        @*<form action="@Url.RouteUrl(new { controller = "Game", action = "RequestSpecificGame", id = item.Team.Id })" method="get" class="edit-link">
+                            <button class="command edit">Request Specific Game</button>
+                        </form>*@
+                }
+            </text>)
+            
+            
+
+            )
+        );
+        }
+    </div>
+}
+
+<br />
+
+@if (Model.UpcomingGames.Count == 0)
+{
+    <p>You have no upcoming games scheduled. @Html.ActionLink("Schedule a game.", "Index", "Game")</p>
+}
+else
+{
+    <div id="upcoming-games">
+        
+        @{
+    var grid = new WebGrid(canPage: false);
+    var gridColumns = grid.Columns(
+        grid.Column("Game.GameDate", header: "Game Date", canSort: false, format:@<text>@item.Game.GameDate</text>),
+        grid.Column("Game.HomeTeam.League.Name", header: "League", format: @<text>
+        <a href="@Url.RouteUrl(new { controller = "Overview", action = "Details", id = item.Game.HomeTeam.League.Id })">@item.Game.HomeTeam.League.Name</a>
+        </text>, canSort: false),
+        grid.Column("HomeTeam", header: "Home Team", canSort: false, format: @<text>@Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(item.HomeTeam, item.Game))</text>),
+        grid.Column("AwayTeam", header: "Away Team", canSort: false, format: @<text>@Html.Raw(Web.Models.Team.PrettyNameWithoutLeague(item.AwayTeam, item.Game))</text>),
+        grid.Column("Location", header: "Location", format: (item) => Html.ActionLink((string)item.Game.Location.Name, "Location", "Overview", new { id = (int)item.Game.Location.Id }, new { }), canSort: false),
+        grid.Column("Type", header: "Type", canSort: false),
+        grid.Column("Status", header: "Status", canSort: false),
+                    grid.Column("Admin", header: " ", format: @<text><span style="white-space: nowrap;">
+                        @if (item.Game.Status == Web.Models.GameStatus.Requested && item.Game.TeamToConfirmGame != null && item.Game.TeamToConfirmGame.Coaches.Contains(Web.Models.Coach.GetCoachForUser(Web.Models.User.GetUserByEmail(User.Identity.Name))))
+                        { 
+                            @Html.ActionLink("Approve", "GameApprove", "Game", new { id = (int)item.Game.Id }, new { onclick = "return confirm('Are you sure you want to confirm playing this game?')", style = "color:#000" })
+                        }
+                    </span></text>, canSort: false),
+                    grid.Column("Admin", header: " ", format: @<text><span style="white-space: nowrap;">
+                        @if (item.Game.Status == Web.Models.GameStatus.Requested && item.Game.TeamToConfirmGame != null && item.Game.TeamToConfirmGame.Coaches.Contains(Web.Models.Coach.GetCoachForUser(Web.Models.User.GetUserByEmail(User.Identity.Name))))
+                        { 
+                            @Html.ActionLink("Decline", "GameDecline", "Game", new { id = (int)item.Game.Id }, new { onclick = "return confirm('Are you sure you want to decline playing this game?')", style = "color:#000" })
+                        }
+                    </span></text>, canSort: false),
+                    grid.Column("Admin", header: " ", format: @<text><span style="white-space: nowrap;">
+                        @if (item.Game.GameDate < DateTime.Now && item.Game.HomeTeam.League.Type == Web.Models.LeagueType.Scrimmage && item.Game.Status == Web.Models.GameStatus.Confirmed)
+                        { 
+                            @Html.ActionLink("Enter Score", "EditScore", "Game", new { id = (int)item.Game.Id, returnUrl = "/Home/Dashboard/" }, new { style = "color:#000" })
+                        }
+                    </span></text>, canSort: false),
+                    grid.Column("Admin", header: " ", format: @<text><span style="white-space: nowrap;">
+                        @if (item.Game.Status == Web.Models.GameStatus.Requested && item.Game.TeamToRequestGame != null && item.Game.TeamToRequestGame.Coaches.Contains(Web.Models.Coach.GetCoachForUser(Web.Models.User.GetUserByEmail(User.Identity.Name))))
+                        {
+                            @Html.ActionLink("Edit", "Edit", "Game", new { id = (int)item.Game.Id, returnUrl = "/Home/Dashboard/" }, new { style = "color:#000" }) 
+                        }
+                    </span></text>, canSort: false),
+                    grid.Column("Admin", header: " ", format: @<text><span style="white-space: nowrap;">
+                        @if (item.Game.Status == Web.Models.GameStatus.Requested && item.Game.TeamToRequestGame != null && item.Game.TeamToRequestGame.Coaches.Contains(Web.Models.Coach.GetCoachForUser(Web.Models.User.GetUserByEmail(User.Identity.Name))))
+                        {
+                            @Html.ActionLink("Delete", "Delete", "Game", new { id = (int)item.Game.Id }, new { onclick = "return confirm('Are you sure you want to delete this game?')", style = "color:#000" })
+                        }
+                    </span></text>, canSort: false)
+    );
+
+    grid.Bind(Model.UpcomingGames, autoSortAndPage: true);
+    
+            @grid.GetHtml(headerStyle: "header",
+                tableStyle: "listing game dataTableActivate", htmlAttributes: new { dataTableHeight = "500px", dataTableTitle = "<h3>Upcoming Games</h3><p>" + @Html.ActionLink("Schedule more games.", "Index", "Game") + "</p>" },
+                alternatingRowStyle: "even",
+                rowStyle: "odd",
+                columns: gridColumns
+            );
+        }
+    </div>
+}
+
+@*
+<h3>Schedule Games</h3>
+
+@if (Model.AvailableDates.Count == 0)
+{
+    <p>No available games.s</p>
+}
+else
+{
+    <div id="team-datesavailable">
+    @{
+        var scheduleGrid = new WebGrid(canPage: true, canSort: false, rowsPerPage: 5, ajaxUpdateContainerId: "team-datesavailable");
+        var scheduleGridColumns = scheduleGrid.Columns(
+        scheduleGrid.Column("Status", header: "Status", canSort: false, format:@<text>
+                @{
+                    Web.Models.Game thisGame = item.GameScheduled;
+                    if(thisGame != null)
+                    {
+                        @thisGame.Status
+                        @: : 
+                        if (thisGame.HomeTeam == item.Team)
+                        {
+                            <a href="@Url.RouteUrl(new { controller = "Overview", action = "Team", id = thisGame.AwayTeam.Id })">@thisGame.AwayTeam.Name @thisGame.AwayTeam.Division.Name @thisGame.AwayTeam.Class.Name</a>
+                            @: vs 
+                        }
+                        else
+                        {
+                            <a href="@Url.RouteUrl(new { controller = "Overview", action = "Team", id = thisGame.HomeTeam.Id })">@thisGame.HomeTeam.Name @thisGame.HomeTeam.Division.Name @thisGame.HomeTeam.Class.Name</a>
+                            @: vs 
+                        }
+                    }
+                    else
+                    {
+                        @:Available
+                        @: : 
+                    }
+                    <a href="@Url.RouteUrl(new { controller = "Overview", action = "Team", id = item.Team.Id })">@item.Team.Name @item.Team.Division.Name @item.Team.Class.Name</a>
+                }</text>),
+        scheduleGrid.Column("Date", header: "Date", canSort: false),
+        scheduleGrid.Column("Location", header: "Location", canSort: false, format: @<text>
+                            <a href="@Url.RouteUrl(new { controller = "Overview", action = "Location", id = item.LocationId })">@item.Location</a></text>)
+    );
+
+    scheduleGrid.Bind(Model.AvailableDates, autoSortAndPage: true);
+    schedule
+                @scheduleGrid.GetHtml(headerStyle: "header",
+                    tableStyle: "listing game",
+                    alternatingRowStyle: "even",
+                    rowStyle: "odd",
+                    columns: scheduleGridColumns
+                );
+        }
+    </div>
+
+}
+
+*@
+
+<div style="border-bottom: 2px solid #ccc; margin: 1em 0 1em 0;"></div>
+
+
+
+<h3>Past Games</h3>
+
+@if (Model.PastGames.Count == 0)
+{
+    <p>You have no past game history.</p>
+}
+else
+{
+
+}
+
+<h4>Inactive Teams</h4>
+@if (Model.TeamsInactive.Count == 0)
+{
+    <p>You have no teams that are currently inactive.</p>
+}
+else
+{
+
+}
+
+<div id="delete-item-dialog" class="dialog" title="Delete Game">
+    <span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span>
+    <div></div>
+    <input type="hidden" id="hfDeleteItemId" />
+</div>
+
+<div id="confirm-item-dialog" class="dialog" title="Accept/Decline Game">
+    <span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span>
+    <div></div>
+    <input type="hidden" id="hfConfirmItemId" />
+</div>
+
+@section scripts {
+    @Styles.Render("~/Content/themes/base/css")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript">
+        function initGrid() {
+            $('button').button();
+        }
+
+        function initGameGrid() {
+            $('button').button();
+
+            $('table.listing.game').on('click', 'button.command.delete', function (e) {
+                // confirm deletion
+                var itemName = $(this).next('input[type=hidden]').val();
+                var dialog = $('div#delete-item-dialog');
+                $('div', dialog).text('Are you sure you want to delete the game?'.replace('{0}', itemName));
+                dialog.dialog('open');
+                dialog.data('form', $(this).parent());
+                e.preventDefault();
+                $(this).blur(); // reset button focus
+            });
+
+            $('table.listing.game').on('click', 'button.command.approve', function (e) {
+                var itemName = $(this).next('input[type=hidden]').val();
+                var dialog = $('div#confirm-item-dialog');
+                $('div', dialog).text('Are you sure you want to confirm playing the game?'.replace('{0}', itemName));
+                dialog.dialog('open');
+                dialog.data('form', $(this).parent());
+                e.preventDefault();
+                $(this).blur(); // reset button focus
+            });
+
+            $('table.listing.game').on('click', 'button.command.decline', function (e) {
+                // confirm deletion
+                var itemName = $(this).next('input[type=hidden]').val();
+                var dialog = $('div#confirm-item-dialog');
+                $('div', dialog).text('Are you sure you want to decline playing the game?'.replace('{0}', itemName));
+                dialog.dialog('open');
+                dialog.data('form', $(this).parent());
+                e.preventDefault();
+                $(this).blur(); // reset button focus
+            });
+        }
+
+        $(document).ready(function () {
+            initGrid();
+            initGameGrid();
+
+            $('div#delete-item-dialog').dialog({
+                autoOpen: false,
+                resizable: false,
+
+                modal: true,
+                buttons: {
+                    'Delete': function () {
+                        // replace text with contact name
+
+                        // simply submit associated form
+                        var form = $(this).data('form');
+                        form.submit();
+                    },
+                    'Cancel': function () {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+
+            $('div#confirm-item-dialog').dialog({
+                autoOpen: false,
+                resizable: false,
+
+                modal: true,
+                buttons: {
+                    'Yes': function () {
+                        // replace text with contact name
+
+                        // simply submit associated form
+                        var form = $(this).data('form');
+                        form.submit();
+                    },
+                    'Cancel': function () {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+        });
+
+
+
+    </script>
+}

@@ -1,0 +1,82 @@
+﻿@model Web.Models.GameSpecificRequestModel
+@{
+    ViewBag.Title = "Request A Game";
+}
+@section Header {
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#GameTime').timepicker();
+        $('#GameDate').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            yearRange: "-5:+5",
+            onChangeMonthYear: function (year, month, elem) {
+                var currentDate = $(this).datepicker('getDate');
+                if (currentDate == null)
+                    return;
+
+                var day = currentDate.getDate();
+                var newDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+                $(this).datepicker('setDate', newDate);
+            }
+        });
+    });
+</script>
+}
+<h2>Request A Specific Game</h2>
+
+@if (TempData.ContainsKey("GameRequested") && ((bool)(TempData["GameRequested"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Game successfully requested.</span>
+    </div>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Game</legend>
+
+        @Html.HiddenFor(model => model.HomeTeamId)
+        @Html.ValidationMessageFor(model => model.HomeTeamId)   
+        <div class="editor-label">
+            Team to play:
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.AwayTeamId, (List<SelectListItem>)ViewBag.AwayTeams, "Please choose", new { })
+            <img id="loading" src="/Images/ajax-loader.gif" alt="Loading..." style="display: none; vertical-align: middle;" /><span style="padding-left:10px;font-weight:bold;"><a href="@Url.Action("GenerateInvite", "Invitation", null)"><img src="/Images/add.png" style="vertical-align:middle;padding-bottom:0px;padding-right:5px;"/>Can't find your team? Click here to invite them!</a></span>
+            @Html.ValidationMessageFor(model => model.AwayTeamId)
+        </div>
+        <div>
+            
+        </div>
+        <div class="editor-label">
+            @Html.LabelFor(model => model.GameDate)
+        </div>
+        <div class="editor-field">
+            @Html.TextBoxFor(model => model.GameDate, new { style = "width: 4em; min-width: 100px;" }) @Html.TextBoxFor(model => model.GameTime, new { style = "width: 4em; min-width: 100px;" })
+            @Html.ValidationMessageFor(model => model.GameDate)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LocationId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.LocationId, (List<SelectListItem>)ViewBag.Locations, new { })
+            @Html.ValidationMessageFor(model => model.LocationId)
+        </div>
+        
+        <p>
+            <button id="ScheduleGame" class="command">Request Game</button>
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to Games", "Index", "Game")
+</div>

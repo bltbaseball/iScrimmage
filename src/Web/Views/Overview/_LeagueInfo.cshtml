@@ -1,0 +1,111 @@
+﻿@model Web.Models.LeagueOverviewModel
+@using Web.Models;
+
+<fieldset class="league-overview">
+    <div>
+        <div style="width: 30em; float: right; text-align: right;">
+        @{
+            Html.RenderPartial("_LeagueNav", Model.League);
+        }
+        </div>
+
+        <h3><a href="@Url.RouteUrl((Model.League.Type == Web.Models.LeagueType.League ? "League" : "Tournament"), new{id=Model.League.Id})">@Model.League.Name</a>
+
+        @if (Model.League.RegistrationEndDate < DateTime.Now)
+        {
+            
+        }
+        else
+        {
+            <text>> <i><a href="@Url.RouteUrl((Model.League.Type == Web.Models.LeagueType.League ? "League" : "Tournament"), new { id = Model.League.Id })"><b>Register Now &amp; More info</b></a></i></text>
+        }
+
+        </h3><br />
+
+        @if (Model.League.Type == LeagueType.Tournament)
+        {
+            @*if (Model.Rankings != null) 
+            {
+                // team rankings
+                <h4>Team Rankings</h4>
+                <div id="league-@Model.League.Id-teams">
+                    @{
+                        var activeTeamGrid = new WebGrid(canPage: false, canSort: false, ajaxUpdateContainerId: "league-" + Model.League.Id.ToString() + "-teams");
+                        activeTeamGrid.Bind(Model.Rankings, autoSortAndPage: true);
+                            @activeTeamGrid.GetHtml(headerStyle: "header",
+                                tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px" },
+                                alternatingRowStyle: "even",
+                                rowStyle: "odd",
+                                columns: activeTeamGrid.Columns(
+                                activeTeamGrid.Column("Ranking", header: "Ranking", canSort: false),
+                                    activeTeamGrid.Column("Team.Name", header: "Name", format: (item) => Html.ActionLink((string)item.Team.Name + " " + (string)item.Team.Division.Name + " " + (string)item.Team.Class.Name, "Team", "Overview", new { id = (int)item.Team.Id }, new { }), canSort: false),
+                                    activeTeamGrid.Column("Wins", header: "Wins",  canSort: false),
+                                    activeTeamGrid.Column("Losses", header: "Losses",  canSort: false),
+                                    activeTeamGrid.Column("Ties", header: "Ties",  canSort: false),
+                                    activeTeamGrid.Column("RunsAllowed", header: "Runs Allow",  canSort: false),
+                                    activeTeamGrid.Column("RunsScored", header: "Runs Scored",  canSort: false)
+                                )
+                            );
+                        }
+                </div>
+            }*@
+            // brackets listing
+            if (Model.Brackets != null)
+            {
+                <h4>Brackets and Pools</h4>
+                foreach (BracketOverviewModel bracket in Model.Brackets.OrderBy(b => b.Bracket.Division.MaxAge).ToList())
+                {
+                    bracket.ReturnUrl = "/Overview/Details/" + Model.League.Id.ToString() + "?tagToSlideOpen=bracket" + bracket.Bracket.Id.ToString();
+                    <h4 class="bracket-header"><a href="#" class="bracket-header"><b>+</b>@bracket.Bracket.FullName()</a></h4>
+                    <div class="bracket-info" id="bracket@{@bracket.Bracket.Id}">
+                        @Html.Partial("_BracketInfo", bracket)
+                    </div>
+                }
+            }
+        }
+
+        @if(Model.Games.Count > 0) {
+            <h4>Division Games</h4>
+            foreach (var grouping in Model.Games.OrderBy(g => g.Division.MaxAge).GroupBy(g => g.Division).ToList())
+            {
+                Game divisionGames = grouping.FirstOrDefault();
+                        <h4 class="bracket-header"><a href="#" class="bracket-header"><b>+</b>@divisionGames.Division.Name</a></h4>
+                        <div class="bracket-info" id="division@{@divisionGames.Division.Name}">
+        
+                <h4>Upcoming Games</h4>
+                @if (Model.UpcomingGames().Where(g => g.Division == divisionGames.Division).ToList().Count == 0)
+                {
+                    <p>All games have been started or played</p>
+                } 
+                else 
+                {
+                    var gameInfoModel = new GameOverviewModel();
+                    gameInfoModel.UniqueAjaxName = "upcoming" + Model.League.Id + divisionGames.Division.Name;
+                    gameInfoModel.ReturnUrl = "/Overview/Details/" + Model.League.Id.ToString() + "?tagToSlideOpen=division" + divisionGames.Division.Name;
+                    gameInfoModel.LeagueGames = Model.UpcomingGamesModel(divisionGames.Division);
+                    @Html.Partial("_GameInfo", gameInfoModel)
+                }
+
+        
+                <h4>Played Games</h4>
+                @if (Model.PastGames().Count == 0)
+                {
+                    <p>No games have been scheduled for this @(Model.League.Type == Web.Models.LeagueType.League ? "league" : "tournament") yet.</p>
+                } 
+                else 
+                {
+                    var gameInfoModel = new GameOverviewModel();
+                    gameInfoModel.UniqueAjaxName = "past" + Model.League.Id + divisionGames.Division.Name;
+                    gameInfoModel.ReturnUrl = "/Overview/Details/" + Model.League.Id.ToString() + "?tagToSlideOpen=division" + divisionGames.Division.Name;
+                    gameInfoModel.LeagueGames = Model.PastGamesModel(divisionGames.Division);
+                    @Html.Partial("_GameInfo", gameInfoModel)
+                }
+
+                </div>
+            }
+        } else {
+            <h3>No games scheduled yet</h3>
+        }
+    </div>
+</fieldset>
+<br />

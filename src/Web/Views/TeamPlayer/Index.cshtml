@@ -1,0 +1,331 @@
+﻿@model Web.Models.TeamPlayersModel
+
+@{
+    ViewBag.Title = "Team Players";
+}
+@section Header {
+    <script type="text/javascript" src="/Scripts/jquery.upload-1.0.2.js"></script>
+    <link href="/Content/themes/base/jquery.Jcrop.css" rel="stylesheet"/>
+    <script src="/Scripts/jquery.Jcrop.js"></script>
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="/Scripts/upload-photo.js"></script>
+    <script type="text/javascript">
+        function initGrid() {
+            $('button').button();
+            $('table.listing').on('click', 'button.command.delete', function (e) {
+                // confirm deletion
+                var itemName = $(this).next('input[type=hidden]').val();
+                var dialog = $('div#delete-item-dialog');
+                $('div', dialog).text('Are you sure you want to remove "{0}" player off this team?'.replace('{0}', itemName));
+                dialog.dialog('open');
+                dialog.data('form', $(this).parent());
+                e.preventDefault();
+                $(this).blur(); // reset button focus
+            });
+        }
+
+        function photoCropped(id, file) {
+            $('#photo-' + id).attr('src', '/PlayerImages/' + file + '.jpeg').show();
+            $('#photo-cont-' + id + ' button').text('Change Photo');
+        }
+
+        PhotoUploadCallbacks.add(photoCropped);
+        $(document).ready(function () {
+            $('#teamplayers').on('click', 'button.AddPhoto', function (e) {
+                e.preventDefault();
+                var dialog = $('#upload-photo-dialog');
+                dialog.dialog('open');
+                // set id for file upload
+                $('#CropId', dialog).val($(this).data('id'));
+                $('#CropType', dialog).val('Player');
+
+            });
+            $('#teamplayers').on('click', 'input.AddPhoto', function (e) {
+                e.preventDefault();
+                var dialog = $('#upload-photo-dialog');
+                dialog.dialog('open');
+                // set id for file upload
+                $('#CropId', dialog).val($(this).data('id'));
+                $('#CropType', dialog).val('Player');
+
+            });
+        });
+    </script>
+    <style>
+        .center {
+            text-align: center;
+        }
+    </style>
+}
+<h1>@Web.Models.Team.PrettyName(Model.Team) in
+    @Model.Team.League.Name
+</h1>
+
+@if (TempData.ContainsKey("PlayerInvited") && ((bool)(TempData["PlayerInvited"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Invitation sent to Player successfully.</span>
+    </div>
+}
+@if (TempData.ContainsKey("GuardianInvited") && ((bool)(TempData["GuardianInvited"]) == true))
+{
+    <div class="status-indicator ui-corner-all ui-state-success">
+        <span class="ui-icon ui-icon-circle-check"></span>
+        <span>Invitation sent to Guardian successfully.</span>
+    </div>
+}
+ 
+    @*@if (Model.Status.HasPaidMandatoryFees)
+    {
+        <div>Fees Paid</div>   
+    } else {
+        if (Model.Team.League.Type == Web.Models.LeagueType.Tournament)
+        {
+            <form action="@Url.RouteUrl(new{ controller="Home", action ="Tournament01", id = Model.Team.Id})" method="get" class="edit-link">
+            <button class="command edit">Pay Fee Now</button>
+            </form>
+        } else {
+            <form action="@Url.RouteUrl(new{ controller="Team", action ="PayFees", id = Model.Team.Id})" method="get" class="edit-link">
+            <button class="command edit">Pay Fee Now</button>
+            </form>
+        }
+    }*@
+
+@if(Model.Team.League.Type != Web.Models.LeagueType.Scrimmage)
+{
+    Html.RenderPartial("_TeamStatus", Model.Status);
+}
+
+@{ WebGrid grid; }
+
+@if(Model.Team.League.Type != Web.Models.LeagueType.Tournament)
+{
+<h3 style="float:left;">Game Dates</h3>
+<span style="float:left;padding-left:30px;font-weight:bold;"><a href="@Url.Action("EditAvailableDates", "Team", new { id = Model.Team.Id })" pTip="Add more dates you are available for home games"><img src="/Images/add.png" style="vertical-align:middle;padding-bottom:4px;padding-right:5px;"/> Add Dates</a></span>
+if (Model.Team.DatesAvailable.Count == 0)
+{
+    <p>There are no game dates.</p>
+}
+else
+{
+    <div id="team-datesavailable">
+    @{
+    grid = new WebGrid(canPage: false);
+    var gridColumns = grid.Columns(
+        grid.Column("Status", header: "Status", canSort: false, format:@<text>
+                @{
+                    Web.Models.Game thisGame = item.GameScheduled;
+                    if(thisGame != null)
+                    {
+                        @thisGame.Status
+                        @: : 
+                        if(thisGame.HomeTeam == item.Team)
+                        {
+                            <a href="@Url.RouteUrl(new { controller = "Overview", action = "Team", id = thisGame.AwayTeam.Id })">@thisGame.AwayTeam.Name @thisGame.AwayTeam.Division.Name @thisGame.AwayTeam.Class.Name</a>
+                        } else {
+                            <a href="@Url.RouteUrl(new { controller = "Overview", action = "Team", id = thisGame.HomeTeam.Id })">@thisGame.HomeTeam.Name @thisGame.HomeTeam.Division.Name @thisGame.HomeTeam.Class.Name</a>
+                        }
+                    } else {
+                        @:Available
+                    }
+                       
+                }</text>),
+        grid.Column("Date", header: "Date", canSort: false),
+        grid.Column("Location", header: "Location", canSort: false, format: @<text>
+                            <a href="@Url.RouteUrl(new { controller = "Overview", action = "Location", id = item.LocationId })">@item.Location</a></text>)
+    );
+
+    grid.Bind(Model.AvailableDates, autoSortAndPage: true);
+    
+                @grid.GetHtml(headerStyle: "header",
+                    tableStyle: "listing game",
+                    alternatingRowStyle: "even",
+                    rowStyle: "odd",
+                    columns: gridColumns
+                );
+        }
+    </div>
+}
+}
+
+<h3>Coaches</h3>
+@if (Model.Team.Coaches.Count == 0)
+{
+    <p>There are no coaches on this team.</p>
+}
+else
+{
+    <div id="team-coaches">
+        @{
+    grid = new WebGrid(canPage: false);
+    var gridColumns = grid.Columns(
+        grid.Column("FirstName", header: "First Name", canSort: false),
+        grid.Column("LastName", header: "Last Name", canSort: false),
+        grid.Column("PhoneNumber", header: "Phone Number", canSort: false),
+        grid.Column("Email", header: "Email", canSort: false)
+    );
+
+    grid.Bind(Model.Team.Coaches, autoSortAndPage: true);
+    
+                @grid.GetHtml(headerStyle: "header",
+                    tableStyle: "listing game",
+                    alternatingRowStyle: "even",
+                    rowStyle: "odd",
+                    columns: gridColumns
+                );
+        }
+    </div>
+}
+
+<h3 style="float:left;">Players</h3>
+<span style="float:left;padding-left:30px;font-weight:bold;"><a href="@Url.Action("Create", "Player", new { id = Model.Team.Id })" pTip="Add players to your team"><img src="/Images/add.png" style="vertical-align:middle;padding-bottom:4px;padding-right:5px;"/> Add Players</a></span>
+
+<div id="teamplayers">
+@{
+    grid = new WebGrid(canPage: false);
+    grid.Bind(Model.Players, autoSortAndPage: true);
+    
+    @grid.GetHtml(headerStyle: "header",
+        tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px" },
+        alternatingRowStyle: "even",
+        rowStyle: "odd",
+        columns: grid.Columns(
+            grid.Column("Edit", style: "center", header: "Status", format: @<text>
+                @if (item.TeamPlayer.Status != Web.Models.PlayerStatus.Active)
+                {
+                    <form action="@Url.RouteUrl(new { controller = "Player", action = "Create", id = item.TeamPlayer.Team.Id })" method="get" class="edit-link">
+                        <button class="command edit">Edit</button>
+                        <input type="hidden" value="@item.TeamPlayer.Player.Id" name="updatePlayerId" />
+                    </form>  
+                }
+                else if (item.TeamPlayer.Status == Web.Models.PlayerStatus.Active)
+                {
+                    @:Active
+                }      
+                    </text>,
+                canSort: false),
+            grid.Column("Name", header: "Player", canSort: false, style: "player", format: @<text>
+                    @item.TeamPlayer.Player.LastName, @item.TeamPlayer.Player.FirstName #@item.TeamPlayer.Player.JerseyNumber
+                    @if (item.TeamPlayer.Player.DateOfBirth != null)
+                    {
+                        <br />@item.TeamPlayer.Player.DateOfBirth.ToShortDateString()
+                    }
+            </text>),
+            grid.Column("Account", header: "Account", canSort: false, style: "player", format: @<text>
+                @if (item.TeamPlayer.Player.User != null)
+                {
+                    @item.TeamPlayer.Player.User.Email
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(item.TeamPlayer.Player.Email))
+                    {
+                        <form action="@Url.RouteUrl(new { controller = "TeamPlayer", action = "Invite", id = item.TeamPlayer.Player.Id, teamId = item.TeamPlayer.Team.Id })" method="post" class="invite-link">
+                            <button class="command" pTip="@item.TeamPlayer.Player.Email">Send Invite</button>
+                            @Html.AntiForgeryToken()
+                        </form>
+                        if (item.TeamPlayer.Player.InvitationSentOn != null)
+                        {
+                            <p style="font-size:smaller;">Invited @item.TeamPlayer.Player.InvitationSentOn</p>
+                        }
+                    }
+                    else
+                    {
+                        <p style="font-size:smaller;">No email address for player</p>
+                    }
+                }
+            </text>),
+            grid.Column("TeamPlayer.Photo", header: "Photo", canSort: false, format: @<text>
+                    <div id="photo-cont-@item.TeamPlayer.Id">
+                        @{
+                            string playerPhoto = null;
+                            string hidePhoto = "display: none;";
+                            if (!string.IsNullOrEmpty(item.TeamPlayer.Photo))
+                            {
+                                playerPhoto = "/PlayerImages/" + item.TeamPlayer.Photo + ".jpeg";
+                                hidePhoto = null;
+                            }   
+                        }
+                        <input type="image" class="photo AddPhoto" data-id="@item.TeamPlayer.Id" id="photo-@item.TeamPlayer.Id" src="@playerPhoto" height="100" width="100"  style="border: 1px solid #999; @hidePhoto"/> 
+                        @if (string.IsNullOrEmpty(item.TeamPlayer.Photo))
+                        {
+                          <button class="command AddPhoto" data-id="@item.TeamPlayer.Id" style="width:100px;">Add Photo</button>
+                        }
+                    </div>
+                    </text>),
+            grid.Column("TeamPlayer.Player.Guardian", header: "Guardian", canSort: false, format: @<text>
+                @if (item.TeamPlayer.Player.Guardian != null)
+                {
+                    if (item.TeamPlayer.Player.Guardian.User != null)
+                    {
+                        <span ptip="@item.TeamPlayer.Player.Guardian.Email">@item.TeamPlayer.Player.Guardian.FirstName @item.TeamPlayer.Player.Guardian.LastName</span>
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(item.TeamPlayer.Player.Guardian.Email))
+                        {
+                            if (item.TeamPlayer.Player.Guardian.InvitationSentOn != null)
+                            {
+                                <div style="font-size:smaller;">Invited @item.TeamPlayer.Player.Guardian.InvitationSentOn</div>
+                            }
+                            <form action="@Url.RouteUrl(new { controller = "TeamPlayer", action = "InviteGuardian", id = item.TeamPlayer.Player.Guardian.Id, playerId = item.TeamPlayer.Player.Id, teamId = item.TeamPlayer.Team.Id })" method="post" class="invite-link">
+                                <button class="command" pTip="@item.TeamPlayer.Player.Guardian.Email">Invite Guardian</button>
+                                @Html.AntiForgeryToken()
+                            </form>
+                        }
+                    }
+                }
+                else
+                {
+                 <text>No Guardian</text>   
+                }
+                </text>
+                                ),
+            grid.Column("TeamPlayer.Player.Guardian", header: "Waiver", canSort: false, format: @<text>
+                @if(Model.Team.League.WaiverRequired) {
+                if (item.TeamPlayer.Player.Guardian != null)
+                {
+                    if (item.TeamPlayer.WaiverStatus != Web.Models.SignStatus.Signed)
+                    {
+                        <form action="@Url.RouteUrl(new { controller = "TeamPlayer", action = "SendWaiver", id = (int)item.TeamPlayer.Id, teamId = item.TeamPlayer.Team.Id })" method="post" class="invite-link">
+                            <button class="command" pTip="@item.TeamPlayer.Player.Guardian.Email">@item.TeamPlayer.WaiverStatus.ToString().Replace("Request", ""): Send Again ></button>
+                            @Html.AntiForgeryToken()
+                        </form>
+                    }
+                    else
+                    {
+                        <div>Waiver: @item.TeamPlayer.WaiverStatus.ToString()</div>
+                    }
+                }
+                else
+                {
+                 <text>No Guardian</text>   
+                }
+                }
+                </text>
+                                ),
+            grid.Column("Delete", style: "center", header: " ",
+                                                        format: @<text>
+                    <form action="@Url.RouteUrl(new { controller = "TeamPlayer", action = "Delete", id = item.TeamPlayer.Id })" method="post" class="delete-link">
+                        <button class="command delete">Remove From Team</button>
+                        <input type="hidden" value="@item.TeamPlayer.Player.LastName, @item.TeamPlayer.Player.FirstName" />
+                        @Html.AntiForgeryToken()
+                    </form>
+                    </text>,
+                                                                        canSort: false)
+                                                                )
+                                                            );
+}
+</div>
+<script type="text/javascript">
+    $('[ptip!=""]').qtip({
+        hide: { fixed: true, delay: 250 }, content: { attr: 'ptip' }
+    });
+</script>
+@{
+    Html.RenderPartial("_UploadPhotoPartial");
+}
+

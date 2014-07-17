@@ -1,0 +1,43 @@
+﻿@{
+    ViewBag.Title = "Downloads";
+        if (Request.IsAuthenticated)
+        {
+            Layout = "~/Views/Shared/_Dashboard.cshtml";
+        }
+        else
+        {
+            Layout = "~/Views/Shared/_Layout.cshtml";
+        }
+    }
+
+<hgroup class="title">
+    <h1>@ViewBag.Title</h1>
+</hgroup>
+
+<table>
+    <thead>
+        <tr>
+            <th>Download</th>
+            <th>Size</th>
+        </tr>
+    </thead>
+    <tbody>
+@{
+    var downloads = Directory.GetFiles(Server.MapPath("~/Content/Downloads")).OrderBy(f => f);
+    var rowClass = "odd";
+    foreach(var file in downloads) 
+    {
+        var info = new FileInfo(file);
+        <tr class="@rowClass">
+            <td><a href="@Url.Content("~/Content/Downloads/" + info.Name)" target="_blank">@info.Name</a></td>
+            <td>@((info.Length/1024).ToString("f1")) KB</td>
+        </tr>
+        if (rowClass == "even"){
+            rowClass = "odd";
+        } else {
+            rowClass = "even";
+        }
+    }
+}
+    </tbody>
+</table>

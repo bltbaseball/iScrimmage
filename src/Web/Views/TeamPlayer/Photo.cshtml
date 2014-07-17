@@ -1,0 +1,179 @@
+﻿@model Web.Models.TeamPlayerUpdateModel
+
+@{
+    ViewBag.Title = "Update Team -> Player";
+}
+@section Header {
+    <link href="/Content/themes/base/jquery.Jcrop.css" rel="stylesheet"/>
+    <script src="/Scripts/jquery.Jcrop.js"></script>
+<style type="text/css">
+
+/* Apply these styles only when #preview-pane has
+   been placed within the Jcrop widget */
+.jcrop-holder #preview-pane {
+  display: block;
+  position: absolute;
+  z-index: 2000;
+  top: 10px;
+  right: -380px;
+  padding: 6px;
+  border: 1px rgba(0,0,0,.4) solid;
+  background-color: white;
+
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+
+  -webkit-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* The Javascript code will set the aspect ratio of the crop
+   area based on the size of the thumbnail preview,
+   specified here */
+#preview-pane .preview-container {
+  width: 250px;
+  height: 250px;
+  overflow: hidden;
+}
+
+</style>
+
+}
+<h2>Update Photo for @ViewBag.PlayerName in
+    @ViewBag.Team.Name in
+    @ViewBag.Team.League.Name</h2>
+
+    <fieldset>
+        <legend>Photo</legend>
+
+@using (Html.BeginForm("CropImage", "TeamPlayer", method: FormMethod.Post, htmlAttributes: new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+        @Html.Hidden("TeamId", (int)ViewBag.Team.Id)
+        @Html.HiddenFor(model => model.Id)
+        
+        @Html.HiddenFor(x => x.Left)
+        @Html.HiddenFor(x => x.Right)
+        @Html.HiddenFor(x => x.Top)
+        @Html.HiddenFor(x => x.Bottom)
+        <table><tr><th style="width:350px;">Original Image</th><th>Cropped Image &nbsp; &nbsp; <input type="submit" value="Crop" /></th></tr></table>
+        <img src="~/PlayerImages/@(System.String.IsNullOrEmpty(Model.Photo) ? "" : Model.Photo).jpeg" id="jcrop-target" height="250" />
+            
+        <div id="preview-pane">
+            <div class="preview-container">
+            <img src="~/PlayerImages/@(System.String.IsNullOrEmpty(Model.Photo) ? "" : Model.Photo).jpeg" class="jcrop-preview" alt="Preview"  />    
+            </div>
+        </div>
+    <br />
+    <br />
+}
+    </fieldset>
+    <fieldset>
+        <legend>Upload New Photo</legend>
+
+@using (Html.BeginForm("UploadPhoto", "TeamPlayer", method: FormMethod.Post, htmlAttributes: new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+        @Html.Hidden("TeamId", (int)ViewBag.Team.Id)
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="editor-field">
+            <input type="file" name="imageFile" id="imageFile" />  
+            <input type="submit" value="Upload" />
+        </div>
+
+}
+    </fieldset>
+    <fieldset>
+        <legend>Delete Photo</legend>
+
+@using (Html.BeginForm("DeletePhoto", "TeamPlayer", method: FormMethod.Post, htmlAttributes: new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+        @Html.Hidden("TeamId", (int)ViewBag.Team.Id)
+        @Html.HiddenFor(model => model.Id)
+
+        <p>
+            <input type="submit" value="Delete" />
+        </p>
+}
+
+    </fieldset>
+
+<div>
+    @Html.ActionLink("Done", "Index", "TeamPlayer", new { id = ((Web.Models.Team)ViewBag.Team).Id }, new { })
+</div>
+<script type="text/javascript">
+    jQuery(function($){
+
+        // Create variables (in this scope) to hold the API and image size
+        var jcrop_api,
+            boundx,
+            boundy,
+
+            // Grab some information about the preview pane
+            $preview = $('#preview-pane'),
+            $pcnt = $('#preview-pane .preview-container'),
+            $pimg = $('#preview-pane .preview-container img'),
+
+            xsize = $pcnt.width(),
+            ysize = $pcnt.height();
+    
+        console.log('init',[xsize,ysize]);
+        $('#jcrop-target').Jcrop({
+            onChange: updatePreview,
+            onSelect: updatePreview,
+            setSelect: [@Model.Top, @Model.Left, @Model.Right, @Model.Bottom],
+            aspectRatio: xsize / ysize
+        },function(){
+            // Use the API to get the real image size
+            var bounds = this.getBounds();
+            boundx = bounds[0];
+            boundy = bounds[1];
+            // Store the API in the jcrop_api variable
+            jcrop_api = this;
+
+            // Move the preview into the jcrop container for css positioning
+            $preview.appendTo(jcrop_api.ui.holder);
+        });
+
+        function updatePreview(c)
+        {
+            if (parseInt(c.w) > 0)
+            {
+                $('#Top').val(c.y);
+                $('#Left').val(c.x);
+                $('#Bottom').val(c.y2);
+                $('#Right').val(c.x2);
+
+                var rx = xsize / c.w;
+                var ry = ysize / c.h;
+
+                $pimg.css({
+                    width: Math.round(rx * boundx) + 'px',
+                    height: Math.round(ry * boundy) + 'px',
+                    marginLeft: '-' + Math.round(rx * c.x) + 'px',
+                    marginTop: '-' + Math.round(ry * c.y) + 'px'
+                });
+            }
+        };
+
+    });
+
+
+</script>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

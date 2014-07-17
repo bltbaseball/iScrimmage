@@ -1,0 +1,43 @@
+﻿@{
+    ViewBag.Title = "Tournaments";
+        if (Request.IsAuthenticated)
+        {
+            Layout = "~/Views/Shared/_Dashboard.cshtml";
+        }
+        else
+        {
+            Layout = "~/Views/Shared/_Layout.cshtml";
+        }
+    }
+
+<hgroup class="title">
+    <h1>@ViewBag.Title</h1>
+</hgroup>
+
+<table>
+    <thead>
+        <tr>
+            <th>When</th>
+            <th>Tournament Name</th>
+            <th>Age Groups</th>
+            <th>Place</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>08/16-08/18</td>
+            <td>BLT Baseball Pre-Fall Season Majors Invitational</td>
+            <td>10U, 12U, 14U</td>
+            <td>Bamford Park</td>
+            <td>@Html.ActionLink("More Info and Register", "Tournament01", "Home")</td>
+        </tr>
+        <tr>
+            <td>07/11-07/14</td>
+            <td>Tommy Collaro's Whirly Bird Classic</td>
+            <td>8U-15U</td>
+            <td>Bamford Park</td>
+            <td class="t_closed">Closed</td>
+        </tr>
+    </tbody>
+</table>

@@ -1,0 +1,30 @@
+﻿@model Web.Models.TeamAvailableDates
+<div id="available-dates-@Model.TeamId">
+@{
+    var dateGrid = new WebGrid(canPage: true, canSort: false, rowsPerPage: 20, ajaxUpdateContainerId: "available-dates-" + Model.TeamId.ToString(), ajaxUpdateCallback: "setArrows");
+    var dateGridColumns = new WebGridColumn[20];
+    dateGridColumns = dateGrid.Columns(
+        //dateGrid.Column("Id", header: "Id", canSort: false),
+        dateGrid.Column("TeamName", header: "Opposing Team", canSort: false, format: @<text>@item.Status: <a href="@Url.RouteUrl(new { controller = "Overview", action = "Team", id = item.Team.Id })">@item.TeamName</a></text>),
+        dateGrid.Column("Date", header: "Date", canSort: false),
+        dateGrid.Column("Type", header: "Type", canSort: false),
+        dateGrid.Column("LocationId", header: "Location", canSort: false, format: @<text><a href="@Url.RouteUrl(new { controller = "Overview", action = "Location", id = item.LocationId })">@item.Location</a></text>),
+        dateGrid.Column("Distance", header: "Distance To", canSort: false, format: @<text>@((item.Distance * 0.000621371).ToString("F1")) miles</text>),
+        dateGrid.Column("", style: "width: 40em; min-width: 200px;", header: " ", format: @<text><span style="white-space:nowrap;">
+            @Html.ActionLink("Play!", "Challenge", new { id = item.Id, myTeamId = (int)Model.TeamId }, new { style = "color:#000" })
+            </span></text>, canSort: false)
+                                                                                                                                             
+    );
+    dateGrid.Bind(Model.AvailableDates, autoSortAndPage: true);
+    
+        @dateGrid.GetHtml(headerStyle: "header",
+            tableStyle: "listing ", htmlAttributes: new { dataTableHeight = "500px", dataTableTitle = Model.TableHeader },
+            alternatingRowStyle: "even",
+            rowStyle: "odd",
+            columns: dateGridColumns
+        );
+        @Html.Hidden("dir", dateGrid.SortDirection) 
+        @Html.Hidden("col", dateGrid.SortColumn)
+}
+
+</div>

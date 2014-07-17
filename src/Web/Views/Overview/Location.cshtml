@@ -1,0 +1,100 @@
+﻿@model Web.Models.LocationOverviewModel
+
+@{
+    ViewBag.Title = Model.Name;
+    if (Request.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_Dashboard.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+
+@section Scripts {
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script type="text/javascript">
+        var map;
+        var geocoder;
+        function initialize() {
+            geocoder = new google.maps.Geocoder();
+            var latlng = new google.maps.LatLng(26.099945, -80.136949)
+            var mapOptions = {
+                zoom: 14,
+                center: latlng,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            map = new google.maps.Map(document.getElementById('Map'),
+                mapOptions);
+
+            codeAddress();
+        }
+
+        function codeAddress() {
+            var address = '@Model.Address @Model.City, @Model.State @Model.Zip';
+            geocoder.geocode({ 'address': address }, function (results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    map.setCenter(results[0].geometry.location);
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        title: '@Model.Name',
+                        position: results[0].geometry.location
+                    });
+                }
+            });
+        }
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+
+        $(document).ready(function () {
+            // init ze map
+        });
+    </script>
+}
+<h2>@Model.Name</h2>
+
+<br />
+@*    <div class="display-label">
+         @Html.DisplayNameFor(model => model.Name)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.Name)
+    </div>*@
+    <div id="Map" style="width: 500px; height: 300px; border: 1px solid #ccc; float: right;">
+
+    </div>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.Address)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.Address)<br />
+        @Html.DisplayFor(model => model.City), @Html.DisplayFor(model => model.State) @Html.DisplayFor(model => model.Zip)<br />
+        <a href="http://maps.google.com/maps?daddr=@Model.Address @Model.City, @Model.State @Model.Zip">Get Directions</a>
+    </div>
+
+    @if(!string.IsNullOrEmpty(Model.Url)) {
+        <div class="display-label">
+             @Html.DisplayNameFor(model => model.Url)
+        </div>
+        <div class="display-field">
+            @Html.DisplayFor(model => model.Url)
+        </div>
+    }
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.Notes)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.Notes)
+    </div>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.GroundsKeeperPhone)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.GroundsKeeperPhone)
+    </div>
+
+<form class="edit-link"><button class="command edit" onclick="history.back(); return false">Back</button></form>

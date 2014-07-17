@@ -1,0 +1,62 @@
+﻿@model Web.Models.LocalPasswordModel
+@{
+    ViewBag.Title = "Profile";
+}
+
+    <h1>@ViewBag.Title</h1>
+
+<p class="message-success">@ViewBag.StatusMessage</p>
+
+<p>You're logged in as <strong>@User.Identity.Name</strong>.</p>
+
+@*@if (ViewBag.HasLocalPassword)
+{
+    @Html.Partial("_ChangePasswordPartial")
+}
+else
+{ 
+    @Html.Partial("_SetPasswordPartial")
+}*@
+
+@*<section id="externalLogins">
+    @Html.Action("RemoveExternalLogins")
+
+    <h3>Add an external login</h3>
+    @Html.Action("ExternalLoginsList", new { ReturnUrl = ViewBag.ReturnUrl })
+</section>*@
+
+@using (Html.BeginForm()) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset style="border:0px;margin:0px;padding:0px;">
+        <legend></legend>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.NotificationEmail)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.NotificationEmail)
+            @Html.ValidationMessageFor(model => model.NotificationEmail)
+        </div>
+
+        @if (User.IsInRole("Player"))
+        {
+        <div class="editor-label">
+            @Html.LabelFor(model => model.IsLookingForTeam)
+        </div>
+        <div class="editor-field">
+            @Html.RadioButtonFor(model => model.IsLookingForTeam, true, new { @id ="IsLookingForTeamTrue" }) <label for="IsLookingForTeamTrue" style="display: inline;">Yes</label>
+            @Html.RadioButtonFor(model => model.IsLookingForTeam, false, new { @id = "IsLookingForTeamFalse" }) <label for="IsLookingForTeamFalse" style="display: inline;">No</label>
+        </div>
+        }
+        <p>
+            <input type="submit" value="Confirm" />
+        </p>
+    </fieldset>
+}
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

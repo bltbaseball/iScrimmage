@@ -1,0 +1,302 @@
+﻿@model Web.Models.TeamUpdateDatesModel
+
+@{
+    ViewBag.Title = "Edit Team";
+}
+
+@if (Model.Team.League.Type == Web.Models.LeagueType.Scrimmage)
+{
+    <h2>Scrimmage Dates</h2>
+    <h3>Please setup dates you are available to play by entering them below. These will immediately become available for other teams to challenge you to a game. You can always come back to enter more dates, or you can skip this step for now.</h3>
+    <br />
+    <br />
+}
+@if (Model.Team.League.Type == Web.Models.LeagueType.League)
+{
+    <p>League Dates: Please setup dates you are available to play by entering them below. These will immediately become available for other teams to setup games against you.</p>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset style="border:0px;">
+        <legend></legend>
+
+        @Html.HiddenFor(model => model.Id)
+        <div id="available-dates">
+        <div class="editor-field">
+            <table id="AvailableDatesList" class="listing">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Location</th>
+                        <th>Type</th>
+                        <th>Within Distance</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.AvailableDates != null)
+                    {
+                        for (var i = 0; i < Model.AvailableDates.Count; i++)
+                        {
+                            var date = Model.AvailableDates[i];
+                            <tr>
+                                <td>
+                                    <input type="hidden" name="AvailableDates.Index" value="@i" /><input type="hidden" name="AvailableDates[@i].Id" value=""/> 
+                                    <input type="text" name="AvailableDates[@i].Date" class="available-date" value="@date.Date"/> 
+                                </td>
+                                <td><input type="text" name="AvailableDates[@i].Time" class="available-time" value="@date.Time" /> </td>
+                                <td>
+                                    <select name="AvailableDates[@i].LocationId">
+                                        @foreach (var item in (List<SelectListItem>)ViewBag.Locations)
+                                        {
+                                            var selected = (date.LocationId == int.Parse(item.Value)) ? " selected=\"selected\"" : "";
+                                            <option value="@item.Value"@Html.Raw(selected)>@item.Text</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <select name="AvailableDates[@i].Type">
+                                        @foreach (var item in (List<SelectListItem>)ViewBag.AvailableDateTypes)
+                                        {
+                                            var selected = (date.Type == item.Value) ? " selected=\"selected\"" : "";
+                                            <option value="@item.Value"@Html.Raw(selected)>@item.Text</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td><input type="text" name="AvailableDates[@i].Distance" value="@date.Distance" style="width: 2em;min-width: 2em;" /> miles</td>
+                                <td><button class="command remove">Remove</button></td>
+                            </tr>
+                        }
+                    }                    
+                </tbody>
+            </table>
+            
+            <fieldset id="AvailableDatesAdd">
+                <legend>Add Available Date</legend>
+                <div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Location</th>
+                                <th>Type</th>
+                                <th>Within Distance</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="vertical-align: middle;"><input type="text" id="AvailableDateDate" class="available-date" value="@DateTime.Now.ToShortDateString()" /></td>
+                                <td style="vertical-align: middle;"><input type="text" id="AvailableDateTime" class="available-time" value="5:00am" /></td>
+                                <td style="vertical-align: middle;">@Html.DropDownList("AvailableDateLocation", (List<SelectListItem>)ViewBag.Locations, new { })</td>
+                                <td style="vertical-align: middle;">
+                                    <select id="AvailableDateType">
+                                        <option value="Home">Home Game</option>
+                                        <option value="Away">Away Game</option>
+                                        <option value="HomeOrAway">Home or Away Game</option>
+                                    </select>
+                                </td>
+                                <td style="vertical-align: middle;"><input type="text" id="AvailableDateDistance" style="width: 2em;min-width: 2em;" /> miles</td>
+                                <td style="vertical-align: middle;"><button id="AvailableDateAdd" class="command add">Add Date</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </fieldset>
+            @Html.ValidationMessageFor(model => model.AvailableDates)
+        </div>
+        </div>
+        <p>
+            @if (Model.Team.Players.Count == 0)
+            {
+                <button class="command" name="Submit">Save and Create Players</button>
+                <button class="command" name="Submit" value="SkipPlayers">Save and Skip Player Entry</button>
+                <button class="command" name="Submit" value="SkipPlayers">Skip Date Entry</button>
+            }
+            else
+            {
+                <button class="command" name="Submit">Save</button>
+            }
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+<div id="location-dialog" class="dialog" title="Create Location">
+    @Html.Partial("_CreateLocation", new Web.Models.LocationNewModel())
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <style type="text/css">
+        input.available-date, input.available-time
+        {
+            min-width: inherit;
+            width: 6em;
+        }
+        ol#AvailableDatesList li
+        {
+            list-style-type: decimal;
+        }
+    </style>
+    <script type="text/javascript">
+        var tournamentIds = [ @(string.Join(",", ((List<int>)ViewBag.Tournaments).ToArray()))];
+
+        function hideDatesForTournament() {
+            $('#available-dates').show();
+            if ($.inArray(parseInt($('#LeagueId').val()), tournamentIds) != -1) {
+                $('#available-dates').hide();
+            }
+        }
+        function availableDateTypeChange() {
+            var type = $('#AvailableDateType').val();
+            if(type == 'Home') {
+                $('#AvailableDateDistance').prop('disabled', true);
+            } else {
+                $('#AvailableDateDistance').prop('disabled', false);
+            }
+            
+        }
+        $(document).ready(function () {
+            var maxIndex = @(Model.AvailableDates == null ? 0 : Model.AvailableDates.Count);
+            $('button').button();
+            $(document).on('change', '#LeagueId', function(e) {
+                hideDatesForTournament();
+            });
+            availableDateTypeChange();
+            hideDatesForTournament();
+            $('#AvailableDatesAdd').on('change', '#AvailableDateType', function(e) {
+                availableDateTypeChange();
+            });
+            $('#AvailableDatesAdd').on('click', '#AvailableDateAdd', function (e) {
+                e.preventDefault();
+
+                var date = $('#AvailableDateDate').val();
+                var time = $('#AvailableDateTime').val();
+                var locationId = $('#AvailableDateLocation').val();
+                var type = $('#AvailableDateType').val();
+                var distance = $('#AvailableDateDistance').val();
+
+                if(date == '' || time == '' || locationId == '')
+                    return;
+                
+                maxIndex++;
+                $('#AvailableDatesList').append(
+                    $('<tr>')
+                        .append($('<td>')
+                            .append($('<input type="hidden" name="AvailableDates.Index" value="' + maxIndex + '" />'))
+                            .append($('<input type="hidden" name="AvailableDates[' + maxIndex + '].Id" />'))
+                            .append($('<input type="text" name="AvailableDates[' + maxIndex + '].Date" class="available-date"/>').val(date))
+                        )
+                        .append($('<td>')
+                            .append($('<input type="text" name="AvailableDates[' + maxIndex + '].Time" class="available-time" /> ').val(time))
+                        )
+                        .append($('<td>')
+                            .append($('#AvailableDateLocation').clone().attr('id', 'AvailableDateLocation' + maxIndex).attr('name', 'AvailableDates[' + maxIndex + '].LocationId').val(locationId))
+                        )
+                        .append($('<td>')
+                            .append($('#AvailableDateType').clone().attr('id', 'AvailableDateType' + maxIndex).attr('name', 'AvailableDates[' + maxIndex + '].Type').val(type))
+                        )
+                        .append($('<td>')
+                            .append($('<input type="text" name="AvailableDates[' + maxIndex + '].Distance" style="width: 2em; min-width: 2em;" /> ').val(distance))
+                            .append('&nbsp;miles')
+                        )
+                        .append($('<td>')
+                            .append($('<button class="command remove">Remove</button>'))
+                        )
+                );
+            });
+            $('#AvailableDatesList').on('click', 'button.remove', function (e) {
+                $(this).parent().parent().remove();
+                e.preventDefault();
+            });
+            $('input.available-time').timepicker();
+            $('input.available-date').datepicker({
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                yearRange: "-5:+5",
+                minDate: new Date(@DateTime.Now.Year, @(DateTime.Now.Month - 1), @DateTime.Now.Day),
+                onChangeMonthYear: function (year, month, elem) {
+                    var currentDate = $(this).datepicker('getDate');
+                    if (currentDate == null)
+                        return;
+
+                    var day = currentDate.getDate();
+                    var newDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+                    $(this).datepicker('setDate', newDate);
+                }
+            });
+
+            $('div#location-dialog').dialog({
+                autoOpen: false,
+                resizable: false,
+                modal: true,
+                width: 600,
+                buttons: {
+                    'Cancel': function () {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+
+            $(document).on('click', 'a.new-location', function(e) {
+                e.preventDefault();
+                $('#location-dialog').dialog('open');
+            });
+
+            $('#location-dialog').on('click', '#CreateLocation', function(e) {
+                e.preventDefault();
+                var isValid = $(this).parents('form').valid();
+                if(!isValid)
+                    return;
+                var dialog = $('#location-dialog');
+                var locations = $('select[name$=LocationId],#AvailableDateLocation');
+                var token = $('input[name=__RequestVerificationToken]', dialog).val();
+                var data = {
+                    Name: $('#Name', dialog).val(),
+                    Address:$('#Address', dialog).val(),
+                    City:$('#City', dialog).val(),
+                    State:$('#State', dialog).val(),
+                    Zip:$('#Zip', dialog).val(),
+                    Url:$('#Url', dialog).val(),
+                    Notes:$('#Notes', dialog).val(),
+                    GroundsKeeperPhone:$('#GroundsKeeperPhone', dialog).val()
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/Location/Create',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+                        if (result) {
+                            if (result.Success) {
+                                // close dialog, populate locations, select created location
+                                $('#location-dialog').dialog('close');
+                                locations.empty();
+                                $.each(result.Locations, function(index, val) {
+                                    locations.append($('<option>').text(val.Name).val(val.Id));
+                                });
+                                locations.val(result.LocationId);
+                            } else {                                
+                                $('#location-dialog').html(result);
+                            }
+                        }
+                        
+                    },
+                    error: function (xhr, status, error) {
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -1,0 +1,278 @@
+﻿@model Web.Models.GameMassModel
+
+@{
+    ViewBag.Title = "Quick Game Create";
+}
+
+<h2>Quick Game Create</h2>
+
+@if (TempData.ContainsKey("Error"))
+{
+    <div class="status-indicator ui-corner-all ui-state-error">
+        <span class="ui-icon ui-icon-alert"></span>
+        <span>@TempData["Error"].ToString()</span>
+    </div>
+}
+
+<div id="GridError" class="status-indicator ui-corner-all ui-state-error" style="display: none;margin-bottom: 10px;">
+    <span class="ui-icon ui-icon-alert"></span>
+    <span class="error-text"></span>
+</div>
+
+@using (Html.BeginForm("MassCreate", "Game", FormMethod.Post, new { id="MassCreateForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Grid Information</legend>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LeagueId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(model => model.LeagueId, (List<SelectListItem>)ViewBag.Leagues)
+            @Html.ValidationMessageFor(model => model.LeagueId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.DivisionId)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(model => model.DivisionId, (List<SelectListItem>)ViewBag.Divisions)
+            @Html.ValidationMessageFor(model => model.DivisionId)
+        </div>
+
+        <p>
+            <button id="PopulateGrid" class="command">Populate Grid</button>
+            <img id="loading" src="/Images/ajax-loader.gif" alt="Loading..." style="display: none; vertical-align: middle;" />
+        </p>
+
+        <div id="game-grid" style="display: none;">
+            <div style="text-align: right; font-size: .9em;"><a href="#" id="AddGame">Add Game To Grid</a></div>
+            <table class="listing">
+                <thead>
+                    <tr>
+                        <th id="HomeTeam">Home Team</th>
+                        <th id="AwayTeam">Away Team</th>
+                        <th>Date/Time</th>
+                        <th>Location</th>
+                        <th>Field</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </thead>
+                <tr id="NoTeams" style="text-align: center; font-weight: bold; display: none;">
+                    <td colspan="6">No teams available for league/division.</td>
+                </tr>
+            @if (Model.Games != null)
+            {
+                for (var i = 0; i < Model.Games.Count(); i++)
+                {
+                    var game = Model.Games[i];
+                    <tr class="game">
+                        <td><input type="hidden" name="Games.Index" value="@i" /> @Html.DropDownList(string.Format("Games[{0}].HomeTeamId", i), (List<SelectListItem>)ViewBag.Teams)</td>
+                        <td>@Html.DropDownList(string.Format("Games[{0}].AwayTeamId", i), (List<SelectListItem>)ViewBag.Teams, "")</td>
+                        <td>
+                            @Html.TextBox(string.Format("Games[{0}].GameDate", i), game.GameDate, new { style = "width: 4em; min-width: 100px;" }) 
+                            @Html.TextBox(string.Format("Games[{0}].GameTime", i), game.GameTime, new { style = "width: 4em; min-width: 100px;" })
+                        </td>
+                        <td>@Html.DropDownList(string.Format("Games[{0}].LocationId", i), (List<SelectListItem>)ViewBag.Locations, "")</td>
+                        <td>@Html.TextBox(string.Format("Games[{0}].Field", i), game.Field)</td>
+                        <td><button class="command remove">Remove Game</button></td>
+                    </tr>
+                }
+            }
+                </table>
+                <button id="SubmitGames" class="command">Submit Games</button>
+        </div>
+        
+        @Html.DropDownList("Locations", (List<SelectListItem>)ViewBag.Locations, "", new { style = "display: none;" })
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+<script type="text/javascript">
+    function showLoading() {
+        $('#loading').show();
+    }
+
+    function hideLoading() {
+        $('#loading').hide();
+    }
+
+    function showError(error) {
+        $('#GridError').show().find('span.error-text').text(error);
+    }
+
+    function hideError() {
+        $('#GridError').hide();
+    }
+
+    function showGrid() {
+        $('#game-grid').show();
+    }
+
+    function hideGrid() {
+        $('#game-grid').hide();
+    }
+
+    function initPickers() {
+        $('.game-time').timepicker();
+        $('.game-date').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            yearRange: "-5:+5",
+            onChangeMonthYear: function (year, month, elem) {
+                var currentDate = $(this).datepicker('getDate');
+                if (currentDate == null)
+                    return;
+
+                var day = currentDate.getDate();
+                var newDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+                $(this).datepicker('setDate', newDate);
+            }
+        });
+    }
+
+    function addGameToGrid(i, homeTeamId) {
+        var table = $('#game-grid table');
+        table.append(
+            $('<tr class="game">')
+                .append($('<td>')
+                    .append($('<input type="hidden" name="Games.Index" value="' + i + '" />'))
+                    .append(teamlist.clone().attr('name', 'Games[' + i + '].HomeTeamId').val(homeTeamId))
+                )
+                .append($('<td>')
+                    .append(teamlist.clone().attr('name', 'Games[' + i + '].AwayTeamId'))
+                )
+                .append($('<td>')
+                    .append($('<input type="text" class="game-date required" name="Games[' + i + '].GameDate" style="width: 4em; min-width: 100px;"/>'))
+                    .append($('<input type="text" class="game-time required" name="Games[' + i + '].GameTime" style="width: 4em; min-width: 100px;"/>'))
+                )
+                .append($('<td>')
+                    .append($('#Locations').clone().attr('name', 'Games[' + i + '].LocationId').removeAttr('id').addClass('required').show())
+                )
+                .append($('<td>')
+                    .append($('<input type="text" name="Games[' + i + '].Field" style="width: 5em; min-width: 5em;"/>'))
+                )
+                .append($('<td>')
+                    .append($('<button class="command remove">').text('Remove').button())
+                )
+        );
+        $('#MassCreateForm').validate();
+    }
+
+    var teamlist = null;
+    $(document).ready(function () {
+
+        @if(Model.Games != null) {
+            <text>showGrid();</text>
+        }
+        initPickers();
+        $('button').button();
+
+        $('#game-grid').on('click', '#AddGame', function (e) {
+            e.preventDefault();
+            var index = $('tr.game').length+1;
+            addGameToGrid(index, '');
+            initPickers();
+        });
+
+        $('#game-grid').on('click', 'button.remove', function (e) {
+            e.preventDefault();
+            $(this).parent().parent().remove();
+        });
+
+        $(document).on('click', '#SubmitGames', function(e) {
+            if (!$('#MassCreateForm').valid()) {
+                e.preventDefault();
+            }
+        });
+
+        $(document).on('click', '#PopulateGrid', function (e) {
+            e.preventDefault();
+
+            hideError();
+
+            var leagueId = $('#LeagueId').val();
+            var divisionId = $('#DivisionId').val();
+            showLoading();
+            $(this).button('disable');
+
+            var data = {
+                leagueId: leagueId,
+                divisionId: divisionId
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/Game/GetTeamsForLeagueAndDivision',
+                data: JSON.stringify(data),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (result) {
+                    if (result) {
+                        if (result.Success == true) {
+                            if(result.LeagueType == @((int)Web.Models.LeagueType.League)) {
+                                $('#HomeTeam').text('Home Team');
+                                $('#AwayTeam').text('Away Team');
+                            } else {
+                                $('#HomeTeam').text('Team 1');
+                                $('#AwayTeam').text('Team 2');
+                            }
+                            showGrid();
+                            // populate dates
+                            var leagueType = result.LeagueType;
+                            var teams = result.Teams;
+
+                            // clear the grid
+                            $('#game-grid table tr.game').remove();
+
+                            if (teams.length == 0) {
+                                $('#NoTeams').show();
+                                $('#AddGame').hide();
+                                $('#SubmitGames').button('disable');
+                            } else {
+                                $('#AddGame').show();
+                                $('#NoTeams').hide();
+                                $('#SubmitGames').button('enable');
+                                var table = $('#game-grid table');
+                                teamlist = $('<select class="required">');
+                                for (var i = 0; i < teams.length; i++) {
+                                    var team = teams[i];
+                                    teamlist.append($('<option>').val(team.TeamId).text(team.TeamName));
+                                }
+
+                                for (var i = 0; i < teams.length; i++) {
+                                    var team = teams[i];
+                                    // populate row item
+                                    addGameToGrid(i, team.TeamId);
+                                }
+                                initPickers();
+                            }
+                            
+                        } else {
+                            showError(result.Error);
+                        }
+                    }
+                    // stop loading
+                    hideLoading();
+                    $('#PopulateGrid').button('enable');
+                },
+                error: function (xhr, status, error) {
+                    showError(error);
+                    hideLoading();
+                    $('#PopulateGrid').button('enable');
+                }
+            });
+        });
+    });
+
+</script>
+}

@@ -1,0 +1,179 @@
+﻿@model Web.Models.GameChallengeNewGameModel
+
+@{
+    ViewBag.Title = "Schedule Game";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    
+        <fieldset>
+        <legend>Schedule Game for @Web.Models.Team.PrettyNameWithoutLeague(ViewBag.MyTeam)</legend>
+
+        <div class="editor-field">
+            @Model.AvailableDate.Team.League.Name
+        </div>
+
+        <div class="editor-label">
+            @if (Model.AvailableDate.IsHome && !Model.AvailableDate.IsAway)
+            {
+                <label>Home Team</label>    
+            }
+            else if (Model.AvailableDate.IsAway && !Model.AvailableDate.IsHome)
+            {
+                <label>Away Team</label>
+            }
+            else
+            {
+                @*Home or Away depending on choice - if coach chooses available date team's home location it is home, otherwise away *@   
+                <label class="home-away">Home Team</label>
+            }
+            
+        </div>
+        <div class="editor-field">
+            @Web.Models.Team.PrettyNameWithoutLeague(Model.AvailableDate.Team)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.GameDate)
+        </div>
+        <div class="editor-field">
+            @Model.AvailableDate.Date
+        </div>
+
+        <div class="editor-label">
+            <label>Details</label>
+        </div>
+        <div class="editor-field">
+            @if (Model.AvailableDate.IsHome && Model.AvailableDate.IsAway)
+            {
+                @:Home Or Away Within @Model.AvailableDate.DistanceFromLocation miles of @Model.AvailableDate.Location.Name
+            }
+            else if (Model.AvailableDate.IsHome)
+            {
+                @:Home At @Model.AvailableDate.Location.Name
+            }
+            else
+            {
+                @:Away Within @Model.AvailableDate.DistanceFromLocation miles of @Model.AvailableDate.Location.Name
+            }
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.LocationId) 
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(m => m.LocationId, (List<SelectListItem>)ViewBag.Locations, new { }) <a href="@Url.RouteUrl(new { controller = "Location", action = "Create" })" class="new-location">( new location )</a>
+            @Html.ValidationMessageFor(model => model.LocationId)
+        </div>
+
+        <p>
+           <button class="command">Request Game</button>
+        </p>
+    </fieldset>
+}
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+<div id="location-dialog" class="dialog" title="Create Location">
+    @Html.Partial("_CreateLocation", new Web.Models.LocationNewModel())
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <style type="text/css">
+        input.available-date, input.available-time
+        {
+            min-width: inherit;
+            width: 6em;
+        }
+        ol#AvailableDatesList li
+        {
+            list-style-type: decimal;
+        }
+    </style>
+    <script type="text/javascript">
+        function checkHomeAway() {
+            // if location chosen is not the home location, they are now officially the away team
+            if($('#LocationId').val() == @(Model.AvailableDate.Location.Id)) {
+                    $('label.home-away').text('Home Team');
+            } else {
+                        $('label.home-away').text('Away Team');
+            } 
+        }
+
+                        $(document).ready(function () {
+                            checkHomeAway();
+            $('div#location-dialog').dialog({
+                autoOpen: false,
+                resizable: false,
+                modal: true,
+                width: 600,
+                buttons: {
+                    'Cancel': function () {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+
+            $(document).on('click', 'a.new-location', function(e) {
+                e.preventDefault();
+                $('#location-dialog').dialog('open');
+            });
+
+            $(document).on('change', '#LocationId', function (e) {
+                checkHomeAway();
+            });
+
+            $('#location-dialog').on('click', '#CreateLocation', function(e) {
+                e.preventDefault();
+                var isValid = $(this).parents('form').valid();
+                if(!isValid)
+                    return;
+                var dialog = $('#location-dialog');
+                var locations = $('select[name$=LocationId],#AvailableDateLocation');
+                var token = $('input[name=__RequestVerificationToken]', dialog).val();
+                var data = {
+                        Name: $('#Name', dialog).val(),
+                        Address:$('#Address', dialog).val(),
+                        City:$('#City', dialog).val(),
+                        State:$('#State', dialog).val(),
+                        Zip:$('#Zip', dialog).val(),
+                        Url:$('#Url', dialog).val(),
+                        Notes:$('#Notes', dialog).val(),
+                        GroundsKeeperPhone:$('#GroundsKeeperPhone', dialog).val()
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/Location/Create',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+                        if (result) {
+                            if (result.Success) {
+                                // just reload the page
+                                location.reload();
+                                // close dialog, populate locations, select created location
+                                //$('#location-dialog').dialog('close');
+                                //locations.empty();
+                                //$.each(result.Locations, function(index, val) {
+                                //    locations.append($('<option>').text(val.Name).val(val.Id));
+                                //});
+                                //locations.val(result.LocationId);
+                            } else {                                
+                                $('#location-dialog').html(result);
+                            }
+                        }
+                        
+                    },
+                    error: function (xhr, status, error) {
+                    }
+                });
+            });
+        });
+    </script>
+}

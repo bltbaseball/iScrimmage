@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Web.Models.User">
+    <Position X="7" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAACAAAAAAEQAAAAAAAAACAAACAAAAAAAAAAA=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Web.Models.Division">
+    <Position X="5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACCAAAAAAAAAAAAAAAAQQAAAACAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Web.Models.TeamClass">
+    <Position X="5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAQAAAACAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Web.Models.Team">
+    <Position X="0.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACADAAAAAAAAAAAAAAIgAAQAABAiAAAACACAAAAAAAA=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Division" />
+      <Property Name="Class" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Players" />
+      <Property Name="Managers" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Web.Models.TeamPlayer">
+    <Position X="0.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAEAAAAACAAAAAAAAAAAAACAAAAEgAAAQAgAAA=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Player" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Web.Models.Manager">
+    <Position X="5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAADAEAAACAAACAAAAAAQAAAAAAAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Web.Models.Player">
+    <Position X="3" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAADAEAAACAAAACAAAAAQAAAAACSAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Parent" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Web.Models.Guardian">
+    <Position X="5.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAEAAACAAAAAIAAAASAAAAAACAAACAAAABAAAAAg=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Web.Models.Location">
+    <Position X="9.5" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAiAAAAAAAAAAAAAAAAAAQAAAACAQACCAAAAAAAAAA=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Web.Models.Game">
+    <Position X="7" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IIACAABAAABAAAAAAAIAAAAAAAgCAAAAAAAQAAIhAAE=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Location" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Web.Models.Fee">
+    <Position X="9.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAiAAAAAAAgAAAAAAAAAACAAAACAAAAEAAAAAAAAAA=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Web.Models.FeePayment">
+    <Position X="9.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAgACAgAACAAAACAAAAAQAAAQEAAAA=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Fee" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Web.Models.Tournament">
+    <Position X="2.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACCAAAAAAAAAAgEAAAAAQAABACAAABCAAAAAAAAAA=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="Web.Models.Gender" Collapsed="true">
+    <Position X="3" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAA=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Web.Models.UserRole" Collapsed="true">
+    <Position X="7.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAEABAAAAAAAAQAAAAg=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Web.Models.PlayerStatus" Collapsed="true">
+    <Position X="3" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACABAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Web.Models.FeePaymentType" Collapsed="true">
+    <Position X="11.5" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAACAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Web.Models.FeePaymentMethod" Collapsed="true">
+    <Position X="11.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAAABAAQAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\CoreModels.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

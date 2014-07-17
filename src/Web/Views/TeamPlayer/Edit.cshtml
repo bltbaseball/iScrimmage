@@ -1,0 +1,81 @@
+﻿@model Web.Models.TeamPlayerUpdateModel
+
+@{
+    ViewBag.Title = "Update Team -> Player";
+}
+
+<h2>Update Team Player for
+    @ViewBag.Team.Name in
+    @ViewBag.Team.League.Name</h2>
+
+
+@using (Html.BeginForm("Edit", "TeamPlayer", method: FormMethod.Post, htmlAttributes: new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Team Player</legend>
+
+        @Html.Hidden("TeamId", (int)ViewBag.Team.Id)
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.IsPhotoVerified)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.IsPhotoVerified)
+            @Html.ValidationMessageFor(model => model.IsPhotoVerified)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Status)
+        </div>
+        <div class="editor-field">
+            @Html.DropDownListFor(model => model.Status, @Web.Models.Transforms.ToSelectList<Web.Models.PlayerStatus>(Model.Status))
+            @Html.ValidationMessageFor(model => model.Status)
+        </div>
+              
+        <div class="editor-label">
+            @Html.LabelFor(model => model.PlayerId)
+        </div>
+        <div class="editor-field">
+            <input type="text" id="PlayerSearch" data-autocomplete-url="@Url.Action("/SearchPlayers", "TeamPlayer", new { teamId = ViewBag.Team.Id })" value="@ViewBag.PlayerName" />
+            @Html.HiddenFor(m => m.PlayerId)
+        </div>
+
+        <p>
+            <input type="submit" value="Save" />
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index", "TeamPlayer", new { id = ((Web.Models.Team)ViewBag.Team).Id }, new { })
+</div>
+<script type="text/javascript">
+jQuery(function ($) {
+    $('*[data-autocomplete-url]').each(function () {
+        $(this).autocomplete({
+            source: $(this).data("autocomplete-url"),
+            minLength: 2,
+            select: function (event, ui) {
+                if (ui.item.id == '0')
+                    return false; //Do nothing, leave the search text as is
+                $('#PlayerId').val(ui.item.id);
+            },
+            change: function (event, ui) {
+                if (ui.item) {
+                    if (ui.item.id != '0') {
+                        this.value = ui.item.label;
+                    }
+                }
+            }
+        });
+    });
+});
+</script>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

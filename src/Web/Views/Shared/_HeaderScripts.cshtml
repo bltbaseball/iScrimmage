@@ -1,0 +1,94 @@
+﻿        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+        <link href='http://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+        @Styles.Render("~/Content/themes/base/jquery.ui.all.css")
+        @Styles.Render("~/Content/themes/base/jquery.timepicker.css")
+        @Styles.Render("~/Content/css")
+        @Styles.Render("~/Content/font-awesome/css/font-awesome.css")
+        @Styles.Render("~/Content/font-awesome/css/font-awesome-ie7.css")
+        @Scripts.Render("~/bundles/modernizr")
+        @Scripts.Render("~/bundles/jquery")
+        @Scripts.Render("~/Scripts/jquery-ui-1.10.3.js")
+        @Scripts.Render("~/Scripts/jquery-migrate-1.0.0.js")
+        @Scripts.Render("~/Scripts/jquery.timepicker.js")
+        @Scripts.Render("~/Scripts/messaging.js")
+        @Styles.Render("~/Scripts/qTip/jquery.qtip.css")
+        @Scripts.Render("~/Scripts/qTip/jquery.qtip.js")
+        @Scripts.Render("~/bundles/jqueryval")
+        @Styles.Render("~/Content/DataTables-1.9.4/media/css/jquery.dataTables.css")
+        @Scripts.Render("~/Scripts/DataTables-1.9.4/media/js/jquery.dataTables.js")
+        @Scripts.Render("~/Scripts/DataTables-1.9.4/extras/FixedColumns/media/js/FixedColumns.js")
+
+        <script type="text/javascript">
+
+            $.urlParam = function(name){
+                var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
+                if (results==null){
+                    return null;
+                }
+                else{
+                    return results[1] || 0;
+                }
+            }
+            function regenerateDataTables() {
+                var oTable = $('.dataTableActivate').dataTable(
+                {
+                    "sScrollY": "300px",
+                    "bPaginate": false,
+                    "bScrollCollapse": true,
+                    "aaSorting": [],
+                    "bInfo": false,
+                    "sDom": '<"header">frtip<"footer">'
+                });
+            }
+
+            $(document).ready(function () {
+                $.each($('.dataTableActivate'), function () {
+                    var dtHeight = "300px";
+                    if ($(this).attr('dataTableHeight') != null)
+                        dtHeight = $(this).attr('dataTableHeight');
+                    var dtTitle = "";
+                    if ($(this).attr('dataTableTitle') != null)
+                        dtTitle = $(this).attr('dataTableTitle');
+                    var newDt = $(this).dataTable(
+                    {
+                        "sScrollY": dtHeight,
+                        "bPaginate": false,
+                        "bScrollCollapse": true,
+                        "aaSorting": [],
+                        "bInfo": false,
+                        "sDom": '<"top"if><"dtTitle">lt<"bottom"p>',
+                    });
+                    $("#" + newDt[0].id + "_wrapper").find(".dtTitle").html(dtTitle);
+                });
+                $('.league-overview').on('click', 'div.bracket-header', function (e) {
+                    console.log('click');
+                    e.preventDefault();
+                    $(this).next('.bracket-info').slideToggle();
+                    if ($(this).children()) {
+                        if ($(this).children()[0].src.indexOf("minus") != -1) {
+                            $(this).children()[0].src = "/Images/icon-plus.gif";
+                        } else {
+                            $(this).children()[0].src = "/Images/icon-minus.gif";
+                        }
+                    }
+
+                });
+                $('.league-overview').on('click', 'a.bracket-header', function (e) {
+                    console.log('click');
+                    e.preventDefault();
+                    $(this).parent().next('.bracket-info').slideToggle();
+                });
+                $('[ptip!=""]').qtip({
+                    hide: { fixed: true, delay: 250 }, content: { attr: 'ptip' }, position: {
+                        my: 'right center',  // Position my top left...
+                        at: 'left center'
+                    }
+                });
+                //regenerateDataTables();
+                $(".bracket-info").slideToggle();
+                if ($.urlParam('tagToSlideOpen') != null) {
+                    $('#' + $.urlParam('tagToSlideOpen')).slideToggle();
+                }
+
+            });
+        </script>
