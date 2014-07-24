@@ -1,54 +1,57 @@
-﻿F@model IList<Web.Models.LeagueOverviewModel>
+﻿@model List<Web.Models.LeagueOverviewModel>
 @using Web.Models
 
-    @{
-        var leagueGrid = new WebGrid(canPage: false);
-        leagueGrid.Bind(Model, autoSortAndPage: true);
+@{
+    var leagueGrid = new WebGrid(canPage: false);
+    leagueGrid.Bind(Model, autoSortAndPage: true);
         
-        @leagueGrid.GetHtml(headerStyle: "header",
+ @leagueGrid.GetHtml(headerStyle: "header",
         tableStyle: "listing dataTableActivate", htmlAttributes: new { dataTableHeight = "500px", dataTableTitle = ViewData["header"] != null ? ViewData["header"] : "<h1>Leagues</h1>" },
                 alternatingRowStyle: "even",
                 rowStyle: "odd",
                 columns: leagueGrid.Columns(
                     leagueGrid.Column("Name", header: "Name", format: @<text>
-                        <br /><b>@item.League.Type:</b> @item.League.Name<br />&nbsp;
-                        </text>, canSort: false),
+    <br />
+    <b>@item.League.Type:</b> @item.League.Name<br />
+    &nbsp;
+                       
+    </text>, canSort: false),
                     leagueGrid.Column("", style: "center", header: "Information", canSort: false, format: @<text>
-                        <a href="@Url.RouteUrl("League", new { id = item.League.Id })">More Info</a>
-                        </text>),
+    <a href="@Url.RouteUrl("League", new { id = item.League.Id })">More Info</a>
+    </text>),
                     leagueGrid.Column("", style: "center", header: "Registration", canSort: false, format: @<text>
-                        @if (item.League.RegistrationEndDate < DateTime.Now)
-                        {
-                            <text><span style="font-style: italic;">Closed</span></text>
-                        }
-                        else
-                        {
-                            <a href="@Url.RouteUrl((item.League.Type == Web.Models.LeagueType.League ? "League" : "Tournament"), new { id = item.League.Id })"><b>Register &amp; More info</b></a>
-                        }
+    @if (item.League.RegistrationEndDate < DateTime.Now)
+    {
+ <text><span style="font-style: italic;">Closed</span></text>
+    }
+    else
+    {
 
-                        </text>),
-                    leagueGrid.Column("EndDate", style: "center", header: "When", canSort: false, format: @<text>
-                        @item.League.StartDate.ToShortDateString() - @item.League.EndDate.ToShortDateString()
-                        </text>),
-                    leagueGrid.Column("EndDate", style: "center", header: "Games/Scores", canSort: false, format: @<text>
-                        <a href="@Url.RouteUrl(new { controller = "Overview", action = "Details", id = item.League.Id })">Games/Scores</a>
-                        </text>),
-                    leagueGrid.Column("EndDate", style: "center", header: "All Teams", canSort: false, format: @<text>
-                        <a href="@Url.RouteUrl(new { controller = "Overview", action = "LeagueTeams", id = item.League.Id })">Teams</a>
-                        </text>),
-                    leagueGrid.Column("EndDate", style: "center", header: "All Coaches", canSort: false, format: @<text>
-                        <a href="@Url.RouteUrl(new { controller = "Overview", action = "LeagueCoaches", id = item.League.Id })">Coaches</a>
-                        </text>),
-                    leagueGrid.Column("EndDate", style: "center", header: "All Players", canSort: false, format: @<text>
-                        <a href="@Url.RouteUrl(new { controller = "Overview", action = "LeaguePlayers", id = item.League.Id })">Players</a>
-                        </text>),
-                    leagueGrid.Column("EndDate", style: "center", header: "Pitch Stats", canSort: false, format: @<text>
-                        <a href="@Url.RouteUrl(new { controller = "Overview", action = "Pitch", id = item.League.Id })">Pitch Stats</a>
-                        </text>)
-                    )
-              );
+        <a href="@Url.RouteUrl((item.League.Type == Web.Models.LeagueType.League ? "League" : "Tournament"), new { id = item.League.Id })"><b>Register &amp; More info</b></a>
     }
 
+    </text>),
+                    leagueGrid.Column("EndDate", style: "center", header: "When", canSort: false, format: @<text>
+    @item.League.StartDate.ToShortDateString() - @item.League.EndDate.ToShortDateString()
+    </text>),
+                    leagueGrid.Column("EndDate", style: "center", header: "Games/Scores", canSort: false, format: @<text>
+    <a href="@Url.RouteUrl(new { controller = "Overview", action = "Details", id = item.League.Id })">Games/Scores</a>
+    </text>),
+                    leagueGrid.Column("EndDate", style: "center", header: "All Teams", canSort: false, format: @<text>
+    <a href="@Url.RouteUrl(new { controller = "Overview", action = "LeagueTeams", id = item.League.Id })">Teams</a>
+    </text>),
+                    leagueGrid.Column("EndDate", style: "center", header: "All Coaches", canSort: false, format: @<text>
+    <a href="@Url.RouteUrl(new { controller = "Overview", action = "LeagueCoaches", id = item.League.Id })">Coaches</a>
+    </text>),
+                    leagueGrid.Column("EndDate", style: "center", header: "All Players", canSort: false, format: @<text>
+    <a href="@Url.RouteUrl(new { controller = "Overview", action = "LeaguePlayers", id = item.League.Id })">Players</a>
+    </text>),
+                    leagueGrid.Column("EndDate", style: "center", header: "Pitch Stats", canSort: false, format: @<text>
+    <a href="@Url.RouteUrl(new { controller = "Overview", action = "Pitch", id = item.League.Id })">Pitch Stats</a>
+    </text>)
+                    )
+              );
+ }
 
 
 

@@ -9,7 +9,8 @@ namespace Web.Models
     {
         League,
         Tournament,
-        Scrimmage
+        Scrimmage,
+        Other
     }
 
     /// <summary>
@@ -101,7 +102,13 @@ namespace Web.Models
         public static IList<League> GetAllLeagues()
         {
             var session = MvcApplication.SessionFactory.GetCurrentSession();
-            return session.QueryOver<League>().OrderBy(i => i.CreatedOn).Desc.List();
+            return session.QueryOver<League>().Where(c =>  c.IsActive == true && c.Type != LeagueType.Other).OrderBy(i => i.CreatedOn).Desc.List();
+        }
+
+        public static IList<League> GetAllOther()
+        {
+            var session = MvcApplication.SessionFactory.GetCurrentSession();
+            return session.QueryOver<League>().Where(c => c.IsActive == true && c.Type == LeagueType.Other).OrderBy(i => i.CreatedOn).Desc.List();
         }
 
         public static String LeagueNameFromGame(Game game)

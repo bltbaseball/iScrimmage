@@ -45,6 +45,24 @@ namespace Web.Controllers
             return Index();
         }
 
+        public ActionResult Other()
+        {
+            var model = new LeaguesOverviewModel();
+            var leagueOverviews = new List<LeagueOverviewModel>();
+            var leagues = Web.Models.League.GetAllOther();
+            foreach (var league in leagues)
+            {
+                leagueOverviews.Add(CreateOverviewForLeague(league));
+            }
+
+            model.All = leagueOverviews.OrderByDescending(l => l.League.IsActive).ThenByDescending(l => l.League.EndDate).ToList();
+            model.Leagues = leagueOverviews.Where(l => l.League.Type == LeagueType.League).OrderByDescending(l => l.League.IsActive).OrderByDescending(l => l.League.EndDate).ToList();
+            model.Tournaments = leagueOverviews.Where(l => l.League.Type == LeagueType.Tournament).OrderByDescending(l => l.League.IsActive).OrderByDescending(l => l.League.EndDate).ToList();
+            model.Scrimmages = leagueOverviews.Where(l => l.League.Type == LeagueType.Scrimmage).OrderByDescending(l => l.League.IsActive).OrderByDescending(l => l.League.EndDate).ToList();
+
+            return View(model);
+        }
+
         private LeagueOverviewModel CreateOverviewForLeague(League league)
         {
             var model = new LeagueOverviewModel();
@@ -110,6 +128,7 @@ namespace Web.Controllers
             return model;
         }
 
+        
         public ActionResult Details(int id)
         {
             var league = Web.Models.League.GetLeagueById(id);
