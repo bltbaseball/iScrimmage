@@ -345,7 +345,7 @@ namespace Web.Controllers
                 return RedirectToAction("Index");
 
             var info = Bracket.PopulateBracketInfo(bracket);
-            
+
             var model = new BracketGamesModel();
             model.Id = id;
             model.Info = info;
@@ -353,7 +353,7 @@ namespace Web.Controllers
             var poolGames = Game.GetPoolGamesForBracket(bracket);
             model.PoolGames = new List<GameUpdateModel>();
 
-            
+
             foreach (var item in poolGames)
             {
                 var gameInfo = new GameUpdateModel

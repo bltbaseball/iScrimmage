@@ -13,10 +13,20 @@
     <header class="noPrint">
         <div class="bg_grain">
         <div class="bg_lined">
-        <div class="content_wrapper">
+        <div class="content_wrapper"> <div id="google_translate_element"></div><script type="text/javascript">
+                                                                                   function googleTranslateElementInit() {
+                                                                                       new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,es,fr,ht,pt', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, gaTrack: true, gaId: 'UA-40371815-1' }, 'google_translate_element');
+                                                                                   }
+</script><script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
             <div id="header_body">
-                <a href="/"><span id="logo"></span></a>
+               
+                <a href="/"><span id="logo"></span></a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <a href="http://www.nations-baseball.com/" target="_blank"><img src="/images/Nations_logo.jpg" width="75" style="vertical-align:middle" /></a> 
+                   <a href="https://www.ibcbaseball.com/" target="_blank"><img src="/images/IBC_Logo.jpg" height="56" style="vertical-align:middle" /> </a>
+                   <a href="http://www.gamereadyscoutday.com/" target="_blank"><img src="/images/GRSD_Logo3.jpg" height="56"  style="vertical-align:middle" /></a>
+               
                 <div id="header_content">
+                    
                     <ul>
                         <li><a href="https://www.facebook.com/BLTBaseball" target="_blank"><img src="/images/s_fb.png" height="23" width="23" alt="" /></a></li>
                         <li><a href="http://iscrimmage.blogspot.com/" target="_blank"><img src="/images/s_b.png" height="23" width="23" alt="" /></a></li>
@@ -25,6 +35,7 @@
                         @if (Request.IsAuthenticated) { 
                         <li class="mr15">@Html.ActionLink("View Dashboard", "Dashboard", "Home")</li>}
                     </ul>
+
                 </div>
             </div>
             <div id="nav_main">
@@ -34,8 +45,8 @@
                     <li>@Html.ActionLink("Why Us", "WhyUs", "Home")</li>
                     <li>@Html.ActionLink("Pricing", "Pricing", "Home")</li>
                     <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
-                    <li><a href="http://iscrimmage.blogspot.com" target="_blank">Blog</a></li>
-                    <li>@Html.ActionLink("Classifieds", "Classifieds", "Home")</li>
+                    <li><a href="http://iscrimmage.blogspot.com/" target="_blank">News</a></li>
+                    <li><a href="http://blog.iscrimmage.com/category/classifieds/" target="_blank">Classifieds</a></li> @*@Html.ActionLink("Classifieds", "Classifieds", "Home")*@
                         @Html.Partial("_LoginPartial")
                 </ul>
             </div>
