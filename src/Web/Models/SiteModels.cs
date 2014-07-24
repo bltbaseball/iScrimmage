@@ -12,6 +12,7 @@ namespace Web.Models
         public IList<LeagueOverviewModel> Leagues { get; set; }
         public IList<LeagueOverviewModel> Tournaments { get; set; }
         public IList<LeagueOverviewModel> Scrimmages { get; set; }
+        public IList<LeagueOverviewModel> Other { get; set; }
         public IList<LeagueOverviewModel> All { get; set; }
     }
 

@@ -13,7 +13,8 @@
 }
 
 <div id="scrimmage-list">
-        @Html.Partial("_InfoOverview", Model.All, new ViewDataDictionary(this.ViewData) { { "header", "<h1>Events</h1>" } })
+         @Html.Partial("_InfoOverview", Model.All, new ViewDataDictionary(this.ViewData) { { "header", "<h1>Events</h1>" } })
+         @Html.Partial("_InfoOverviewOthers", Model.Other, new ViewDataDictionary(this.ViewData) { { "header", "<h1>Other</h1>" } })
 </div>
 
 @*<a id="scrimmages"></a>

@@ -14,14 +14,21 @@
         <div class="bg_lined dashboard_header">
         <div class="content_wrapper">
             <div id="header_body">
-                <a href="/"><span id="logo"></span></a>
+                <a href="/"><span id="logo"></span></a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+               <a href="http://www.nations-baseball.com/" target="_blank"><img src="/images/Nations_logo.jpg" width="75" style="vertical-align:middle" /></a> 
+                   <a href="https://www.ibcbaseball.com/" target="_blank"><img src="/images/IBC_Logo.jpg" height="56" style="vertical-align:middle" /> </a>
+                   <a href="http://www.gamereadyscoutday.com/" target="_blank"><img src="/images/GRSD_Logo3.jpg" height="56"  style="vertical-align:middle" /></a>
                 <div id="header_content">
                     <ul>
                         @Html.Partial("_LoginPartial")
-                        <li class="mr15"><a href="http://iscrimmage.blogspot.com" target="_blank">Blog</a></li>
-                        <li class="mr15">@Html.ActionLink("Classifieds", "Classifieds", "Home")</li>
+
+                       
+                        
+                        <li class="mr15"><a href="http://iscrimmage.blogspot.com/" target="_blank">News</a></li>
+                        <li class="mr15"><a href="http://blog.iscrimmage.com/category/classifieds/" target="_blank">Classifieds</a></li> @*@Html.ActionLink("Classifieds", "Classifieds", "Home") *@
                     
                         <li class="mr15">@Html.ActionLink("Home", "Index", "Home")</li>
+                        
                     </ul>
                 </div>
             </div>
@@ -58,6 +65,8 @@
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Overview", action = "Tournament" })"><i class="icon-list-ul"></i> Tournaments</a></li>
                         <li class="@if (controllerName == "Overview" && controllerAction == "League")
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Overview", action = "League" })"><i class="icon-list-ul"></i> Leagues</a></li>
+                        <li class="@if (controllerName == "Overview" && controllerAction == "Other")
+                                   { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Overview", action = "Other" })"><i class="icon-list-ul"></i> Leagues</a></li>
                         <li class="db_menu_last @if (controllerName == "Locations")
                                                 { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Location", action = "Index" })"><i class="icon-flag"></i> Locations</a></li>
                         <li><h3>People</h3></li>
@@ -89,8 +98,8 @@
                     {
                         <li class="@if (controllerName == "Profile")
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Home", action = "Dashboard" })"><i class="icon-home"></i> Dashboard</a></li>
-                        <li class="@if(controllerName == "Account")
-                                   { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Account", action = "Manage"})"><i class="icon-user"></i> My Profile</a></li>
+                        <li class="@if (controllerName == "Account")
+                                   { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Account", action = "Manage" })"><i class="icon-user"></i> My Profile</a></li>
                         <li class="@if (controllerName == "Team" || controllerName == "TeamPlayer")
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Team", action = "Index" })"><i class="icon-group"></i> My Teams/Roster</a></li>
                         <li class="@if (controllerName == "Game")
@@ -114,8 +123,8 @@
                     {
                         <li class="@if (controllerName == "Profile")
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Home", action = "Dashboard" })"><i class="icon-home"></i> Dashboard</a></li>
-                        <li class="@if(controllerName == "Account")
-                                   { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Account", action = "Manage"})"><i class="icon-user"></i> My Profile</a></li>
+                        <li class="@if (controllerName == "Account")
+                                   { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Account", action = "Manage" })"><i class="icon-user"></i> My Profile</a></li>
                         <li class="@if (controllerName == "Team" || controllerName == "TeamPlayer")
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Team", action = "Index" })"><i class="icon-group"></i> My Teams/Roster</a></li>
                         <li class="@if (controllerName == "Game")
@@ -139,8 +148,8 @@
                     {
                         <li class="@if (controllerName == "Profile")
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Home", action = "Dashboard" })"><i class="icon-home"></i> Dashboard</a></li>
-                        <li class="@if(controllerName == "Account")
-                                   { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Account", action = "Manage"})"><i class="icon-user"></i> My Profile</a></li>
+                        <li class="@if (controllerName == "Account")
+                                   { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Account", action = "Manage" })"><i class="icon-user"></i> My Profile</a></li>
                         <li class="@if (controllerName == "Players")
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Player", action = "CreateUnattached" })"><i class="icon-star"></i> Add Player</a></li>
                         <li class="@if (controllerName == "Invitation")
@@ -159,8 +168,8 @@
                     {
                         <li class="@if (controllerName == "Profile")
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Home", action = "Dashboard" })"><i class="icon-home"></i> Dashboard</a></li>
-                        <li class="@if(controllerName == "Account")
-                                   { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Account", action = "Manage"})"><i class="icon-user"></i> My Profile</a></li>
+                        <li class="@if (controllerName == "Account")
+                                   { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Account", action = "Manage" })"><i class="icon-user"></i> My Profile</a></li>
                         <li class="@if (controllerName == "Game")
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Game", action = "Index" })"><i class="icon-calendar"></i> Games</a></li>
                         <li class="@if (controllerName == "Invitation")
@@ -178,8 +187,8 @@
                     {
                         <li class="@if (controllerName == "Profile")
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Home", action = "Dashboard" })"><i class="icon-home"></i> Dashboard</a></li>
-                        <li class="@if(controllerName == "Account")
-                                   { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Account", action = "Manage"})"><i class="icon-user"></i> My Profile</a></li>
+                        <li class="@if (controllerName == "Account")
+                                   { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Account", action = "Manage" })"><i class="icon-user"></i> My Profile</a></li>
                         <li class="@if (controllerName == "Invitation")
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Invitation", action = "GenerateInvite" })"><i class="icon-user-md"></i> Invite</a></li>
                         <li class="@if (controllerName == "Overview" && controllerAction == "Scrimmage")
@@ -208,7 +217,8 @@
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Overview", action = "Tournament" })"><i class="icon-list-ul"></i> Tournaments</a></li>
                         <li class="@if (controllerName == "Overview" && controllerAction == "League")
                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Overview", action = "League" })"><i class="icon-list-ul"></i> Leagues</a></li>
-
+                         <li class="@if (controllerName == "Overview" && controllerAction == "Other")
+                                    { @Html.Raw("active-trail") }"><a href="@Url.RouteUrl(new { controller = "Overview", action = "Other" })"><i class="icon-list-ul"></i> Leagues</a></li>
                     @*<li><a href="/Overview#leagues">Leagues</a></li>
                     <li><a href="/Overview#tournaments">Tournaments</a></li>
                     <li>@Html.ActionLink("Locations", "Locations", "Overview")</li>*@
