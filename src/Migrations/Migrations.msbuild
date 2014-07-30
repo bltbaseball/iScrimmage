@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Migrate">
+  <UsingTask TaskName="FluentMigrator.MSBuild.Migrate"
+       AssemblyFile="..\packages\FluentMigrator.1.2.1.0\tools\FluentMigrator.MSBuild.dll"/>
+
+  <PropertyGroup>
+    <Environment Condition="'$(Environment)'=='' ">Dev</Environment>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Environment)'=='Dev'">
+    <Connection>Data Source=(local);Initial Catalog=BLT;Integrated Security=true;</Connection>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Environment)'=='Test'">
+    <Connection>Data Source=(local);Initial Catalog=BLT;Integrated Security=true;</Connection>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Environment)'=='Prod'">
+    <Connection>Data Source=(local);Initial Catalog=BLT;Integrated Security=true;</Connection>
+  </PropertyGroup>
+
+  <Target Name="Migrate" >
+    <Message Text="Starting FluentMigrator Migration"/>
+    <Migrate Database="sqlserver2008"
+             Connection="$(Connection)"
+             Target=".\iScrimmage.Data.Migrations\bin\Debug\iScrimmage.Data.Migrations.dll">
+    </Migrate>
+  </Target>
+
+  <Target Name="MigrateDown" >
+    <Message Text="Starting FluentMigrator Rollback All"/>
+    <Migrate Database="sqlserver2008"
+             Connection="$(Connection)"
+             Target=".\iScrimmage.Data.Migrations\bin\Debug\iScrimmage.Data.Migrations.dll"
+             Task="migrate:down">
+    </Migrate>
+  </Target>
+
+  <Target Name="Rollback" >
+    <Message Text="Starting FluentMigrator Rollback All"/>
+    <Migrate Database="sqlserver2008"
+             Connection="$(Connection)"
+             Target=".\iScrimmage.Data.Migrations\bin\Debug\iScrimmage.Data.Migrations.dll"
+             Task="rollback">
+    </Migrate>
+  </Target>
+
+</Project>

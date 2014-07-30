@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{2A447065-33D7-428A-A06E-7B7224447B57}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1F3236B5-084C-4B3B-99D3-565479E064A9}"
@@ -9,6 +11,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1F3236
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Migrations", "Migrations", "{61811E9B-95AD-4FFA-8582-EF3CE3E1C5CB}"
+	ProjectSection(SolutionItems) = preProject
+		Migrations\Migrations.msbuild = Migrations\Migrations.msbuild
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iScrimmage.Migrations", "Migrations\iScrimmage.Migrations\iScrimmage.Migrations.csproj", "{5400E435-834D-4040-9C88-23CDECD94062}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iScrimmage.Data.Migrations", "Migrations\iScrimmage.Data.Migrations\iScrimmage.Data.Migrations.csproj", "{5D7EF3C1-44AF-40F6-AED8-23355362AA75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iScrimmage.Core", "iScrimmage.Core\iScrimmage.Core.csproj", "{D587C2BD-AF45-4E67-93B9-0D09853A6DE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,8 +35,24 @@ Global
 		{2A447065-33D7-428A-A06E-7B7224447B57}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A447065-33D7-428A-A06E-7B7224447B57}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2A447065-33D7-428A-A06E-7B7224447B57}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{5400E435-834D-4040-9C88-23CDECD94062}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5400E435-834D-4040-9C88-23CDECD94062}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5400E435-834D-4040-9C88-23CDECD94062}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5400E435-834D-4040-9C88-23CDECD94062}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D7EF3C1-44AF-40F6-AED8-23355362AA75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D7EF3C1-44AF-40F6-AED8-23355362AA75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D7EF3C1-44AF-40F6-AED8-23355362AA75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D7EF3C1-44AF-40F6-AED8-23355362AA75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D587C2BD-AF45-4E67-93B9-0D09853A6DE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D587C2BD-AF45-4E67-93B9-0D09853A6DE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D587C2BD-AF45-4E67-93B9-0D09853A6DE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D587C2BD-AF45-4E67-93B9-0D09853A6DE8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5400E435-834D-4040-9C88-23CDECD94062} = {61811E9B-95AD-4FFA-8582-EF3CE3E1C5CB}
+		{5D7EF3C1-44AF-40F6-AED8-23355362AA75} = {61811E9B-95AD-4FFA-8582-EF3CE3E1C5CB}
 	EndGlobalSection
 EndGlobal
