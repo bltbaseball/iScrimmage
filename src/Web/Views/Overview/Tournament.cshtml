@@ -14,6 +14,7 @@
 <a id="tournaments"></a>
 <div id="tournament-list">
         @Html.Partial("_InfoOverview", Model.Tournaments, new ViewDataDictionary(this.ViewData) { { "header", "<h1>Tournaments</h1>" } })
+        @Html.Partial("_InfoOverviewOthers", Model.Other, new ViewDataDictionary(this.ViewData) { { "header", "<h1>Other</h1>" } })
 </div>
 
 
