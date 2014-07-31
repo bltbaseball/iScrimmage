@@ -103,7 +103,7 @@
                             @for (var i = 0; i < Model.HomePlayerStats.Count; i++)
                             {
                                 <tr>
-                                    <td>@Model.HomePlayerStats[i].Player.Player.FirstName @Model.HomePlayerStats[i].Player.Player.LastName #@Model.HomePlayerStats[i].Player.Player.JerseyNumber (@Model.HomePlayerStats[i].Player.Player.Id)</td>
+                                    <td>@Model.HomePlayerStats[i].Player.Player.FirstName @Model.HomePlayerStats[i].Player.Player.LastName</td>
                                     <td>@Html.HiddenFor(m=>m.HomePlayerStats[i].PlayerId)
                                         @Html.TextBoxFor(m=>m.HomePlayerStats[i].InningsPitched, new {style="min-width: 0; width: 5em;" })
                                     </td>
@@ -131,7 +131,7 @@
                             @for (var i = 0; i < Model.AwayPlayerStats.Count; i++)
                             {
                                 <tr>
-                                    <td>@Model.AwayPlayerStats[i].Player.Player.FirstName @Model.AwayPlayerStats[i].Player.Player.LastName #@Model.AwayPlayerStats[i].Player.Player.JerseyNumber (@Model.AwayPlayerStats[i].Player.Player.Id)</td>
+                                    <td>@Model.AwayPlayerStats[i].Player.Player.FirstName @Model.AwayPlayerStats[i].Player.Player.LastName</td>
                                     <td>@Html.HiddenFor(m=>m.AwayPlayerStats[i].PlayerId)
                                         @Html.TextBoxFor(m=>m.AwayPlayerStats[i].InningsPitched, new {style="min-width: 0; width: 5em;" })
                                     </td>
