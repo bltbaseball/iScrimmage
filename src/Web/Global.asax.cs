@@ -26,6 +26,8 @@ namespace Web
         {
             log4net.Config.XmlConfigurator.Configure();
 
+            SqlServerTypes.Utilities.LoadNativeAssemblies(Server.MapPath("~/bin"));
+
             AreaRegistration.RegisterAllAreas();
 
             WebApiConfig.Register(GlobalConfiguration.Configuration);
@@ -78,7 +80,7 @@ namespace Web
         private static void BuildSchema(NHibernate.Cfg.Configuration config)
         {
             config.SetProperty("current_session_context_class", "web");
-            new NHibernate.Tool.hbm2ddl.SchemaExport(config).SetOutputFile(System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/schema.sql")).Create(true, false);
+            //new NHibernate.Tool.hbm2ddl.SchemaExport(config).SetOutputFile(System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/schema.sql")).Create(true, false);
         }
 
         protected void Application_BeginRequest(object sender, EventArgs e)
