@@ -109,9 +109,9 @@
       <HintPath>..\packages\log4net.2.0.0\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.SqlServer.Types, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\dlls\Microsoft.SqlServer.Types.dll</HintPath>
+    <Reference Include="Microsoft.SqlServer.Types, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.SqlServer.Types.11.0.1\lib\net20\Microsoft.SqlServer.Types.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.Mvc.FixedDisplayModes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -346,8 +346,25 @@
     <Compile Include="Models\UsersModels.cs" />
     <Compile Include="Models\WebContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlServerTypes\Loader.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\packages\Microsoft.SqlServer.Types.11.0.1\nativeBinaries\x64\msvcr100.dll">
+      <Link>SqlServerTypes\x64\msvcr100.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\packages\Microsoft.SqlServer.Types.11.0.1\nativeBinaries\x64\SqlServerSpatial110.dll">
+      <Link>SqlServerTypes\x64\SqlServerSpatial110.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\packages\Microsoft.SqlServer.Types.11.0.1\nativeBinaries\x86\msvcr100.dll">
+      <Link>SqlServerTypes\x86\msvcr100.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\packages\Microsoft.SqlServer.Types.11.0.1\nativeBinaries\x86\SqlServerSpatial110.dll">
+      <Link>SqlServerTypes\x86\SqlServerSpatial110.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="App_Data\EmailTemplates\challenge-coach.html" />
     <Content Include="App_Data\EmailTemplates\games-updated.html" />
     <Content Include="App_Data\EmailTemplates\games-bracketBracket.html" />
@@ -552,9 +569,12 @@
     <Content Include="Images\forms\bg_submit_blue.jpg" />
     <Content Include="Images\forms\bg_submit.jpg" />
     <Content Include="Images\forms\bg_submit_ro.jpg" />
+    <Content Include="Images\GRSD_Logo3.jpg" />
+    <Content Include="Images\IBC_Logo.jpg" />
     <Content Include="Images\icon-minus.gif" />
     <Content Include="Images\icon-plus.gif" />
     <Content Include="Images\logo.png" />
+    <Content Include="Images\Nations_logo.jpg" />
     <Content Include="Images\nav_ro.png" />
     <Content Include="Images\news\sf_02.jpg" />
     <Content Include="Images\news\sf_03.jpg" />
@@ -970,6 +990,7 @@
     <Content Include="Scripts\qTip\jquery.qtip.min.css" />
     <Content Include="Scripts\qTip\jquery.qtip.min.js" />
     <Content Include="Scripts\upload-photo.js" />
+    <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="Views\Home\Index.cshtml">
       <SubType>Code</SubType>
     </Content>
@@ -1143,6 +1164,7 @@
     <Content Include="Views\Overview\_TeamOverview.cshtml" />
     <Content Include="Views\Overview\LeagueTeams.cshtml" />
     <Content Include="Views\Overview\_LeagueNav.cshtml" />
+    <Content Include="Views\Overview\_InfoOverviewOthers.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Images\Coaches\" />
