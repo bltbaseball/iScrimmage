@@ -227,7 +227,7 @@ namespace iScrimmage.Data.Migrations
                 CreatedOn = DateTime.Today
             });
 
-            Execute.WithConnection(migrateLeagueData);
+            //Execute.WithConnection(migrateMemberData);
         }
 
         private void migrateLeagueData(IDbConnection conn, IDbTransaction tran)
