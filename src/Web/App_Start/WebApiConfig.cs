@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Web.Http;
+using System.Web.Http.Dispatcher;
+using Newtonsoft.Json;
+using Web.Filters;
 
 namespace Web
 {
@@ -15,10 +19,13 @@ namespace Web
                 defaults: new { id = RouteParameter.Optional }
             );
 
-            // Uncomment the following line of code to enable query support for actions with an IQueryable or IQueryable<T> return type.
-            // To avoid processing unexpected or malicious queries, use the validation settings on QueryableAttribute to validate incoming queries.
-            // For more information, visit http://go.microsoft.com/fwlink/?LinkId=279712.
-            //config.EnableQuerySupport();
+            config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
+
+            config.Filters.Add(new WebApiExceptionFilter());
+
+            var jsonSetting = new JsonSerializerSettings();
+            jsonSetting.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+            config.Formatters.JsonFormatter.SerializerSettings = jsonSetting;
         }
     }
 }
