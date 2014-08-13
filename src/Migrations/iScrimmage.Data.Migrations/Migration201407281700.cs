@@ -27,9 +27,9 @@ namespace iScrimmage.Data.Migrations
             Delete.Table("Role").InSchema("blt");
             Delete.Table("Team").InSchema("blt");
             Delete.Table("Location").InSchema("blt");
-            Delete.Table("Class").InSchema("blt");
             Delete.Table("EventUmpire").InSchema("blt");
             Delete.Table("EventDivisionClass").InSchema("blt");
+            Delete.Table("Class").InSchema("blt");
             Delete.Table("Division").InSchema("blt");
             Delete.Table("Event").InSchema("blt");
             Delete.Table("Invite").InSchema("blt");
