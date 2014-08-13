@@ -1,16 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Data;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Dynamic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using FluentMigrator;
-using FluentMigrator.Expressions;
 using iScrimmage.Core.Security;
 using iScrimmage.Core.Extensions;
 using iScrimmage.Migrations.Extensions;
@@ -23,22 +16,26 @@ namespace iScrimmage.Data.Migrations
         private string systemId = "71A54F04-6177-4289-8FF9-6A35245369E6";
 
         private Dictionary<string, Guid> idMap;
- 
+
         public override void Down()
         {
-            Delete.Table("Photo").InSchema("blt");
+
+
+            // Delete.Table("Photo").InSchema("blt");  //does not exist
             Delete.Table("Roster").InSchema("blt");
             Delete.Table("TeamMember").InSchema("blt");
             Delete.Table("Role").InSchema("blt");
             Delete.Table("Team").InSchema("blt");
             Delete.Table("Location").InSchema("blt");
             Delete.Table("Class").InSchema("blt");
-            Delete.Table("LeagueUmpire").InSchema("blt");
-            Delete.Table("LeagueDivision").InSchema("blt");
+            Delete.Table("EventUmpire").InSchema("blt");
+            Delete.Table("EventDivisionClass").InSchema("blt");
             Delete.Table("Division").InSchema("blt");
-            Delete.Table("League").InSchema("blt");
+            Delete.Table("Event").InSchema("blt");
             Delete.Table("Invite").InSchema("blt");
             Delete.Table("Contact").InSchema("blt");
+            Delete.Table("MemberWaiver").InSchema("blt");
+            Delete.Table("Waiver").InSchema("blt");
             Delete.Table("Member").InSchema("blt");
 
             Delete.Schema("blt");
@@ -69,6 +66,10 @@ namespace iScrimmage.Data.Migrations
                 .WithColumn("Umpire").AsBoolean().WithDefaultValue(0).Indexed("IX_Member_Umpire")
                 .WithColumn("SiteAdmin").AsBoolean().WithDefaultValue(0)
                 .WithColumn("OldId").AsInt32().Nullable().Indexed("IX_Member_OldId")
+                .WithColumn("Status").AsString(125).Nullable()
+                .WithColumn("WaiverStatus").AsString(125).Nullable()
+                .WithColumn("SignedWaiverId").AsString(250).Nullable()
+                .WithColumn("PhotoVerified").AsBoolean().WithDefaultValue(0)
                 .WithAuditColumns();
 
             Create.iScrimmageTable("blt", "Contact")
@@ -88,9 +89,9 @@ namespace iScrimmage.Data.Migrations
                 .WithColumn("SentOn").AsDate().NotNullable()
                 .WithAuditColumns();
 
-            Create.iScrimmageTable("blt", "League")
-                .WithColumn("Type").AsString(125).NotNullable().Indexed("IX_League_Type")
-                .WithColumn("Name").AsString(125).NotNullable().Unique("IX_League_Name")
+            Create.iScrimmageTable("blt", "Event")
+                .WithColumn("Type").AsString(125).NotNullable().Indexed("IX_Event_Type")
+                .WithColumn("Name").AsString(125).NotNullable().Unique("IX_Event_Name")
                 .WithColumn("HtmlDescription").AsString(int.MaxValue).Nullable()
                 .WithColumn("Url").AsString(250).Nullable()
                 .WithColumn("StartDate").AsDate().NotNullable()
@@ -108,9 +109,9 @@ namespace iScrimmage.Data.Migrations
                 .WithColumn("MaxAge").AsInt32().NotNullable().WithDefaultValue(17)
                 .WithAuditColumns();
 
-            Create.iScrimmageTable("blt", "LeagueUmpire")
-                .WithColumn("MemberId").AsGuid().NotNullable().ForeignKey("FK_LeagueUmpire_Member", "blt", "Member", "Id")
-                .WithColumn("LeagueId").AsGuid().NotNullable().ForeignKey("FK_LeagueUmpire_League", "blt", "League", "Id")
+            Create.iScrimmageTable("blt", "EventUmpire")
+                .WithColumn("MemberId").AsGuid().NotNullable().ForeignKey("FK_EventUmpire_Member", "blt", "Member", "Id")
+                .WithColumn("EventId").AsGuid().NotNullable().ForeignKey("FK_EventUmpire_League", "blt", "Event", "Id")
                 .WithAuditColumns();
 
             Create.iScrimmageTable("blt", "Class")
@@ -118,31 +119,32 @@ namespace iScrimmage.Data.Migrations
                 .WithColumn("Handicap").AsInt32().NotNullable().WithDefaultValue(0)
                 .WithAuditColumns();
 
-            Create.iScrimmageTable("blt", "LeagueDivision")
-                .WithColumn("LeagueId").AsGuid().NotNullable().ForeignKey("FK_LeagueDivision_League", "blt", "League", "Id")
-                .WithColumn("DivisionId").AsGuid().NotNullable().ForeignKey("FK_LeagueDivision_Division", "blt", "Division", "Id")
+            Create.iScrimmageTable("blt", "EventDivisionClass")
+                .WithColumn("EventId").AsGuid().NotNullable().ForeignKey("FK_EventDivisionClass_Event", "blt", "Event", "Id")
+                .WithColumn("DivisionId").AsGuid().NotNullable().ForeignKey("FK_EventDivisionClass_Division", "blt", "Division", "Id")
+                .WithColumn("ClassId").AsGuid().NotNullable().ForeignKey("FK_EventDivisionClass_Class", "blt", "Class", "Id")
                 .WithAuditColumns();
 
             Create.iScrimmageTable("blt", "Location")
-                .WithColumn("Name").AsString(125).NotNullable().Unique("IX_Location_Name")
-                .WithColumn("Url").AsString(250).NotNullable()
+                .WithColumn("Name").AsString(125).NotNullable()
+                .WithColumn("Url").AsString(250).Nullable()
                 .WithColumn("PhoneNumber").AsString(125).Nullable()
                 .WithColumn("Address").AsString(125).Nullable()
                 .WithColumn("City").AsString(125).Nullable()
                 .WithColumn("State").AsFixedLengthString(2).Nullable()
                 .WithColumn("Zip").AsString(10).Nullable()
                 .WithColumn("Notes").AsString(500).Nullable()
-                .WithColumn("Latitude").AsDecimal(18,5).Nullable()
-                .WithColumn("Longitude").AsDecimal(18,5).Nullable()
+                .WithColumn("Latitude").AsDecimal(18, 5).Nullable()
+                .WithColumn("Longitude").AsDecimal(18, 5).Nullable()
                 .WithAuditColumns();
 
             // FluentMigrator does not support the geography type.
-            Execute.Sql("ALTER TABLE blt.Location ADD Point geography");
+            //Execute.Sql("ALTER TABLE blt.Location ADD Point geography");
 
             Create.iScrimmageTable("blt", "Team")
                 .WithColumn("ClassId").AsGuid().NotNullable().ForeignKey("FK_Team_Class", "blt", "Class", "Id")
                 .WithColumn("DivisionId").AsGuid().NotNullable().ForeignKey("FK_Team_Division", "blt", "Division", "Id")
-                .WithColumn("LeagueId").AsGuid().NotNullable().ForeignKey("FK_Team_League", "blt", "League", "Id")
+                .WithColumn("EventId").AsGuid().NotNullable().ForeignKey("FK_Event_League", "blt", "Event", "Id")
                 .WithColumn("LocationId").AsGuid().Nullable().ForeignKey("FK_Team_Location", "blt", "Location", "Id")
                 .WithColumn("Name").AsString(125).NotNullable().Unique("IX_Team_Name")
                 .WithColumn("HtmlDescription").AsString(int.MaxValue).Nullable()
@@ -162,16 +164,23 @@ namespace iScrimmage.Data.Migrations
                 .WithColumn("TeamId").AsGuid().Nullable().ForeignKey("FK_TeamMember_Team", "blt", "Team", "Id")
                 .WithColumn("MemberId").AsGuid().NotNullable().ForeignKey("FK_TeamMember_Member", "blt", "Member", "Id")
                 .WithColumn("RoleId").AsGuid().Nullable().ForeignKey("FK_TeamMember_Role", "blt", "Role", "Id")
-                .WithColumn("PhotoVerified").AsBoolean().WithDefaultValue(0)
                 .WithColumn("JerseyNumber").AsInt32().WithDefaultValue(0)
-                .WithColumn("Status").AsString(125).Nullable()
-                .WithColumn("WaiverStatus").AsString(125).Nullable()
-                .WithColumn("SignedWaiverId").AsString(250).Nullable()
+
                 .WithAuditColumns();
 
             Create.iScrimmageTable("blt", "Roster")
                 .WithColumn("TeamMemberId").AsGuid().NotNullable().ForeignKey("FK_Roster_TeamMember", "blt", "TeamMember", "Id")
-                .WithColumn("LeagueId").AsGuid().NotNullable().ForeignKey("FK_Roster_League", "blt", "League", "Id")
+                .WithColumn("LeagueId").AsGuid().NotNullable().ForeignKey("FK_Roster_Event", "blt", "Event", "Id")
+                .WithAuditColumns();
+
+            Create.iScrimmageTable("blt", "Waiver")
+                .WithColumn("StartDate").AsDate().NotNullable()
+                .WithColumn("EndDate").AsDate().NotNullable()
+                .WithAuditColumns();
+
+            Create.iScrimmageTable("blt", "MemberWaiver")
+                .WithColumn("MemberId").AsGuid().NotNullable().ForeignKey("FK_MemberWaiver_Member", "blt", "Member", "Id")
+                .WithColumn("WaiverId").AsGuid().NotNullable().ForeignKey("FK_MemberWaiver_Waiver", "blt", "Waiver", "Id")
                 .WithAuditColumns();
 
             var systemMember = new
@@ -228,6 +237,11 @@ namespace iScrimmage.Data.Migrations
             });
 
             Execute.WithConnection(migrateLeagueData);
+            Execute.WithConnection(migrateMemberData);
+
+
+            //handle geography items
+            //Execute.Sql("UPDATE blt.[Location] SET [Point] = geography::STPointFromText('POINT(' + CAST([Longitude] AS VARCHAR(20)) + ' ' +  CAST([Latitude] AS VARCHAR(20)) + ')', 4326)");
         }
 
         private void migrateLeagueData(IDbConnection conn, IDbTransaction tran)
@@ -241,16 +255,16 @@ namespace iScrimmage.Data.Migrations
 
         private void migrateMemberData(IDbConnection conn, IDbTransaction tran)
         {
-            migrateCoachesData(conn, tran);
-            migrateGuardiansData(conn, tran);
-            migrateManagersData(conn, tran);
-            migratePlayersData(conn, tran);
-            migrateUmpiresData(conn, tran);
+            //migrateCoachesData(tran);
+            //migrateGuardiansData(conn, tran);
+            //migrateManagersData(conn, tran);
+            //migratePlayersData(conn, tran);
+            //migrateUmpiresData(conn, tran);
         }
 
         private void migrateLeaguesData(IDbConnection conn, IDbTransaction tran)
         {
-            var insertRecords = new List<ExpandoObject>(); 
+            var insertRecords = new List<ExpandoObject>();
 
             var columns = new
             {
@@ -278,7 +292,7 @@ namespace iScrimmage.Data.Migrations
                 {
                     while (reader.Read())
                     {
-                        var oldId = "League" + reader.GetInt32(columns.Id);
+                        var oldId = "Event" + reader.GetInt32(columns.Id);
                         var newId = getMappedId(oldId);
 
                         dynamic record = new ExpandoObject();
@@ -310,7 +324,7 @@ namespace iScrimmage.Data.Migrations
                 {
                     cmd.Transaction = tran;
 
-                    insertRecord(cmd, "blt", "League", record);
+                    insertRecord(cmd, "blt", "Event", record);
                 }
             }
         }
@@ -477,12 +491,12 @@ namespace iScrimmage.Data.Migrations
                 Point = 11
             };
 
-            using (IDbCommand cmd = tran.Connection.CreateCommand())
+            using (var cmd = tran.Connection.CreateCommand())
             {
                 cmd.Transaction = tran;
                 cmd.CommandText = @"SELECT [Id],[Name],[Url],[GroundsKeeperPhone],[Address],[City],[State],[Zip],[Notes],[Latitude],[Longitude],[Point] FROM [dbo].[Locations]";
 
-                using (IDataReader reader = cmd.ExecuteReader())
+                using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -490,19 +504,17 @@ namespace iScrimmage.Data.Migrations
                         var newId = getMappedId(oldId);
 
                         dynamic record = new ExpandoObject();
-
                         record.Id = newId;
                         record.Name = reader.GetValueOrNull<string>(columns.Name);
                         record.Url = reader.GetValueOrNull<string>(columns.Url);
                         record.PhoneNumber = reader.GetValueOrNull<string>(columns.PhoneNumber);
                         record.Address = reader.GetValueOrNull<string>(columns.Address);
                         record.City = reader.GetValueOrNull<string>(columns.City);
-                        record.State = reader.GetValueOrNull<string>(columns.State);
+                        record.State = "FL";
                         record.Zip = reader.GetValueOrNull<string>(columns.Zip);
                         record.Notes = reader.GetValueOrNull<string>(columns.Notes);
-                        record.Latitiude = reader.GetValueOrNull<string>(columns.Latitiude);
+                        record.Latitude = reader.GetValueOrNull<string>(columns.Latitiude);
                         record.Longitude = reader.GetValueOrNull<string>(columns.Longitude);
-                        record.Point = reader.GetValueOrNull<string>(columns.Point);
                         record.CreatedBy = systemId;
                         record.CreatedOn = DateTime.Today;
 
@@ -513,16 +525,15 @@ namespace iScrimmage.Data.Migrations
 
             foreach (var record in insertRecords)
             {
-                using (IDbCommand cmd = tran.Connection.CreateCommand())
+                using (var cmd = tran.Connection.CreateCommand())
                 {
                     cmd.Transaction = tran;
-
                     insertRecord(cmd, "blt", "Location", record);
                 }
             }
         }
 
-        private void migrateCoachesData(IDbConnection conn, IDbTransaction tran)
+        private void migrateCoachesData(IDbTransaction tran)
         {
             var insertMemberRecords = new List<ExpandoObject>();
             var insertContactRecords = new List<ExpandoObject>();
@@ -1042,7 +1053,7 @@ namespace iScrimmage.Data.Migrations
 
         private void updateAdminMembers(IDbConnection conn, IDbTransaction tran)
         {
-            
+
         }
 
         private Guid getMappedId(string key)
