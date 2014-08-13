@@ -6,6 +6,7 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using Autofac;
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using NHibernate;
@@ -21,12 +22,14 @@ namespace Web
     public class MvcApplication : System.Web.HttpApplication
     {
         public static ISessionFactory SessionFactory { get; private set; }
+        public static IContainer Container { get; protected set; }
 
         protected void Application_Start()
         {
             log4net.Config.XmlConfigurator.Configure();
 
             SqlServerTypes.Utilities.LoadNativeAssemblies(Server.MapPath("~/bin"));
+            Container = ContainerConfig.RegisterContainer(this);
 
             AreaRegistration.RegisterAllAreas();
 

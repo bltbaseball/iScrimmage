@@ -30,8 +30,72 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Autofac">
+      <HintPath>..\packages\Autofac.3.5.0\lib\net40\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac.Extras.CommonServiceLocator">
+      <HintPath>..\packages\Autofac.Extras.CommonServiceLocator.3.2.0\lib\net40\Autofac.Extras.CommonServiceLocator.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac.Integration.Mvc">
+      <HintPath>..\packages\Autofac.Mvc5.3.3.2\lib\net45\Autofac.Integration.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac.Integration.WebApi">
+      <HintPath>..\packages\Autofac.WebApi2.3.3.3\lib\net45\Autofac.Integration.WebApi.dll</HintPath>
+    </Reference>
+    <Reference Include="Dapper">
+      <HintPath>..\packages\Dapper.1.29\lib\net45\Dapper.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.0\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation">
+      <HintPath>..\packages\CommonServiceLocator.1.2\lib\portable-windows8+net40+sl5+windowsphone8\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.1.0\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.1.0\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.1.0\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.1.0\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.1.0\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.1.0\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.1.0\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.1.0\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -39,11 +103,82 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\Ioc.cs" />
+    <Compile Include="Common\ResourceHelper.cs" />
+    <Compile Include="Common\UserSession.cs" />
+    <Compile Include="Common\UserSessionProvider.cs" />
+    <Compile Include="Data\Configuration\ConnectionConfiguration.cs" />
+    <Compile Include="Data\Configuration\DataConfiguration.cs" />
+    <Compile Include="Data\ConnectionConfiguration.cs" />
+    <Compile Include="Data\ConnectionFactory.cs" />
+    <Compile Include="Data\Conventions\FieldNamingConventions.cs" />
+    <Compile Include="Data\Conventions\PrimaryKeyConventions.cs" />
+    <Compile Include="Data\Conventions\TableNamingConventions.cs" />
+    <Compile Include="Data\Criterion\AndCriteria.cs" />
+    <Compile Include="Data\Criterion\Criteria.cs" />
+    <Compile Include="Data\Criterion\ICriteria.cs" />
+    <Compile Include="Data\Criterion\OrCriteria.cs" />
+    <Compile Include="Data\Criterion\OrCriteriaDynamic.cs" />
+    <Compile Include="Data\Criterion\PropertyCriteria.cs" />
+    <Compile Include="Data\DataEnvironment.cs" />
+    <Compile Include="Data\Exceptions\ConnectionConfigurationException.cs" />
+    <Compile Include="Data\Exceptions\MappingException.cs" />
+    <Compile Include="Data\Exceptions\RecordNotFoundException.cs" />
+    <Compile Include="Data\Extensions\ClassMapExtensions.cs" />
+    <Compile Include="Data\Extensions\PredicateExtensions.cs" />
+    <Compile Include="Data\Extensions\PropertyMapExtensions.cs" />
+    <Compile Include="Data\Generators\GuidCombGenerator.cs" />
+    <Compile Include="Data\Generators\IIdentityGenerator.cs" />
+    <Compile Include="Data\IConnectionFactory.cs" />
+    <Compile Include="Data\IDataContext.cs" />
+    <Compile Include="Data\IQuerySpec.cs" />
+    <Compile Include="Data\Mapping\Attributes\SubClassAttribute.cs" />
+    <Compile Include="Data\Mapping\AuditPropertyPart.cs" />
+    <Compile Include="Data\Mapping\ClassMap.cs" />
+    <Compile Include="Data\Mapping\ClassMapper.cs" />
+    <Compile Include="Data\Mapping\CrossWalk.cs" />
+    <Compile Include="Data\Mapping\IMappingOverride.cs" />
+    <Compile Include="Data\Mapping\JoinPart.cs" />
+    <Compile Include="Data\Mapping\KeyMap.cs" />
+    <Compile Include="Data\Mapping\PropertyMap.cs" />
+    <Compile Include="Data\Mapping\ReferenceMap.cs" />
+    <Compile Include="Data\Mapping\SubClassMap.cs" />
+    <Compile Include="Data\MultipleResultReader.cs" />
+    <Compile Include="Data\Queries\MemberByEmailQuery.cs" />
+    <Compile Include="Data\SqlBuilder.cs" />
+    <Compile Include="Data\SqlBuilderDomain.cs" />
+    <Compile Include="Data\SqlDataContext.cs" />
+    <Compile Include="Data\TemplatedQuerySpec.cs" />
+    <Compile Include="Extensions\BaseModelExtensions.cs" />
     <Compile Include="Extensions\DataReaderExtensions.cs" />
+    <Compile Include="Data\Models\BaseModel.cs" />
+    <Compile Include="Data\Models\Member.cs" />
+    <Compile Include="Extensions\DynamicExtensions.cs" />
+    <Compile Include="Extensions\Inflector.cs" />
+    <Compile Include="Extensions\Numeric.cs" />
+    <Compile Include="Extensions\RegexPattern.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Extensions\ValidationExtensions.cs" />
+    <Compile Include="iScrimmageContainerConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Data\Queries\MembersQuery.cs" />
     <Compile Include="Security\PasswordHash.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Data\Queries\MembersQuery.sql">
+      <DependentUpon>MembersQuery.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Data\Queries\MemberByEmailQuery.sql">
+      <DependentUpon>MemberByEmailQuery.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
