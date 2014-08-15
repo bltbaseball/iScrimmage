@@ -16,13 +16,17 @@ namespace Web
                 "~/Scripts/vendor/angular-1.2.22/angular-resource.js",
                 "~/Scripts/vendor/angular-1.2.22/angular-route.js",
                 "~/Scripts/vendor/angular-1.2.22/angular-sanitize.js",
-                "~/Scripts/vendor/angular-1.2.22/angular-touch.js"
+                "~/Scripts/vendor/angular-1.2.22/angular-touch.js",
+                "~/Scripts/vendor/lodash-2.4.1/lodash.compat.js",
+                "~/Scripts/vendor/angular-spinner-0.5.1/angular-spinner.js",
+                "~/Scripts/vendor/spin.js/spin.js"
             ));
 
             bundles.Add(new ScriptBundle("~/bundles/site").Include(
                 "~/Scripts/site/iscrimmage.api.js",
                 "~/Scripts/site/iscrimmage.app.js",
-                "~/Scripts/site/iscrimmage.home.controller.js"
+                "~/Scripts/site/iscrimmage.home.controller.js",
+                "~/Scripts/site/iscrimmage.account.controller.js"
             ));
 
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(

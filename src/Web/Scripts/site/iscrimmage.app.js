@@ -1,5 +1,5 @@
 ﻿
-var iscrimmageApp = angular.module("iScrimmageApp", ["ngRoute", "iScrimmageApi"])
+var iscrimmageApp = angular.module("iScrimmageApp", ["ngRoute", "angularSpinner", "iScrimmageApi"])
     .config([
         "$routeProvider",
         function($routeProvider) {

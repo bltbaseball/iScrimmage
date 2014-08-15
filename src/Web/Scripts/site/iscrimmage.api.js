@@ -10,7 +10,7 @@ iScrimmageApi.factory("AccountApi", [
             login: function(member) {
                 var deferred = $q.defer();
 
-                $http.post(apiUrl + "login", member)
+                $http.post(apiUrl + "Login", member)
                     .success(function (data) {
                         deferred.resolve(data);
                     })
@@ -24,7 +24,7 @@ iScrimmageApi.factory("AccountApi", [
             logout: function() {
                 var deferred = $q.defer();
 
-                $http.get(apiUrl + "logout")
+                $http.get(apiUrl + "Logout")
                     .success(function (data) {
                         deferred.resolve(data);
                     })
@@ -38,7 +38,7 @@ iScrimmageApi.factory("AccountApi", [
             register: function(member) {
                 var deferred = $q.defer();
 
-                $http.post(apiUrl + "register", member)
+                $http.post(apiUrl + "Register", member)
                     .success(function (data) {
                         deferred.resolve(data);
                     })
@@ -52,7 +52,21 @@ iScrimmageApi.factory("AccountApi", [
             sendResetLink: function(member) {
                 var deferred = $q.defer();
 
-                $http.post(apiUrl + "sendresetlink", member)
+                $http.post(apiUrl + "SendResetLink", member)
+                    .success(function (data) {
+                        deferred.resolve(data);
+                    })
+                    .error(function (err) {
+                        deferred.reject(err);
+                    });
+
+                return deferred.promise;
+            },
+
+            resetPassword: function(member) {
+                var deferred = $q.defer();
+
+                $http.post(apiUrl + "ResetPassword", member)
                     .success(function (data) {
                         deferred.resolve(data);
                     })

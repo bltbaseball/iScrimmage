@@ -9,6 +9,7 @@ using iScrimmage.Core.Data;
 using iScrimmage.Core.Data.Queries;
 using iScrimmage.Core.Data.Models;
 using iScrimmage.Core.Security;
+using NHibernate.Engine;
 using Web.Helpers;
 
 namespace Web.Controllers.Api
@@ -31,67 +32,112 @@ namespace Web.Controllers.Api
         [HttpPost]
         public IHttpActionResult Login([FromBody] Member credentials)
         {
-            if (credentials == null)
+            try
             {
+                if (credentials == null)
+                {
+                    throw new InvalidCredentialsException();
+                }
+
+                if (String.IsNullOrEmpty(credentials.Email) || String.IsNullOrEmpty(credentials.Password))
+                {
+                    throw new InvalidCredentialsException();
+                }
+
+                var query = new MemberByEmailQuery(credentials.Email);
+
+                var member = Context.Execute(query);
+
+                if (member == null)
+                {
+                    throw new InvalidCredentialsException();
+                }
+
+                if (PasswordHash.ValidatePassword(credentials.Password, member.Password))
+                {
+                    // Don't return sensitive data.
+                    member.Password = "";
+                    member.ResetToken = "";
+                    member.ResetTokenExpiresOn = null;
+                    member.VerificationToken = "";
+
+                    this.CurrentUser = UserSession.Initialize(member);
+                    FormsAuthentication.SetAuthCookie(member.Email, false);
+
+                    return Ok<dynamic>(new { Success = true, Member = member });
+                }
+
                 throw new InvalidCredentialsException();
             }
-
-            if (String.IsNullOrEmpty(credentials.Email) || String.IsNullOrEmpty(credentials.Password))
+            catch (Exception ex)
             {
-                throw new InvalidCredentialsException();
+                return Ok<dynamic>(new { Success = false, Error = ex.Message });
             }
-
-            var query = new MemberByEmailQuery(credentials.Email);
-
-            var member = Context.Execute(query);
-
-            if (member == null)
-            {
-                throw new InvalidCredentialsException();
-            }
-
-            if (PasswordHash.ValidatePassword(credentials.Password, member.Password))
-            {
-                // Clear password for security purposes.
-                member.Password = "";
-
-                this.CurrentUser = UserSession.Initialize(member);
-                FormsAuthentication.SetAuthCookie(member.Email, false);
-
-                return Ok<Member>(member);
-            }
-
-            throw new InvalidCredentialsException();
         }
 
         [HttpPost]
         public IHttpActionResult Register([FromBody] Member member)
         {
-            return Ok<Member>(member);
+            return Ok<dynamic>(new {Success = true, Member = member});
+        }
+
+        [HttpPost]
+        public IHttpActionResult ResetPassword([FromBody] Member data)
+        {
+            try
+            {
+                var query = new MemberByResetToken(data.ResetToken, DateTime.UtcNow);
+                var member = Context.Execute(query);
+
+                if (member == null)
+                {
+                    return Ok<dynamic>(new { Success = false, Error = "This reset link is invalid or expired." });
+                }
+
+                member.Password = PasswordHash.CreateHash(data.Password);
+                member.ResetToken = "";
+                member.ModifiedBy = member.Id;
+                member.ModifiedOn = DateTime.UtcNow;
+
+                Context.Update<Member>(member.Id, member);
+
+                return Ok<dynamic>(new { Success = true });
+            }
+            catch (Exception ex)
+            {
+                return Ok<dynamic>(new { Success = false, Error = ex.Message });
+            }
         }
 
         [HttpPost]
         public IHttpActionResult SendResetLink([FromBody] Member credentials)
         {
-            var query = new MemberByEmailQuery(credentials.Email);
-
-            var member = Context.Execute(query);
-
-            if (member == null)
+            try
             {
-                return Ok<dynamic>(new {Error = "The provided email address could not be found."});
+                var query = new MemberByEmailQuery(credentials.Email);
+
+                var member = Context.Execute(query);
+
+                if (member == null)
+                {
+                    return Ok<dynamic>(new {Success = false, Error = "The provided email address could not be found."});
+                }
+
+                member.ResetToken = Guid.NewGuid().ToString().Replace("-", "");
+                member.ResetTokenExpiresOn = DateTime.UtcNow.AddHours(24);
+                member.ModifiedBy = Guid.Empty;
+                member.ModifiedOn = DateTime.UtcNow;
+
+                Context.Update<Member>(member.Id, member);
+
+                EmailNotification.ResetPassword(member);
+
+                return Ok<dynamic>(new {Success = true});
             }
-
-            member.ResetToken = Guid.NewGuid().ToString().Replace("-", "");
-            member.ResetTokenExpiresOn = DateTime.UtcNow.AddHours(24);
-            member.ModifiedBy = Guid.Empty;
-            member.ModifiedOn = DateTime.UtcNow;
-
-            Context.Update<Member>(member.Id, member);
-
-            EmailNotification.ResetPassword(member);
-
-            return Ok<Member>(credentials);
+            catch (Exception ex)
+            {
+                return Ok<dynamic>(new {Success = false, Error = ex.Message});
+            }
         }
     }
 }

@@ -1014,6 +1014,7 @@
     <Content Include="Scripts\qTip\jquery.qtip.js" />
     <Content Include="Scripts\qTip\jquery.qtip.min.css" />
     <Content Include="Scripts\qTip\jquery.qtip.min.js" />
+    <Content Include="Scripts\site\iscrimmage.account.controller.js" />
     <Content Include="Scripts\site\iscrimmage.api.js" />
     <Content Include="Scripts\site\iscrimmage.app.js" />
     <Content Include="Scripts\site\iscrimmage.home.controller.js" />
@@ -1034,6 +1035,12 @@
     <Content Include="Scripts\vendor\angular-1.2.22\angular-touch.min.js" />
     <Content Include="Scripts\vendor\angular-1.2.22\angular.js" />
     <Content Include="Scripts\vendor\angular-1.2.22\angular.min.js" />
+    <Content Include="Scripts\vendor\angular-spinner-0.5.1\angular-spinner.js" />
+    <Content Include="Scripts\vendor\angular-spinner-0.5.1\angular-spinner.min.js" />
+    <Content Include="Scripts\vendor\lodash-2.4.1\lodash.compat.js" />
+    <Content Include="Scripts\vendor\lodash-2.4.1\lodash.compat.min.js" />
+    <Content Include="Scripts\vendor\spin.js\spin.js" />
+    <Content Include="Scripts\vendor\spin.js\spin.min.js" />
     <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="Views\Home\Index.cshtml">
       <SubType>Code</SubType>
@@ -1218,6 +1225,7 @@
     <Content Include="Scripts\vendor\angular-1.2.22\angular-touch.min.js.map" />
     <Content Include="Scripts\vendor\angular-1.2.22\angular.min.js.map" />
     <Content Include="Views\Account\ResetPassword.cshtml" />
+    <Content Include="Scripts\vendor\angular-spinner-0.5.1\angular-spinner.min.js.map" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Images\Coaches\" />

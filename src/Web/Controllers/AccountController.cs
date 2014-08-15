@@ -375,6 +375,14 @@ namespace Web.Controllers
                     member.Id = Guid.Empty;
                 }
 
+                // Don't return sensitive data.
+                member.Password = "";
+                member.ResetTokenExpiresOn = null;
+                member.VerificationToken = "";
+
+                // Will need the reset token
+                member.ResetToken = id;
+
                 ViewData.Model = member;
             }
 

@@ -42,7 +42,9 @@
 }
 </section>*@
 
-<section class="social" id="socialLoginForm">
+<span us-spinner="{radius:40, length:30, width:14, trail:50}" spinner-key="login"></span>
+
+<section ng-controller="iScrimmageAccount" ng-cloak class="social" id="socialLoginForm">
     @*<h2>Use another service to log in.</h2>
     @Html.Action("ExternalLoginsList", new { ReturnUrl = ViewBag.ReturnUrl })*@
     @*
@@ -50,6 +52,9 @@
     {
         @Html.AntiForgeryToken()*@
     <fieldset id="socialLoginList">
+        <p ng-if="error" class="error">
+            <span>{{error}}</span>
+        </p>
         <p>
             <div class="editor-label">
                 <label>Email Address</label>
