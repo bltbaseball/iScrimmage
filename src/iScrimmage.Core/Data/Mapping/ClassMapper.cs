@@ -5,7 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using iScrimmage.Core.Data.Mapping.Attributes;
-using iScrimmage.Core.Models;
+using iScrimmage.Core.Data.Models;
 using Microsoft.Practices.ServiceLocation;
 using log4net;
 

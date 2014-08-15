@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using iScrimmage.Core.Data;
-using iScrimmage.Core.Models;
+using iScrimmage.Core.Data.Models;
 using System.Collections.Generic;
 
 namespace iScrimmage.Core.Data.Queries

@@ -5,7 +5,12 @@ using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
+using Autofac;
 using DotNetOpenAuth.AspNet;
+using iScrimmage.Core.Common;
+using iScrimmage.Core.Data;
+using iScrimmage.Core.Data.Models;
+using iScrimmage.Core.Data.Queries;
 using Microsoft.Web.WebPages.OAuth;
 using WebMatrix.WebData;
 using Web.Filters;
@@ -347,6 +352,32 @@ namespace Web.Controllers
         [AllowAnonymous]
         public ActionResult ExternalLoginFailure()
         {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public ActionResult ResetPassword(string id)
+        {
+            if (String.IsNullOrEmpty(id))
+            {
+                ViewData.Model = null;
+            }
+            else
+            {
+                var context = Ioc.Current.Resolve<IDataContext>();
+                var query = new MemberByResetToken(id, DateTime.UtcNow);
+                var member = context.Execute(query);
+
+                if (member == null)
+                {
+                    // Create member with empty id to indicate no member was found by the token.
+                    member = new Member();
+                    member.Id = Guid.Empty;
+                }
+
+                ViewData.Model = member;
+            }
+
             return View();
         }
 

@@ -1,4 +1,4 @@
-﻿using iScrimmage.Core.Models;
+﻿using iScrimmage.Core.Data.Models;
 
 namespace iScrimmage.Core.Common
 {

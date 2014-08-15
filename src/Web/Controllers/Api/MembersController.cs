@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.Http;
 using iScrimmage.Core.Data;
 using iScrimmage.Core.Data.Exceptions;
-using iScrimmage.Core.Models;
+using iScrimmage.Core.Data.Models;
 using iScrimmage.Core.Queries;
 using Web.Filters;
 

@@ -8,6 +8,23 @@ namespace Web
         // For more information on Bundling, visit http://go.microsoft.com/fwlink/?LinkId=254725
         public static void RegisterBundles(BundleCollection bundles)
         {
+            bundles.Add(new ScriptBundle("~/bundles/angular").Include(
+                "~/Scripts/vendor/angular-1.2.22/angular.js",
+                "~/Scripts/vendor/angular-1.2.22/angular-animate.js",
+                "~/Scripts/vendor/angular-1.2.22/angular-cookies.js",
+                "~/Scripts/vendor/angular-1.2.22/angular-loader.js",
+                "~/Scripts/vendor/angular-1.2.22/angular-resource.js",
+                "~/Scripts/vendor/angular-1.2.22/angular-route.js",
+                "~/Scripts/vendor/angular-1.2.22/angular-sanitize.js",
+                "~/Scripts/vendor/angular-1.2.22/angular-touch.js"
+            ));
+
+            bundles.Add(new ScriptBundle("~/bundles/site").Include(
+                "~/Scripts/site/iscrimmage.api.js",
+                "~/Scripts/site/iscrimmage.app.js",
+                "~/Scripts/site/iscrimmage.home.controller.js"
+            ));
+
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
                         "~/Scripts/jquery-{version}.js"));
 

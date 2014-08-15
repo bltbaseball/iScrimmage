@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace iScrimmage.Core.Models
+namespace iScrimmage.Core.Data.Models
 {
     public abstract class BaseModel
     {

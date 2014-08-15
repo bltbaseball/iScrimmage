@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace iScrimmage.Core.Models
+namespace iScrimmage.Core.Data.Models
 {
+    [Table("blt.Member")]
     public class Member : BaseModel
     {
         public virtual Guid? GuardianId { get; set; }

@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Web;
 using Web.Models;
+using iScrimmage.Core.Data.Models;
 
 namespace Web.Helpers
 {
@@ -319,6 +320,17 @@ namespace Web.Helpers
                 if(player.Player.Guardian != null)
                     SendEmail(subject, body.Replace("{Name}", string.Format("{0} {1}", player.Player.Guardian.FirstName, player.Player.Guardian.LastName)), player.Player.Guardian.Email);
             }
+        }
+
+        public static void ResetPassword(Member member)
+        {
+            var subject = "Password Reset";
+            var body = File.ReadAllText(HttpContext.Current.Server.MapPath(TEMPLATE_PATH + "password-reset.html"));
+            
+            body = body.Replace("{Name}", member.FirstName);
+            body = body.Replace("{Token}", member.ResetToken);
+
+            SendEmail(subject, body, member.Email);
         }
 
         private static void SendEmail(string subject, string body, string recipient)
