@@ -7,6 +7,7 @@ iscrimmageApp.controller("iScrimmageAccount", [
         function init() {
             scope.loginEmail = "";
             scope.loginPassword = "";
+            scope.loginRedirect = "";
             scope.resetEmail = "";
             scope.resetToken = "";
             scope.newPassword = "";
@@ -23,7 +24,12 @@ iscrimmageApp.controller("iScrimmageAccount", [
             accountApi.login({ Email: scope.loginEmail, Password: scope.loginPassword }).then(
                 function (data) {
                     if (data.Success) {
-                        window.location.href = "/Home/Dashboard";
+                        if (_.isEmpty(scope.loginRedirect)) {
+                            window.location.href = "/Home/Dashboard";
+                        }
+                        else {
+                            window.location.href = scope.loginRedirect;
+                        }
                     }
                     else {
                         scope.error = data.Error;

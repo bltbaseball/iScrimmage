@@ -51,7 +51,7 @@
     @using (Html.BeginForm("ExternalLogin", "Account", new { ReturnUrl = ViewBag.ReturnUrl }))
     {
         @Html.AntiForgeryToken()*@
-    <fieldset id="socialLoginList">
+    <fieldset id="socialLoginList" ng-init="loginRedirect='@ViewBag.ReturnUrl'">
         <p ng-if="error" class="error">
             <span>{{error}}</span>
         </p>
