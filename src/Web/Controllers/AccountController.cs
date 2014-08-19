@@ -34,6 +34,58 @@ namespace Web.Controllers
             return View();
         }
 
+        public ActionResult Logout()
+        {
+            FormsAuthentication.SignOut();
+            return RedirectToAction("Index", "Home");
+
+            //return Redirect("https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=http://" + 
+            //System.Web.HttpContext.Current.Request.Url.Host + ":" + System.Web.HttpContext.Current.Request.Url.Port);
+            //return RedirectToAction("Index", "Home");
+            //return RedirectToAction("Index", "Home");
+        }
+
+        [AllowAnonymous]
+        public ActionResult Register()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public ActionResult ResetPassword(string id)
+        {
+            if (String.IsNullOrEmpty(id))
+            {
+                ViewData.Model = null;
+            }
+            else
+            {
+                var context = Ioc.Current.Resolve<IDataContext>();
+                var query = new MemberByResetToken(id, DateTime.UtcNow);
+                var member = context.Execute(query);
+
+                if (member == null)
+                {
+                    // Create member with empty id to indicate no member was found by the token.
+                    member = new Member();
+                    member.Id = Guid.Empty;
+                }
+
+                // Don't return sensitive data.
+                member.Password = "";
+                member.ResetTokenExpiresOn = null;
+                member.VerificationToken = "";
+
+                // Will need the reset token
+                member.ResetToken = id;
+
+                ViewData.Model = member;
+            }
+
+            return View();
+        }
+
+        /*
         //
         // POST: /Account/Login
 
@@ -51,6 +103,7 @@ namespace Web.Controllers
             ModelState.AddModelError("", "The user name or password provided is incorrect.");
             return View(model);
         }
+        */
 
         public ActionResult Manage()
         {
@@ -139,19 +192,6 @@ namespace Web.Controllers
             return RedirectToAction("Dashboard", "Home");
         }
   
-        //
-        // POST: /Account/LogOff
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult LogOff()
-        {
-            FormsAuthentication.SignOut();
-            return Redirect("https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=http://" + 
-                System.Web.HttpContext.Current.Request.Url.Host + ":" + System.Web.HttpContext.Current.Request.Url.Port);
-            //return RedirectToAction("Index", "Home");
-            //return RedirectToAction("Index", "Home");
-        }
 
         // We don't need a separate registration form. It's automatically handled by the Login/OAuth authentication.
         // After a user logs in for the first time, they should be redirected to their invitation page to fill out their
@@ -162,6 +202,7 @@ namespace Web.Controllers
             return View();
         }
 
+        /*
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -354,42 +395,8 @@ namespace Web.Controllers
         {
             return View();
         }
+        */
 
-        [AllowAnonymous]
-        public ActionResult ResetPassword(string id)
-        {
-            if (String.IsNullOrEmpty(id))
-            {
-                ViewData.Model = null;
-            }
-            else
-            {
-                var context = Ioc.Current.Resolve<IDataContext>();
-                var query = new MemberByResetToken(id, DateTime.UtcNow);
-                var member = context.Execute(query);
-
-                if (member == null)
-                {
-                    // Create member with empty id to indicate no member was found by the token.
-                    member = new Member();
-                    member.Id = Guid.Empty;
-                }
-
-                // Don't return sensitive data.
-                member.Password = "";
-                member.ResetTokenExpiresOn = null;
-                member.VerificationToken = "";
-
-                // Will need the reset token
-                member.ResetToken = id;
-
-                ViewData.Model = member;
-            }
-
-            return View();
-        }
-
-        
         #region Helpers
         private ActionResult RedirectToLocal(string returnUrl)
         {

@@ -84,8 +84,8 @@ namespace iScrimmage.Core.Data
             var map = ClassMapper.GetMap(typeof(T));
             var builder = new SqlBuilderDomain(map);
 
-            map.AssignIdentifierValues(data)
-               .AssignTimeStamp(data);
+            //map.AssignIdentifierValues(data)
+            //   .AssignTimeStamp(data);
 
             var sql = builder.Insert.RawSql;
 

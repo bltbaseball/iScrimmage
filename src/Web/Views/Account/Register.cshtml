@@ -1,36 +1,144 @@
-﻿@model Web.Models.RegisterModel
+﻿@model iScrimmage.Core.Data.Models.Member
+
 @{
-    ViewBag.Title = "Register";
+    ViewBag.Title = "Create A Free Account";
 }
 
 <hgroup class="title">
     <h1>@ViewBag.Title.</h1>
-    <h2>Create a new account.</h2>
 </hgroup>
 
-@using (Html.BeginForm()) {
-    @Html.AntiForgeryToken()
-    @Html.ValidationSummary()
+<span us-spinner="{radius:40, length:30, width:14, trail:50}" spinner-key="register"></span>
 
-    <fieldset>
-        <legend>Registration Form</legend>
-        <ol>
-            <li>
-                @Html.LabelFor(m => m.UserName)
-                @Html.TextBoxFor(m => m.UserName)
-            </li>
-            <li>
-                @Html.LabelFor(m => m.Password)
-                @Html.PasswordFor(m => m.Password)
-            </li>
-            <li>
-                @Html.LabelFor(m => m.ConfirmPassword)
-                @Html.PasswordFor(m => m.ConfirmPassword)
-            </li>
-        </ol>
-        <input type="submit" value="Register" />
-    </fieldset>
-}
+<section ng-controller="iScrimmageAccount" ng-cloak class="social">
+    <span ng-hide="registerData.Registered"><i class="icon-asterisk error"></i>&nbsp;All fields are required.</span>
+    <br /><br />
+
+    <div ng-if="error" class="error">
+        <span>{{error}}</span>
+    </div>
+    <div ng-hide="registerData.Registered">
+        <div class="clear">
+            <div class="floatleft" style="width: 350px;">
+                <div class="editor-label">
+                    <label>Please enter a valid email address.</label>
+                </div>
+                <div class="editor-field">
+                    <input type="text" ng-model="registerData.Email" />
+                    <ul><li ng-if="registerData.Errors.EmailMissing" class="error">This field is required.</li></ul>
+                    <blt-email-checker ng-model="registerData.Email" />
+                </div>
+            </div>
+            <div class="floatleft" style="width: 350px;">
+                <div class="editor-label">
+                    <label>Please re-enter the email address.</label>
+                </div>
+                <div class="editor-field">
+                    <input type="text" ng-model="registerData.EmailConfirm" />
+                    <ul><li ng-if="registerData.Errors.EmailConfirmMissing" class="error">This field is required.</li></ul>
+                    <blt-email-matcher ng-model="registerData.EmailConfirm" match="registerData.Email" />
+                </div>
+            </div>
+        </div>
+
+        <div class="clear">
+            <div class="floatleft" style="width: 350px;">
+                <div class="editor-label">
+                    <label>Please enter a password.</label>
+                </div>
+                <div class="editor-field">
+                    <input type="password" ng-model="registerData.Password" />
+                    <ul><li ng-if="registerData.Errors.PasswordMissing" class="error">This field is required.</li></ul>
+                    <blt-password-strength ng-model="registerData.Password" />
+                </div>
+            </div>
+            <div class="floatleft" style="width: 350px;">
+                <div class="editor-label">
+                    <label>Please re-enter the password.</label>
+                </div>
+                <div class="editor-field">
+                    <input type="password" ng-model="registerData.PasswordConfirm" />
+                    <ul><li ng-if="registerData.Errors.PasswordConfirmMissing" class="error">This field is required.</li></ul>
+                    <blt-password-matcher ng-model="registerData.PasswordConfirm" match="registerData.Password" />
+                </div>
+            </div>
+        </div>
+
+        <div class="clear">
+            <div class="floatleft" style="width: 350px;">
+                <div class="editor-label">
+                    <label>Please enter your first name.</label>
+                </div>
+                <div class="editor-field">
+                    <input type="text" ng-model="registerData.FirstName" />
+                    <ul><li ng-if="registerData.Errors.FirstNameMissing" class="error">This field is required.</li></ul>
+                </div>
+            </div>
+            <div class="floatleft" style="width: 350px;">
+                <div class="editor-label">
+                    <label>Please enter your last name.</label>
+                </div>
+                <div class="editor-field">
+                    <input type="text" ng-model="registerData.LastName" />
+                    <ul><li ng-if="registerData.Errors.LastNameMissing" class="error">This field is required.</li></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="clear">
+            <div class="floatleft" style="width: 350px;">
+                <div class="editor-label">
+                    <label>Please enter your phone number.</label>
+                </div>
+                <div class="editor-field">
+                    <input type="text" ng-model="registerData.Phone" />
+                    <ul><li ng-if="registerData.Errors.PhoneMissing" class="error">This field is required.</li></ul>
+                </div>
+            </div>
+            <div class="floatleft" style="width: 350px;">
+                <div class="editor-label">
+                    <label>Are you:</label>
+                </div>
+                <div class="editor-field">
+                    <input type="radio" name="role" ng-model="registerData.Role" value="coach" /> A Coach?<br />
+                    <input type="radio" name="role" ng-model="registerData.Role" value="guardian" /> A Parent or Guardian?<br />
+                    <input type="radio" name="role" ng-model="registerData.Role" value="playerOver13" /> A Player 13 or Over?<br />
+                    <input type="radio" name="role" ng-model="registerData.Role" value="playerUnder13" /> A Player Under 13?
+                </div>
+                <ul><li ng-if="registerData.Errors.RoleMissing" class="error">This field is required.</li></ul>
+            </div>
+        </div>
+
+    </div>
+
+    <div ng-show="registerData.Registered">
+        <div class="editor-label">
+            <label>Welcome, {{registerData.FirstName}}. Your account has been created.</label><br />
+            @Html.ActionLink("Log In", "Login", "Account")
+        </div>
+    </div>
+
+    <div class="clear" ng-hide="registerData.Registered">
+        <div ng-if="registerData.Errors.Count > 0" class="editor-label">
+            <label class="error">Please correct the errors indicated above.</label>
+        </div>
+        <button ng-click="register()" type="submit" title="Create An Account">Create An Account</button>
+    </div>
+
+</section>
+
+<script type="text/ng-template" id="pwdPopover">
+    <span>A strong password contains all of the following:</span>
+    <ul>
+        <li>Over 8 characters long</li>
+        <li>Uppercase letters</li>
+        <li>Lowercase letters</li>
+        <li>Numbers</li>
+        <li>Special characters (!#$...)</li>
+        <li>No letters successively repeated more than 2 times</li>
+    </ul>
+
+</script>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")

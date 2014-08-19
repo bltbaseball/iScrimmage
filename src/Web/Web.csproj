@@ -371,6 +371,7 @@
     <Compile Include="Models\WebContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlServerTypes\Loader.cs" />
+    <Compile Include="Transition\Membership.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\packages\Microsoft.SqlServer.Types.11.0.1\nativeBinaries\x64\msvcr100.dll">
@@ -1039,6 +1040,8 @@
     <Content Include="Scripts\vendor\angular-spinner-0.5.1\angular-spinner.min.js" />
     <Content Include="Scripts\vendor\lodash-2.4.1\lodash.compat.js" />
     <Content Include="Scripts\vendor\lodash-2.4.1\lodash.compat.min.js" />
+    <Content Include="Scripts\vendor\nsPopover-0.5.8\nsPopover.css" />
+    <Content Include="Scripts\vendor\nsPopover-0.5.8\nsPopover.js" />
     <Content Include="Scripts\vendor\spin.js\spin.js" />
     <Content Include="Scripts\vendor\spin.js\spin.min.js" />
     <Content Include="SqlServerTypes\readme.htm" />

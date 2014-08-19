@@ -19,7 +19,8 @@ namespace Web
                 "~/Scripts/vendor/angular-1.2.22/angular-touch.js",
                 "~/Scripts/vendor/lodash-2.4.1/lodash.compat.js",
                 "~/Scripts/vendor/angular-spinner-0.5.1/angular-spinner.js",
-                "~/Scripts/vendor/spin.js/spin.js"
+                "~/Scripts/vendor/spin.js/spin.js",
+                "~/Scripts/vendor/nsPopover-0.5.8/nsPopover.js"
             ));
 
             bundles.Add(new ScriptBundle("~/bundles/site").Include(
@@ -44,7 +45,9 @@ namespace Web
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
                         "~/Scripts/modernizr-*"));
 
-            bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/site.css"));
+            bundles.Add(new StyleBundle("~/Content/css").Include(
+                "~/Content/site.css",
+                "~/Scripts/vendor/nsPopover-0.5.8/nsPopover.css"));
 
             bundles.Add(new StyleBundle("~/Content/themes/base/css").Include(
                         "~/Content/themes/base/jquery.ui.core.css",

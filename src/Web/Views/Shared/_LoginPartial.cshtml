@@ -1,11 +1,9 @@
-﻿@if (Request.IsAuthenticated) {
+﻿@if (Request.IsAuthenticated)
+{
     Web.Models.BLTBPrincipal loggedInUser = (Web.Models.BLTBPrincipal)User;
-    <li>
-        @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" })) {
-            @Html.AntiForgeryToken()
-            <a href="javascript:document.getElementById('logoutForm').submit()">Log off</a>
-        }
-    </li>
-} else {
-    <li>@Html.ActionLink("Log in", "Login", "Account")</li>
+    <li>@Html.ActionLink("Log Out", "Logout", "Account")</li>
+}
+else
+{
+    <li>@Html.ActionLink("Log In", "Login", "Account")</li>
 }

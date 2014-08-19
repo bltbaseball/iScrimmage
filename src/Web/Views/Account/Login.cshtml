@@ -1,4 +1,4 @@
-﻿@model Web.Models.LoginModel
+﻿@model iScrimmage.Core.Data.Models.Member
 
 @{
     ViewBag.Title = "Log In";
@@ -8,51 +8,12 @@
     <h1>@ViewBag.Title</h1>
 </hgroup>
 
-
-
-@*<section id="loginForm">
-<h2>Use a local account to log in.</h2>
-@using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl })) {
-    @Html.AntiForgeryToken()
-    @Html.ValidationSummary(true)
-
-    <fieldset>
-        <legend>Log in Form</legend>
-        <ol>
-            <li>
-                @Html.LabelFor(m => m.UserName)
-                @Html.TextBoxFor(m => m.UserName)
-                @Html.ValidationMessageFor(m => m.UserName)
-            </li>
-            <li>
-                @Html.LabelFor(m => m.Password)
-                @Html.PasswordFor(m => m.Password)
-                @Html.ValidationMessageFor(m => m.Password)
-            </li>
-            <li>
-                @Html.CheckBoxFor(m => m.RememberMe)
-                @Html.LabelFor(m => m.RememberMe, new { @class = "checkbox" })
-            </li>
-        </ol>
-        <input type="submit" value="Log in" />
-    </fieldset>
-    <p>
-        @Html.ActionLink("Register", "Register") if you don't have an account.
-    </p>
-}
-</section>*@
-
 <span us-spinner="{radius:40, length:30, width:14, trail:50}" spinner-key="login"></span>
 
-<section ng-controller="iScrimmageAccount" ng-cloak class="social" id="socialLoginForm">
-    @*<h2>Use another service to log in.</h2>
-    @Html.Action("ExternalLoginsList", new { ReturnUrl = ViewBag.ReturnUrl })*@
-    @*
-    @using (Html.BeginForm("ExternalLogin", "Account", new { ReturnUrl = ViewBag.ReturnUrl }))
-    {
-        @Html.AntiForgeryToken()*@
-    <fieldset id="socialLoginList" ng-init="loginRedirect='@ViewBag.ReturnUrl'">
+<section ng-controller="iScrimmageAccount" ng-cloak class="social">
+    <fieldset ng-init="loginData.Redirect='@ViewBag.ReturnUrl'">
         <p ng-if="error" class="error">
+            <br/>
             <span>{{error}}</span>
         </p>
         <p>
@@ -60,24 +21,23 @@
                 <label>Email Address</label>
             </div>
             <div class="editor-field">
-                <input type="text" ng-model="loginEmail" />
+                <input type="text" ng-model="loginData.Email" />
             </div>
 
             <div class="editor-label">
                 <label>Password</label>
             </div>
             <div class="editor-field">
-                <input type="password" ng-model="loginPassword" />
+                <input type="password" ng-model="loginData.Password" />
             </div>
         </p>
-
-        <button ng-click="login()" type="submit" name="provider" title="Log In">Log In</button>
-        &nbsp;&nbsp;
-        @Html.ActionLink("Forgot My Password", "ResetPassword", "Account")
+        <p>
+            <button ng-click="login()" type="submit" name="provider" title="Log In">Log In</button>
+        </p>
+        <p>
+            @Html.ActionLink("I Forgot My Password", "ResetPassword", "Account")
+            &nbsp;&nbsp;
+            @Html.ActionLink("Create A Free Account", "Register", "Account")
+        </p>
     </fieldset>
-    @*}*@
 </section>
-
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-}

@@ -143,6 +143,7 @@
     <Compile Include="Data\Mapping\PropertyMap.cs" />
     <Compile Include="Data\Mapping\ReferenceMap.cs" />
     <Compile Include="Data\Mapping\SubClassMap.cs" />
+    <Compile Include="Data\Models\Contact.cs" />
     <Compile Include="Data\MultipleResultReader.cs" />
     <Compile Include="Data\Queries\MemberByEmailQuery.cs" />
     <Compile Include="Data\Queries\MemberByResetToken.cs" />

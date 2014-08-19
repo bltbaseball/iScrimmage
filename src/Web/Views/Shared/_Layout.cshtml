@@ -138,32 +138,13 @@
                                         }
                                         else
                                         {
-                                            <div id="sh_login_members" class="sh_login_cons">            <h2>Members</h2>
+                                            <div id="sh_login_members" class="sh_login_cons">
                                                 <h2>Members</h2>
-                                                <span>Login with your Google account.</span>
-                                                @using (Html.BeginForm("ExternalLogin", "Account", new { ReturnUrl = "/Home/Dashboard" }))
-                                                {
-                                                    @Html.AntiForgeryToken()
-                                                    <button type="submit" name="provider" value="google" title="Login" style="cursor:pointer;">Login</button>
-                                                }
+                                                <button type="submit" title="Login" style="cursor:pointer;" onclick="location.href='@Url.Action("Login", "Account")';return false;">Login</button>
                                             </div>
                                             <div id="sh_login_join" class="sh_login_cons">
-                                                <h2>Join!</h2>
-                                                <span>Start now by joining for free!</span>
-                                                <span style="display:inline-block">
-                                                    @using (Html.BeginForm("ExternalLogin", "Account", new { ReturnUrl = "/Home/Dashboard" }))
-                                                    {
-                                                        @Html.AntiForgeryToken()
-                                                        <button type="submit" name="provider" value="google" title="Login" style="cursor:pointer;">Existing Google Users</button>
-                                                    }
-                                                </span>
-                                                <span style="display:inline-block">
-                                                    @using (Html.BeginForm("ExternalSignup", "Account", new { ReturnUrl = "/Home/Dashboard" }, FormMethod.Post, new { target = "_blank" }))
-                                                    {
-                                                        @Html.AntiForgeryToken()
-                                                        <button type="submit" name="provider" value="google" title="Create An Account" style="cursor:pointer;">Create Google Account</button>
-                                                    }
-                                                </span>
+                                                <h2>Join For Free!</h2>
+                                                <button type="submit" title="Register" style="cursor:pointer;" onclick="location.href='@Url.Action("Register", "Account")';return false;">Create A Free Account</button>
                                             </div>
                                         }
                                     </div>

@@ -1033,8 +1033,17 @@ table.listing td
 
 .error
 {
-    font-weight: bold;
-    color: #660000;
+    color: #990000;
+}
+
+.warning
+{
+    color: #ff8c00;
+}
+
+.success
+{
+    color: #009900;
 }
 
 /* __________________ Contact Us ___________ */

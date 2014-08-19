@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net.Http;
 using System.Net.Mail;
+using System.Security.Authentication;
 using System.Web.Http;
 using System.Web.Security;
-using Google.GData.Client;
 using iScrimmage.Core.Common;
 using iScrimmage.Core.Data;
 using iScrimmage.Core.Data.Queries;
@@ -36,12 +36,12 @@ namespace Web.Controllers.Api
             {
                 if (credentials == null)
                 {
-                    throw new InvalidCredentialsException();
+                    throw new InvalidCredentialException("The provided credentials are not valid.");
                 }
 
                 if (String.IsNullOrEmpty(credentials.Email) || String.IsNullOrEmpty(credentials.Password))
                 {
-                    throw new InvalidCredentialsException();
+                    throw new InvalidCredentialException("The provided credentials are not valid.");
                 }
 
                 var query = new MemberByEmailQuery(credentials.Email);
@@ -50,7 +50,7 @@ namespace Web.Controllers.Api
 
                 if (member == null)
                 {
-                    throw new InvalidCredentialsException();
+                    throw new InvalidCredentialException("The provided credentials are not valid.");
                 }
 
                 if (PasswordHash.ValidatePassword(credentials.Password, member.Password))
@@ -67,7 +67,7 @@ namespace Web.Controllers.Api
                     return Ok<dynamic>(new { Success = true, Member = member });
                 }
 
-                throw new InvalidCredentialsException();
+                throw new InvalidCredentialException("The provided credentials are not valid.");
             }
             catch (Exception ex)
             {
@@ -76,9 +76,95 @@ namespace Web.Controllers.Api
         }
 
         [HttpPost]
-        public IHttpActionResult Register([FromBody] Member member)
+        public IHttpActionResult Register([FromBody] dynamic data)
         {
-            return Ok<dynamic>(new {Success = true, Member = member});
+            try
+            {
+                var newId = Guid.NewGuid();
+                var hash = PasswordHash.CreateHash((string)data.Password);
+
+                var member = new Member()
+                {
+                    Id = newId,
+                    Email = data.Email,
+                    Password = hash,
+                    FirstName = data.FirstName,
+                    LastName = data.LasttName,
+                    VerificationToken = "",
+                    ResetToken = "",
+                    CreatedBy = newId,
+                    CreatedOn = DateTime.UtcNow,
+                    ModifiedBy = newId,
+                    ModifiedOn = DateTime.UtcNow
+                };
+
+                var contact = new Contact()
+                {
+                    Id = Guid.NewGuid(),
+                    MemberId = newId,
+                    Type = "Mobile",
+                    PhoneNumber = data.Phone,
+                    CreatedBy = newId,
+                    CreatedOn = DateTime.UtcNow,
+                    ModifiedBy = newId,
+                    ModifiedOn = DateTime.UtcNow
+                };
+
+                Context.BeginTransaction();
+
+                Context.Insert<Member>(member);
+                Context.Insert<Contact>(contact);
+
+                // TODO: Save the role
+
+                // Create transition data
+                Transition.Membership.CreateUser(member, (string)data.Role, contact);
+
+                Context.CommitTransaction();
+
+                // Don't return sensitive data.
+                member.Password = "";
+                member.ResetToken = "";
+                member.ResetTokenExpiresOn = null;
+                member.VerificationToken = "";
+
+                return Ok<dynamic>(new { Success = true, Member = member });
+            }
+            catch (Exception ex)
+            {
+                Context.RollbackTransaction(); 
+                
+                return Ok<dynamic>(new { Success = false, Error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public IHttpActionResult CheckEmailAvailability([FromBody] Member data)
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(data.Email))
+                {
+                    throw new ArgumentNullException("email", "The 'email' argumant is missing.");
+                }
+
+                var query = new MemberByEmailQuery(data.Email);
+
+                var member = Context.Execute(query);
+
+                if (member == null)
+                {
+                    return Ok<dynamic>(new {Success = true, Available = true});
+                }
+                else
+                {
+                    return Ok<dynamic>(new { Success = true, Available = false });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Ok<dynamic>(new { Success = false, Error = ex.Message });
+            }
         }
 
         [HttpPost]

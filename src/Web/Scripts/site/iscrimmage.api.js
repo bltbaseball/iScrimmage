@@ -11,10 +11,10 @@ iScrimmageApi.factory("AccountApi", [
                 var deferred = $q.defer();
 
                 $http.post(apiUrl + "Login", member)
-                    .success(function (data) {
+                    .success(function(data) {
                         deferred.resolve(data);
                     })
-                    .error(function (err) {
+                    .error(function(err) {
                         deferred.reject(err);
                     });
 
@@ -25,10 +25,10 @@ iScrimmageApi.factory("AccountApi", [
                 var deferred = $q.defer();
 
                 $http.get(apiUrl + "Logout")
-                    .success(function (data) {
+                    .success(function(data) {
                         deferred.resolve(data);
                     })
-                    .error(function (err) {
+                    .error(function(err) {
                         deferred.reject(err);
                     });
 
@@ -39,10 +39,10 @@ iScrimmageApi.factory("AccountApi", [
                 var deferred = $q.defer();
 
                 $http.post(apiUrl + "Register", member)
-                    .success(function (data) {
+                    .success(function(data) {
                         deferred.resolve(data);
                     })
-                    .error(function (err) {
+                    .error(function(err) {
                         deferred.reject(err);
                     });
 
@@ -53,6 +53,20 @@ iScrimmageApi.factory("AccountApi", [
                 var deferred = $q.defer();
 
                 $http.post(apiUrl + "SendResetLink", member)
+                    .success(function(data) {
+                        deferred.resolve(data);
+                    })
+                    .error(function(err) {
+                        deferred.reject(err);
+                    });
+
+                return deferred.promise;
+            },
+
+            checkIfEmailIsUsed: function(email) {
+                var deferred = $q.defer();
+
+                $http.post(apiUrl + "CheckEmailAvailability", { Email: email })
                     .success(function (data) {
                         deferred.resolve(data);
                     })
