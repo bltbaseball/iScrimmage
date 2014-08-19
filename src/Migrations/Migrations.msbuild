@@ -12,11 +12,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Environment)'=='Dev'">
-    <Connection>server=216.119.113.102;database=iscrimma_prod;User ID=iscri_sa2;Password=B@53b@!!sa;MultipleActiveResultSets=true;Application Name=BLT;Asynchronous Processing=true</Connection>
+    <Connection>server=216.119.113.102;database=iscrimma_dev;User ID=iscri_dev;Password=7Vf8ro4!;MultipleActiveResultSets=true;Application Name=BLT;Asynchronous Processing=true</Connection>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Environment)'=='Test'">
-    <Connection>server=216.119.113.102;database=iscrimma_prod;User ID=iscri_sa2;Password=B@53b@!!sa;MultipleActiveResultSets=true;Application Name=BLT;Asynchronous Processing=true</Connection>
+    <Connection>server=216.119.113.102;database=iscrimma_test;User ID=iscri_test;Password=uAt6m9%1;MultipleActiveResultSets=true;Application Name=BLT;Asynchronous Processing=true</Connection>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Environment)'=='Prod'">
