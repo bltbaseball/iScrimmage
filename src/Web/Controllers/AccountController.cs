@@ -85,6 +85,38 @@ namespace Web.Controllers
             return View();
         }
 
+        [AllowAnonymous]
+        public ActionResult Verify(string id)
+        {
+            if (String.IsNullOrEmpty(id))
+            {
+                ViewData.Model = null;
+            }
+            else
+            {
+                var context = Ioc.Current.Resolve<IDataContext>();
+                var query = new MemberByVerifyToken(id);
+                var member = context.Execute(query);
+
+                if (member == null)
+                {
+                    // Create member with empty id to indicate no member was found by the token.
+                    member = new Member();
+                    member.Id = Guid.Empty;
+                }
+
+                // Don't return sensitive data.
+                member.Password = "";
+                member.ResetToken = "";
+                member.ResetTokenExpiresOn = null;
+                member.VerificationToken = "";
+
+                ViewData.Model = member;
+            }
+
+            return View();
+        }
+
         /*
         //
         // POST: /Account/Login

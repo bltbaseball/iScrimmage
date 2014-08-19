@@ -1,0 +1,39 @@
+﻿@model iScrimmage.Core.Data.Models.Member
+
+
+@{
+    ViewBag.Title = "Verify Account";
+}
+
+<hgroup class="title">
+    <h1>@ViewBag.Title</h1>
+</hgroup>
+
+<span us-spinner="{radius:40, length:30, width:14, trail:50}" spinner-key="reset"></span>
+
+<section ng-controller="iScrimmageAccount" ng-cloak class="social">
+    @if (Model == null || Model.Id == Guid.Empty)
+    {
+        <fieldset>
+            <br />
+            <p>
+                This verification link could not be found.
+            </p>
+            <p>
+                @Html.ActionLink("Create A Free Account", "Register", "Account")                
+            </p>
+        </fieldset>
+    }
+    else
+    {
+        <fieldset>
+            <br />
+            <p>
+                Your account has been successfully verified.<br />
+            </p>
+            <p>
+                @Html.ActionLink("Continue", "Dashboard", "Home")
+            </p>
+        </fieldset>
+    }
+</section>

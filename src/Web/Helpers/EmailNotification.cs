@@ -322,6 +322,17 @@ namespace Web.Helpers
             }
         }
 
+        public static void VerifyAccount(Member member)
+        {
+            var subject = "Verify Account";
+            var body = File.ReadAllText(HttpContext.Current.Server.MapPath(TEMPLATE_PATH + "account-verify.html"));
+
+            body = body.Replace("{Name}", member.FirstName);
+            body = body.Replace("{Token}", member.VerificationToken);
+
+            SendEmail(subject, body, member.Email);
+        }
+
         public static void ResetPassword(Member member)
         {
             var subject = "Password Reset";

@@ -390,6 +390,7 @@
       <Link>SqlServerTypes\x86\SqlServerSpatial110.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="App_Data\EmailTemplates\account-verify.html" />
     <Content Include="App_Data\EmailTemplates\challenge-coach.html" />
     <Content Include="App_Data\EmailTemplates\games-updated.html" />
     <Content Include="App_Data\EmailTemplates\games-bracketBracket.html" />
@@ -728,6 +729,7 @@
     <Content Include="Scripts\DataTables-1.9.4\extras\ColVis\media\js\ColVis.min.js.gz" />
     <Content Include="Scripts\DataTables-1.9.4\extras\ColReorder\media\js\ColReorder.min.js.gz" />
     <Content Include="Scripts\DataTables-1.9.4\extras\AutoFill\media\js\AutoFill.min.js.gz" />
+    <None Include="Properties\PublishProfiles\iScrimmage Dev.pubxml" />
     <None Include="Properties\PublishProfiles\Newtek Production.pubxml" />
     <None Include="Scripts\jquery-2.0.2.intellisense.js" />
     <Content Include="Scripts\ckeditor\adapters\jquery.js" />
@@ -1229,6 +1231,7 @@
     <Content Include="Scripts\vendor\angular-1.2.22\angular.min.js.map" />
     <Content Include="Views\Account\ResetPassword.cshtml" />
     <Content Include="Scripts\vendor\angular-spinner-0.5.1\angular-spinner.min.js.map" />
+    <Content Include="Views\Account\Verify.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Images\Coaches\" />

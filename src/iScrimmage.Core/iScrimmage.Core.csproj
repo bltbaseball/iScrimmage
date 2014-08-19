@@ -147,6 +147,7 @@
     <Compile Include="Data\MultipleResultReader.cs" />
     <Compile Include="Data\Queries\MemberByEmailQuery.cs" />
     <Compile Include="Data\Queries\MemberByResetToken.cs" />
+    <Compile Include="Data\Queries\MemberByVerifyToken.cs" />
     <Compile Include="Data\SqlBuilder.cs" />
     <Compile Include="Data\SqlBuilderDomain.cs" />
     <Compile Include="Data\SqlDataContext.cs" />
@@ -184,6 +185,11 @@
   <ItemGroup>
     <EmbeddedResource Include="Data\Queries\MemberByResetToken.sql">
       <DependentUpon>MemberByResetToken.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Data\Queries\MemberByVerifyToken.sql">
+      <DependentUpon>MemberByVerifyToken.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

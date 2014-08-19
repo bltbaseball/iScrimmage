@@ -114,7 +114,8 @@
     <div ng-show="registerData.Registered">
         <div class="editor-label">
             <label>Welcome, {{registerData.FirstName}}. Your account has been created.</label><br />
-            @Html.ActionLink("Log In", "Login", "Account")
+            <label>An email containing an account verification link has been sent to {{registerData.Email}}.</label><br/>
+            <label>Once you verify your email account you will be directed to the log in page.</label>
         </div>
     </div>
 

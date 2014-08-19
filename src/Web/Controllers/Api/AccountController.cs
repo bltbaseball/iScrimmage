@@ -90,7 +90,7 @@ namespace Web.Controllers.Api
                     Password = hash,
                     FirstName = data.FirstName,
                     LastName = data.LasttName,
-                    VerificationToken = "",
+                    VerificationToken = Guid.NewGuid().ToString().Replace("-", ""),
                     ResetToken = "",
                     CreatedBy = newId,
                     CreatedOn = DateTime.UtcNow,
@@ -121,6 +121,8 @@ namespace Web.Controllers.Api
                 Transition.Membership.CreateUser(member, (string)data.Role, contact);
 
                 Context.CommitTransaction();
+
+                EmailNotification.VerifyAccount(member);
 
                 // Don't return sensitive data.
                 member.Password = "";
@@ -186,6 +188,36 @@ namespace Web.Controllers.Api
                 member.ModifiedOn = DateTime.UtcNow;
 
                 Context.Update<Member>(member.Id, member);
+
+                return Ok<dynamic>(new { Success = true });
+            }
+            catch (Exception ex)
+            {
+                return Ok<dynamic>(new { Success = false, Error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public IHttpActionResult SendVerificationLink([FromBody] Member credentials)
+        {
+            try
+            {
+                var query = new MemberByEmailQuery(credentials.Email);
+
+                var member = Context.Execute(query);
+
+                if (member == null)
+                {
+                    return Ok<dynamic>(new { Success = false, Error = "The provided email address could not be found." });
+                }
+
+                member.VerificationToken = Guid.NewGuid().ToString().Replace("-", "");
+                member.ModifiedBy = Guid.Empty;
+                member.ModifiedOn = DateTime.UtcNow;
+
+                Context.Update<Member>(member.Id, member);
+
+                EmailNotification.VerifyAccount(member);
 
                 return Ok<dynamic>(new { Success = true });
             }
