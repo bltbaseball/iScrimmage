@@ -4,15 +4,19 @@
        AssemblyFile="..\packages\FluentMigrator.1.2.1.0\tools\FluentMigrator.MSBuild.dll"/>
 
   <PropertyGroup>
-    <Environment Condition="'$(Environment)'=='' ">Dev</Environment>
+    <Environment Condition="'$(Environment)'=='' ">Local</Environment>
   </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(Environment)'=='Dev'">
+
+  <PropertyGroup Condition="'$(Environment)'=='Local'">
     <Connection>Data Source=(local);Initial Catalog=BLT;Integrated Security=true;</Connection>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Environment)'=='Dev'">
+    <Connection>server=216.119.113.102;database=iscrimma_prod;User ID=iscri_sa2;Password=B@53b@!!sa;MultipleActiveResultSets=true;Application Name=BLT;Asynchronous Processing=true</Connection>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Environment)'=='Test'">
-    <Connection>Data Source=(local);Initial Catalog=BLT;Integrated Security=true;</Connection>
+    <Connection>server=216.119.113.102;database=iscrimma_prod;User ID=iscri_sa2;Password=B@53b@!!sa;MultipleActiveResultSets=true;Application Name=BLT;Asynchronous Processing=true</Connection>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Environment)'=='Prod'">
